@@ -11,7 +11,8 @@
     "activeTab"
   ],
   "host_permissions": [
-    "http://localhost:*/*"
+    "http://localhost:*/*",
+    "http://192.168.14.118:*/*"
   ],
   "optional_host_permissions": [
     "*://*.interpark.com/*",
@@ -26,7 +27,8 @@
       "matches": [
         "file:///*/*",
         "http://localhost:*/*",
-        "http://127.0.0.1:*/*"
+        "http://127.0.0.1:*/*",
+        "http://192.168.14.118:*/*"
       ],
       "js": [
         "config/sites.js",

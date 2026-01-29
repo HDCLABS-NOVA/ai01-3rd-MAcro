@@ -13,9 +13,9 @@ from io import BytesIO
 from PIL import ImageGrab
 
 
-def click_and_restore(x: int, y: int, delay: float = 0.0):
+def human_click(x: int, y: int, delay: float = 0.0):
     """
-    클릭 후 마우스를 원래 위치로 복원 (빠른 원자적 동작)
+    사람처럼 자연스러운 마우스 움직임으로 클릭
     
     Args:
         x: 클릭할 X 좌표
@@ -23,25 +23,54 @@ def click_and_restore(x: int, y: int, delay: float = 0.0):
         delay: 클릭 전 대기 시간 (초)
     """
     import time
-    
-    # 현재 마우스 위치 저장 (시작 시점)
-    orig_x, orig_y = pyautogui.position()
-    
-    # 일시적으로 기본 대기시간 비활성화 (더 빠른 동작)
-    original_pause = pyautogui.PAUSE
-    pyautogui.PAUSE = 0
+    import random
     
     try:
-        # 빠른 클릭 (이동 + 클릭 한번에)
+        # 클릭 전 약간의 랜덤 대기 (0.1~0.3초)
         if delay > 0:
             time.sleep(delay)
-        pyautogui.click(x, y)
+        else:
+            time.sleep(random.uniform(0.1, 0.3))
         
-        # 원래 위치로 즉시 복원
-        pyautogui.moveTo(orig_x, orig_y)
-    finally:
-        # 원래 대기시간 복원
-        pyautogui.PAUSE = original_pause
+        # 사람처럼 자연스러운 곡선 움직임으로 목표 위치로 이동
+        # duration: 0.3~0.7초 (사람의 자연스러운 마우스 이동 시간)
+        # tween: easeInOutQuad (가속-감속 곡선, 사람의 움직임과 유사)
+        duration = random.uniform(0.3, 0.7)
+        pyautogui.moveTo(x, y, duration=duration, tween=pyautogui.easeInOutQuad)
+        
+        # 클릭 전 짧은 멈춤 (사람이 목표를 확인하는 시간)
+        time.sleep(random.uniform(0.05, 0.15))
+        
+        # 클릭
+        pyautogui.click()
+        
+        # 클릭 후 약간 대기 (페이지 반응 대기)
+        time.sleep(random.uniform(0.1, 0.2))
+        
+    except Exception as e:
+        print(f"Mouse movement error: {e}")
+
+
+# Backward compatibility - click_and_restore is now just human_click
+click_and_restore = human_click
+
+
+def human_type(text: str):
+    """
+    사람처럼 자연스러운 타이핑 (각 글자마다 랜덤 딜레이)
+    
+    Args:
+        text: 입력할 텍스트
+    """
+    import time
+    import random
+    
+    for char in text:
+        pyautogui.write(char)
+        # 사람의 타이핑 속도는 보통 200-400ms per character
+        # 빠른 타이퍼는 80-150ms, 느린 타이퍼는 250-400ms
+        # 중간 정도의 타이핑 속도로 설정
+        time.sleep(random.uniform(0.08, 0.25))
 
 # -----------------------------------------------------------------------------
 # VLM 설정

@@ -111,7 +111,7 @@ class BaseState {
   }
 
   /**
-   * Helper: Safe click with validation
+   * Helper: Safe click with human-like behavior
    */
   async safeClick(element, delay = 0) {
     if (!element) throw new Error('Element is null');
@@ -124,10 +124,47 @@ class BaseState {
       throw new Error('Element is disabled');
     }
 
-    if (delay > 0) await sleep(delay);
+    // Human-like pre-click delay (100-300ms)
+    const preDelay = delay > 0 ? delay : (100 + Math.random() * 200);
+    await sleep(preDelay);
 
+    // Simulate human interaction sequence
+    // 1. Hover (人がマウスを要素の上に移動)
+    element.dispatchEvent(new MouseEvent('mouseover', {
+      bubbles: true,
+      cancelable: true,
+      view: window
+    }));
+    
+    // Brief hover pause (50-150ms - 人が要素を確認する時間)
+    await sleep(50 + Math.random() * 100);
+    
+    // 2. Mouse down (人がクリックを開始)
+    element.dispatchEvent(new MouseEvent('mousedown', {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+      button: 0
+    }));
+    
+    // Click press duration (30-100ms - 人の自然なクリック時間)
+    await sleep(30 + Math.random() * 70);
+    
+    // 3. Mouse up (人がクリックを完了)
+    element.dispatchEvent(new MouseEvent('mouseup', {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+      button: 0
+    }));
+    
+    // 4. Actual click event
     element.click();
-    logger.debug('CLICK', {
+    
+    // Post-click delay (100-200ms - ページの反応を待つ)
+    await sleep(100 + Math.random() * 100);
+    
+    logger.debug('HUMAN_CLICK', {
       tag: element.tagName,
       id: element.id,
       class: element.className

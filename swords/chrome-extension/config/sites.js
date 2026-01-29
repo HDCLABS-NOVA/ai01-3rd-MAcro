@@ -182,25 +182,11 @@ const SiteConfig = {
 
 /**
  * Get site config by hostname
+ * Simplified to always use mocktest configuration
  */
 function getSiteConfig(hostname = window.location.hostname) {
-  // Check URL path for mock test page
-  if (location.href.includes('mock-ticket-page')) {
-    return SiteConfig.mocktest;
-  }
-  
-  // localhost (dev/test server) - use mocktest config with adjusted selectors
-  if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-    // Use mocktest config as base, can be customized for specific localhost apps
-    return SiteConfig.mocktest;
-  }
-  
-  if (hostname.includes('interpark')) {
-    return SiteConfig.interpark;
-  }
-  // Add more site detection logic
-  
-  return null;
+  // Always use mocktest config for all sites
+  return SiteConfig.mocktest;
 }
 
 /**

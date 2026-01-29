@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from modules.popup_watcher import PopupWatcher
 from modules import vlm_handler
-from modules.vlm_handler import encode_image_to_base64, call_vlm, capture_screen, click_and_restore
+from modules.vlm_handler import encode_image_to_base64, call_vlm, capture_screen, click_and_restore, human_type
 
 class TicketParkWatcher(PopupWatcher):
     """
@@ -40,27 +40,46 @@ class TicketParkWatcher(PopupWatcher):
         # Comprehensive Prompt
         prompt = f"""Screenshot size: {width}x{height} pixels.
 
-Analyze the screen for the following elements. Priority: CAPTCHA > Date/Time Modal > Performance List.
+Analyze the screen for the following elements. Priority: CAPTCHA > Performance Icons > Date/Time Modal.
+
+**IMPORTANT: ALL coordinates must be NORMALIZED (0.0-1.0 range), NOT pixel values!**
+Example: If an element is at pixel (960, 540) on a 1920x1080 screen, return x=0.5, y=0.5
 
 1. **CAPTCHA**: 
-   - Look for a distorted text image (usually 6 uppercase letters). READ EVERY CHARACTER CAREFULLY. Do not miss any.
-   - Look for an INPUT BOX **BELOW** the distorted image. It contains the gray text "문자 | 입력" (or similar).
-   - START coordinates for click must be the CENTER of that **INPUT BOX**, NOT the distorted image.
+   - At the top: distorted/striped CAPTCHA image with 6 letters (like "MJTAFS")
+   - In the middle: EMPTY WHITE INPUT BOX with gray placeholder "문자 입력" - THIS IS YOUR TARGET!
+   - At the bottom: Purple "확인" button
+   - The INPUT BOX is located DIRECTLY ABOVE the purple "확인" button (just a small gap between them)
+   - DO NOT target the striped CAPTCHA image at the top!
+   - READ the 6 letters from the CAPTCHA image, but return coordinates for the INPUT BOX (above the button)
+   - Return x,y = CENTER of the WHITE INPUT BOX (직접 "확인" 버튼 위), NORMALIZED 0-1
 
-2. **Date/Time Modal**: A popup title like "날짜 선택", "시간 선택", and a "예매하기" (Reserve) button.
-3. **Performance List**: A section title "HOT 공연" or "티켓 예매". Performance cards with images.
+2. **Performance Icons**: Colorful rectangular icons/cards for shows/concerts (like theater masks, music notes, emoji-style icons)
+   - Return NORMALIZED coordinates (0-1) for ALL detected icons (up to 5)
+   - These are usually on the main page before entering a specific show
+
+3. **Date/Time Modal**: A popup/modal with title "뮤지컬 <숏는날자>" or similar at the top.
+   - **Layout**: 
+     * Top section: "날짜 선택" label with 2 date buttons (white rounded rectangles with dates like "2026-02-01")
+     * Middle section: "시간 선택" label with 2 time buttons (white rounded rectangles with times like "14:00", "19:30")
+     * Bottom section: Large gray button "예매하기" (Reserve button)
+   - **What to detect**:
+     * date_x, date_y: CENTER of the FIRST date button (under "날짜 선택")
+     * time_x, time_y: CENTER of the FIRST time button (under "시간 선택")
+     * reserve_x, reserve_y: CENTER of the large gray "예매하기" button at the bottom
+   - **IMPORTANT**: Return NORMALIZED coordinates (0.0-1.0) with 3 decimal places
+   - Be precise! The buttons are small, so accuracy is critical.
 
 RETURN JSON ONLY. Choose ONE best action.
 
 Type "CAPTCHA":
-{{"type":"CAPTCHA", "text":"CHARS", "x":0.xxx, "y":0.xxx}} 
-(text=The 6 identified letters. x,y=Center of the "문자 입력" input box, generally below the captcha text)
+{{"type":"CAPTCHA", "text":"6CHARS", "x":0.xxx, "y":0.xxx}} 
+
+Type "PERFORMANCE_ICONS":
+{{"type":"PERFORMANCE_ICONS", "icons":[{{"x":0.xxx, "y":0.xxx}}, {{"x":0.xxx, "y":0.xxx}}]}}
 
 Type "DATE_TIME":
-{{"type":"DATE_TIME", "date_x":0.xx, "date_y":0.xx, "time_x":0.xx, "time_y":0.xx, "reserve_x":0.xx, "reserve_y":0.xx}}
-
-Type "AUTO_ENTER":
-{{"type":"AUTO_ENTER", "x":0.xx, "y":0.xx}}
+{{"type":"DATE_TIME", "date_x":0.xxx, "date_y":0.xxx, "time_x":0.xxx, "time_y":0.xxx, "reserve_x":0.xxx, "reserve_y":0.xxx}}
 
 Type "NONE":
 {{"type":"NONE"}}"""
@@ -72,28 +91,38 @@ Type "NONE":
             
         p_type = result.get("type", "NONE").upper()
         
-        # 1. CAPTCHA (Highest Priority)
+        # 1. CAPTCHA (Highest Priority) - with strict validation
         if p_type == "CAPTCHA":
              p_text = result.get("text", "")
              raw_x = float(result.get("x", 0))
              raw_y = float(result.get("y", 0))
              
-             if raw_x > 1.0: raw_x /= width
-             if raw_y > 1.0: raw_y /= height
+             # Validate CAPTCHA format: exactly 6 uppercase letters
+             captcha_str = "".join(e for e in p_text if e.isalnum()).upper()
              
-             abs_x = self.mon_x + int(raw_x * width)
-             abs_y = self.mon_y + int(raw_y * height)
-             
-             if p_text and raw_x > 0 and raw_y > 0:
-                captcha_str = "".join(e for e in p_text if e.isalnum())
-                self.update_status(f"🔐 CAPTCHA DETECTED: '{captcha_str}' (Click: {abs_x}, {abs_y})")
-                
-                click_and_restore(abs_x, abs_y)
-                time.sleep(0.1)
-                pyautogui.write(captcha_str)
-                time.sleep(0.1)
-                pyautogui.press('enter')
-                return True
+             if (len(captcha_str) == 6 and
+                 captcha_str.isalpha() and
+                 0.1 < raw_x < 0.9 and 0.1 < raw_y < 0.9):
+                 
+                 # Convert coordinates
+                 if raw_x > 1.0: raw_x /= width
+                 if raw_y > 1.0: raw_y /= height
+                 
+                 abs_x = self.mon_x + int(raw_x * width)
+                 abs_y = self.mon_y + int(raw_y * height)
+                 
+                 self.update_status(f"🔐 CAPTCHA DETECTED: '{captcha_str}' (Click: {abs_x}, {abs_y})")
+                 
+                 click_and_restore(abs_x, abs_y)
+                 time.sleep(0.2)
+                 human_type(captcha_str)
+                 time.sleep(0.2)
+                 pyautogui.press('enter')
+                 return True
+             else:
+                 # Invalid CAPTCHA format, ignore
+                 self.update_status(f"⚠️ Invalid CAPTCHA format: '{p_text}' (len={len(captcha_str)}) - Ignored")
+                 return False
 
         # 2. Date/Time Selection (If Enabled)
         elif p_type == "DATE_TIME" and self.enable_date_time:
@@ -108,6 +137,7 @@ Type "NONE":
 
                 if d_x > 0 and t_x > 0 and r_x > 0:
                      self.update_status("📅 Auto Date/Time Selection detected")
+                     self.update_status(f"   Normalized: date=({d_x:.3f},{d_y:.3f}) time=({t_x:.3f},{t_y:.3f}) reserve=({r_x:.3f},{r_y:.3f})")
                      
                      if d_x > 1.0: d_x /= width
                      if d_y > 1.0: d_y /= height
@@ -140,23 +170,34 @@ Type "NONE":
                 pass
 
 
-        # 3. Auto Enter (If Enabled)
-        elif p_type == "AUTO_ENTER" and self.enable_auto_enter:
-             raw_x = float(result.get("x", 0))
-             raw_y = float(result.get("y", 0))
-             
-             if raw_x > 1.0: raw_x /= width
-             if raw_y > 1.0: raw_y /= height
-             
-             abs_x = self.mon_x + int(raw_x * width)
-             abs_y = self.mon_y + int(raw_y * height)
-             
-             if raw_x > 0 and raw_y > 0:
-                 self.update_status(f"🚪 Auto Enter: Clicking Performance ({abs_x}, {abs_y})")
-                 click_and_restore(abs_x, abs_y)
-                 # Wait a bit longer after entering to let page load
-                 time.sleep(2.0) 
-                 return True
+        # 3. Performance Icons (If Auto Enter Enabled)
+        elif p_type == "PERFORMANCE_ICONS" and self.enable_auto_enter:
+            try:
+                import random
+                icons = result.get("icons", [])
+                if icons and len(icons) > 0:
+                    # Pick random icon
+                    selected_icon = random.choice(icons)
+                    
+                    raw_x = float(selected_icon.get("x", 0))
+                    raw_y = float(selected_icon.get("y", 0))
+                    
+                    if raw_x > 1.0: raw_x /= width
+                    if raw_y > 1.0: raw_y /= height
+                    
+                    abs_x = self.mon_x + int(raw_x * width)
+                    abs_y = self.mon_y + int(raw_y * height)
+                    
+                    if raw_x > 0 and raw_y > 0:
+                        idx = icons.index(selected_icon) + 1
+                        self.update_status(f"🎭 Auto Enter: Clicking Icon {idx}/{len(icons)} at ({abs_x}, {abs_y})")
+                        click_and_restore(abs_x, abs_y)
+                        time.sleep(2.0)
+                        return True
+            except Exception as e:
+                self.update_status(f"⚠️ Icon click error: {e}")
+            
+            return False
 
         return False
 
@@ -202,7 +243,7 @@ class TicketParkAutoApp:
 
         self.var_auto_enter = tk.BooleanVar(value=False)
         self.cb_auto_enter = tk.Checkbutton(control_frame, 
-            text="🚪 Auto Enter (Random Click on Main)",
+            text="🎭 Auto Enter (Click Performance Icons)",
             variable=self.var_auto_enter,
             bg=self.colors['card'], fg=self.colors['text'], selectcolor='#000000',
             font=('Segoe UI', 10), activebackground=self.colors['card'], activeforeground=self.colors['text'],
