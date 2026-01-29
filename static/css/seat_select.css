@@ -1,0 +1,357 @@
+/* 좌석 선택 페이지(index.html) 전용 스타일 */
+
+.perf-bar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  padding: 16px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.perf-title-bar {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.perf-date-bar {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.main-container {
+  display: flex;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  gap: 20px;
+}
+
+.seat-section {
+  flex: 1;
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stage {
+  background: linear-gradient(180deg, #333 0%, #555 100%);
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+  border-radius: 8px 8px 50% 50% / 8px 8px 20% 20%;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+.seat-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.legend-box {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+}
+
+.legend-box.vip {
+  background: #6b4fbb;
+}
+
+.legend-box.r {
+  background: #3498db;
+}
+
+.legend-box.selected {
+  background: #ff6b6b;
+}
+
+.legend-box.sold {
+  background: #ccc;
+}
+
+.seat-container {
+  overflow-x: auto;
+  padding: 10px;
+}
+
+.seat-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 800px;
+}
+
+.seat-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.row-label {
+  width: 30px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 12px;
+  color: #666;
+}
+
+.seat {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px 3px 4px 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  border: none;
+}
+
+.seat.vip {
+  background: #6b4fbb;
+}
+
+.seat.r {
+  background: #3498db;
+}
+
+.seat.s {
+  background: #2ecc71;
+}
+
+.seat.selected {
+  background: #ff6b6b !important;
+  transform: scale(1.15);
+}
+
+.seat.sold {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.seat:hover:not(.sold):not(.selected) {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar {
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.sidebar-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.selected-seats {
+  min-height: 80px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.selected-seat-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0ebff;
+  color: #6b4fbb;
+  padding: 10px 14px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.selected-seat-tag .seat-name {
+  font-weight: 700;
+}
+
+.selected-seat-tag .seat-cancel {
+  width: 20px;
+  height: 20px;
+  background: rgba(107, 79, 187, 0.2);
+  border: none;
+  border-radius: 50%;
+  color: #6b4fbb;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.selected-seat-tag .seat-cancel:hover {
+  background: #ff6b6b;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+.no-seat {
+  color: #aaa;
+  font-size: 14px;
+  padding: 20px 0;
+}
+
+.price-info {
+  background: #f8f8f8;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.notice-box {
+  background: #fff8e6;
+  border: 1px solid #ffe4a0;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 13px;
+  color: #8a6d3b;
+  line-height: 1.6;
+}
+
+.notice-box strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #856404;
+}
+
+.btn-book {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #6b4fbb 0%, #8b6fdb 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-book:hover {
+  background: linear-gradient(135deg, #5a3ea8 0%, #7a5fca 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(107, 79, 187, 0.4);
+}
+
+.btn-book:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 이선좌 모달 */
+.seat-taken-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.seat-taken-content {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  max-width: 380px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.seat-taken-icon {
+  font-size: 60px;
+  margin-bottom: 16px;
+}
+
+.seat-taken-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #ff6b6b;
+  margin-bottom: 12px;
+}
+
+.seat-taken-msg {
+  font-size: 15px;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.seat-taken-btn {
+  background: linear-gradient(135deg, #6b4fbb 0%, #8b6fdb 100%);
+  color: #fff;
+  border: none;
+  padding: 14px 50px;
+  border-radius: 30px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.seat-taken-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(107, 79, 187, 0.4);
+}

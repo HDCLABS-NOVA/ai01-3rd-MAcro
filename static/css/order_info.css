@@ -1,0 +1,79 @@
+/* 예매자 정보 페이지(step3_booker) 전용 스타일 */
+
+.delivery-options {
+  display: flex;
+  gap: 16px;
+}
+
+.delivery-option {
+  flex: 1;
+  padding: 24px 20px;
+  border: 2px solid #e1e1e1;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.delivery-option:hover {
+  border-color: #6b4fbb;
+}
+
+.delivery-option.selected {
+  border-color: #6b4fbb;
+  background: #f0ebff;
+}
+
+.delivery-option input {
+  display: none;
+}
+
+.delivery-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+}
+
+.delivery-option h4 {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.delivery-option p {
+  font-size: 12px;
+  color: #888;
+}
+
+.delivery-option .fee {
+  margin-top: 8px;
+  font-weight: 700;
+  color: #6b4fbb;
+}
+
+.price-summary {
+  background: #f8f8f8;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.price-row.total {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  padding-top: 12px;
+  margin-top: 8px;
+  border-top: 2px solid #6b4fbb;
+}
+
+.price-row.total .amount {
+  color: #ff6b6b;
+  font-size: 22px;
+}

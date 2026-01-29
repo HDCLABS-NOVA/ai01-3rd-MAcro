@@ -1,0 +1,83 @@
+/* 결제 페이지(step4_payment) 전용 스타일 */
+
+.payment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.payment-option {
+  padding: 20px 16px;
+  border: 2px solid #e1e1e1;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.payment-option:hover {
+  border-color: #6b4fbb;
+}
+
+.payment-option.selected {
+  border-color: #6b4fbb;
+  background: #f0ebff;
+}
+
+.payment-option input {
+  display: none;
+}
+
+.payment-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+.payment-option span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.summary-box {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 24px;
+  color: #fff;
+}
+
+.summary-title {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 16px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 16px;
+  margin-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.btn-pay {
+  background: #ff6b6b;
+  color: #fff;
+  flex: 2;
+  font-size: 18px;
+}
+
+.btn-pay:hover {
+  background: #ee5a5a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+}

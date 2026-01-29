@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공연 목록 | TicketPark</title>
+    <link rel="stylesheet" href="/static/css/perf_list.css">
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-top">
+            <a href="/performances" class="logo">TICKET<span>PARK</span></a>
+            <div class="user-info">
+                <span class="user-name"><strong>{{ user.name }}</strong>님 환영합니다</span>
+                <a href="/admin" class="btn-logout">로그 뷰어</a>
+                <a href="/logout" class="btn-logout">로그아웃</a>
+            </div>
+        </div>
+        <nav class="nav">
+            <a href="/performances" class="active">공연</a>
+            <a href="#">뮤지컬/연극</a>
+            <a href="#">콘서트</a>
+            <a href="#">스포츠</a>
+            <a href="#">전시/행사</a>
+        </nav>
+    </header>
+
+    <div class="banner">
+        <h1>🎫 티켓 예매</h1>
+        <p>빠르고 안전한 티켓 예매 서비스</p>
+    </div>
+
+    <div class="container">
+        <h2 class="section-title">HOT 공연</h2>
+        <div class="performance-grid">
+            {% for perf in performances %}
+            <div class="perf-card" onclick="openModal('{{ perf.id }}')">
+                <div class="perf-image">🎭</div>
+                <div class="perf-content">
+                    <span class="perf-category">{% if 'concert' in perf.id %}콘서트{% else %}뮤지컬{% endif %}</span>
+                    <h3 class="perf-title">{{ perf.title }}</h3>
+                    <p class="perf-artist">{{ perf.artist }}</p>
+                    <div class="perf-info">
+                        <div><span class="icon">📍</span> {{ perf.venue }}</div>
+                        <div><span class="icon">📅</span> {{ perf.dates[0] }} ~ {{ perf.dates[-1] }}</div>
+                    </div>
+                    <div class="perf-price">
+                        <span class="price-label">VIP석</span>
+                        <span class="price-value">{{ "{:,}".format(perf.price.VIP) }}원</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- 날짜/시간 선택 모달 -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">날짜 및 시간 선택</h3>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="select-group">
+                    <label>날짜 선택</label>
+                    <div class="date-options" id="dateOptions"></div>
+                </div>
+                <div class="select-group">
+                    <label>시간 선택</label>
+                    <div class="time-options" id="timeOptions"></div>
+                </div>
+                <button class="btn-confirm" id="btnConfirm" disabled onclick="goToQueue()">예매하기</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        © 2026 TICKETPARK. All rights reserved.
+    </footer>
+
+    <script>
+        // 템플릿 변수
+        const performances = {{ performances | tojson | safe }};
+        const user = {{ user | tojson | safe }};
+    </script>
+    <script src="/static/js/log_collector.js"></script>
+    <script src="/static/js/perf_list.js"></script>
+</body>
+
+</html>

@@ -4,219 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>보안문자 | 티켓 예매</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Malgun Gothic', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 16px 40px;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #fff;
-            text-decoration: none;
-        }
-
-        .logo span {
-            color: #ff6b6b;
-        }
-
-        .main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-        }
-
-        .captcha-box {
-            background: #fff;
-            border-radius: 24px;
-            padding: 40px;
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .captcha-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
-
-        .captcha-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .captcha-desc {
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-
-        .captcha-image-box {
-            background: #f8f8f8;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .captcha-image {
-            font-size: 36px;
-            font-weight: 800;
-            letter-spacing: 12px;
-            color: #333;
-            font-family: 'Courier New', monospace;
-            user-select: none;
-            background: linear-gradient(45deg, #e8e8e8 25%, #f5f5f5 25%, #f5f5f5 50%, #e8e8e8 50%, #e8e8e8 75%, #f5f5f5 75%);
-            background-size: 20px 20px;
-            padding: 20px 30px;
-            border-radius: 8px;
-            display: inline-block;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-            transform: skewX(-5deg);
-        }
-
-        .captcha-refresh {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            opacity: 0.6;
-            transition: opacity 0.2s;
-        }
-
-        .captcha-refresh:hover {
-            opacity: 1;
-        }
-
-        .captcha-input {
-            width: 100%;
-            padding: 16px;
-            border: 2px solid #e1e1e1;
-            border-radius: 12px;
-            font-size: 24px;
-            text-align: center;
-            letter-spacing: 8px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-
-        .captcha-input:focus {
-            outline: none;
-            border-color: #6b4fbb;
-            box-shadow: 0 0 0 4px rgba(107, 79, 187, 0.1);
-        }
-
-        .btn-verify {
-            width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #6b4fbb 0%, #8b6fdb 100%);
-            color: #fff;
-            border: none;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-verify:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(107, 79, 187, 0.4);
-        }
-
-        .error-msg {
-            color: #dc3545;
-            font-size: 14px;
-            margin-top: 15px;
-            display: none;
-            padding: 12px;
-            background: #fff5f5;
-            border-radius: 8px;
-        }
-
-        .error-msg.show {
-            display: block;
-            animation: shake 0.5s;
-        }
-
-        @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            25% {
-                transform: translateX(-10px);
-            }
-
-            75% {
-                transform: translateX(10px);
-            }
-        }
-
-        .timer-box {
-            margin-top: 20px;
-            padding: 12px;
-            background: #f8f8f8;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #666;
-        }
-
-        .timer-box .time {
-            color: #ff6b6b;
-            font-weight: 700;
-        }
-
-        .perf-info {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 16px 20px;
-            margin: -40px -40px 30px -40px;
-            border-radius: 24px 24px 0 0;
-            border-bottom: 1px solid #eee;
-            text-align: left;
-        }
-
-        .perf-name {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
-        }
-
-        .perf-date {
-            font-size: 13px;
-            color: #888;
-        }
-    </style>
+    <title>보안문자 입력 | 티켓 예매</title>
+    <link rel="stylesheet" href="/static/css/captcha.css">
 </head>
 
 <body>
@@ -231,12 +20,15 @@
                 <div class="perf-date">{{ selected_date }} {{ selected_time }}</div>
             </div>
 
-            <div class="captcha-icon">🔐</div>
-            <h1 class="captcha-title">보안문자 입력</h1>
-            <p class="captcha-desc">자동 예매 프로그램 방지를 위해<br>아래 문자를 정확히 입력해주세요.</p>
+            <div class="captcha-icon">🔒</div>
+            <h2 class="captcha-title">보안문자 입력</h2>
+            <p class="captcha-desc">
+                매크로 프로그램 방지를 위해<br>
+                아래 보안문자를 입력해주세요.
+            </p>
 
             <div class="captcha-image-box">
-                <div class="captcha-image" id="captchaText"></div>
+                <span class="captcha-image" id="captchaText"></span>
                 <button class="captcha-refresh" onclick="refreshCaptcha()" title="새로고침">🔄</button>
             </div>
 
@@ -245,165 +37,22 @@
 
             <button class="btn-verify" onclick="verifyCaptcha()">확인</button>
 
-            <div class="error-msg" id="errorMsg">보안문자가 일치하지 않습니다. 다시 입력해주세요.</div>
+            <p class="error-msg" id="errorMsg">보안문자가 일치하지 않습니다. 다시 입력해주세요.</p>
 
             <div class="timer-box">
-                ⏱️ 남은 시간: <span class="time" id="timer">03:00</span>
+                남은 시간: <span class="time" id="timer">03:00</span>
             </div>
         </div>
     </main>
 
     <script>
+        // 템플릿 변수
         const perfId = "{{ performance.id }}";
         const selectedDate = "{{ selected_date }}";
         const selectedTime = "{{ selected_time }}";
-
-        // 예매창 로그 시작 (캡챠 ~ 예매완료)
-        const bookSessionId = 'book_' + Math.random().toString(36).substr(2, 8);
-        const pageStartTime = Date.now();
-        let captchaCode = '';
-        let captchaStartTime = 0;
-        let attemptCount = 0;
-        let mouseTrajectory = [];
-
-        // sessionStorage에 book 로그 데이터 초기화
-        const bookLogData = {
-            session_id: bookSessionId,
-            stage: 'book',
-            performance_id: perfId,
-            selected_date: selectedDate,
-            selected_time: selectedTime,
-            booking_start_time: new Date().toISOString(),
-            captcha: {
-                start_time: null,
-                end_time: null,
-                attempts: [],
-                success: false,
-                mouse_trajectory: []
-            },
-            seats: {
-                selected: [],
-                taken_by_others: [],
-                selection_time: null
-            },
-            discount: {
-                selected: null,
-                selection_time: null
-            },
-            delivery: {
-                method: null,
-                selection_time: null
-            },
-            payment: {
-                method: null,
-                selection_time: null
-            },
-            booking_end_time: null
-        };
-
-        function saveBookLogToStorage() {
-            sessionStorage.setItem('bookLogData', JSON.stringify(bookLogData));
-        }
-
-        // 초기 저장
-        saveBookLogToStorage();
-
-        function generateCaptcha() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-            captchaCode = '';
-            for (let i = 0; i < 6; i++) {
-                captchaCode += chars[Math.floor(Math.random() * chars.length)];
-            }
-            document.getElementById('captchaText').textContent = captchaCode;
-            captchaStartTime = Date.now();
-            bookLogData.captcha.start_time = new Date().toISOString();
-        }
-
-        function refreshCaptcha() {
-            generateCaptcha();
-            document.getElementById('captchaInput').value = '';
-            document.getElementById('errorMsg').classList.remove('show');
-
-            bookLogData.captcha.attempts.push({
-                action: 'refresh',
-                timestamp: new Date().toISOString()
-            });
-            saveBookLogToStorage();
-        }
-
-        function verifyCaptcha() {
-            const input = document.getElementById('captchaInput').value.toUpperCase();
-            const captchaTime = Date.now() - captchaStartTime;
-            attemptCount++;
-
-            bookLogData.captcha.attempts.push({
-                action: 'attempt',
-                input: input,
-                correct: input === captchaCode,
-                time_ms: captchaTime,
-                attempt_number: attemptCount,
-                timestamp: new Date().toISOString()
-            });
-
-            if (input === captchaCode) {
-                // 성공
-                bookLogData.captcha.success = true;
-                bookLogData.captcha.end_time = new Date().toISOString();
-                bookLogData.captcha.mouse_trajectory = mouseTrajectory;
-                saveBookLogToStorage();
-
-                window.location.href = `/section/${perfId}?date=${selectedDate}&time=${selectedTime}`;
-            } else {
-                // 실패
-                document.getElementById('errorMsg').classList.add('show');
-                document.getElementById('captchaInput').value = '';
-                document.getElementById('captchaInput').focus();
-                saveBookLogToStorage();
-
-                // 3회 실패 시 새 캡챠
-                if (attemptCount >= 3) {
-                    attemptCount = 0;
-                    setTimeout(refreshCaptcha, 1000);
-                }
-            }
-        }
-
-        // 마우스 궤적 수집
-        let lastMouseTime = 0;
-        document.addEventListener('mousemove', (e) => {
-            const now = Date.now();
-            if (now - lastMouseTime >= 50) {
-                mouseTrajectory.push({ x: e.clientX, y: e.clientY, t: now - pageStartTime });
-                lastMouseTime = now;
-            }
-        });
-
-        // 엔터키 처리
-        document.getElementById('captchaInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') verifyCaptcha();
-        });
-
-        // 타이머
-        let timeLeft = 180;
-        function updateTimer() {
-            const m = Math.floor(timeLeft / 60);
-            const s = timeLeft % 60;
-            document.getElementById('timer').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-
-            if (timeLeft > 0) {
-                timeLeft--;
-                setTimeout(updateTimer, 1000);
-            } else {
-                alert('시간이 초과되었습니다. 다시 시도해주세요.');
-                location.href = '/performances';
-            }
-        }
-
-        // 초기화
-        generateCaptcha();
-        updateTimer();
-        document.getElementById('captchaInput').focus();
     </script>
+    <script src="/static/js/log_collector.js"></script>
+    <script src="/static/js/captcha.js"></script>
 </body>
 
 </html>

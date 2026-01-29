@@ -1,0 +1,205 @@
+/* 캡챠(보안문자) 페이지 전용 스타일 */
+
+body {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px 40px;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+  text-decoration: none;
+}
+
+.logo span {
+  color: #ff6b6b;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.captcha-box {
+  background: #fff;
+  border-radius: 24px;
+  padding: 40px;
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.captcha-icon {
+  font-size: 60px;
+  margin-bottom: 20px;
+}
+
+.captcha-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.captcha-desc {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 30px;
+  line-height: 1.6;
+}
+
+.captcha-image-box {
+  background: #f8f8f8;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.captcha-image {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 12px;
+  color: #333;
+  font-family: 'Courier New', monospace;
+  user-select: none;
+  background: linear-gradient(45deg, #e8e8e8 25%, #f5f5f5 25%, #f5f5f5 50%, #e8e8e8 50%, #e8e8e8 75%, #f5f5f5 75%);
+  background-size: 20px 20px;
+  padding: 20px 30px;
+  border-radius: 8px;
+  display: inline-block;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  transform: skewX(-5deg);
+}
+
+.captcha-refresh {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.captcha-refresh:hover {
+  opacity: 1;
+}
+
+.captcha-input {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #e1e1e1;
+  border-radius: 12px;
+  font-size: 24px;
+  text-align: center;
+  letter-spacing: 8px;
+  margin-bottom: 20px;
+  text-transform: uppercase;
+}
+
+.captcha-input:focus {
+  outline: none;
+  border-color: #6b4fbb;
+  box-shadow: 0 0 0 4px rgba(107, 79, 187, 0.1);
+}
+
+.btn-verify {
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(135deg, #6b4fbb 0%, #8b6fdb 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-verify:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(107, 79, 187, 0.4);
+}
+
+.error-msg {
+  color: #dc3545;
+  font-size: 14px;
+  margin-top: 15px;
+  display: none;
+  padding: 12px;
+  background: #fff5f5;
+  border-radius: 8px;
+}
+
+.error-msg.show {
+  display: block;
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-10px);
+  }
+
+  75% {
+    transform: translateX(10px);
+  }
+}
+
+.timer-box {
+  margin-top: 20px;
+  padding: 12px;
+  background: #f8f8f8;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.timer-box .time {
+  color: #ff6b6b;
+  font-weight: 700;
+}
+
+.perf-info {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px 20px;
+  margin: -40px -40px 30px -40px;
+  border-radius: 24px 24px 0 0;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+}
+
+.perf-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.perf-date {
+  font-size: 13px;
+  color: #888;
+}

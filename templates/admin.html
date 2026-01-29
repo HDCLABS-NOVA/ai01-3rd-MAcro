@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그 뷰어 | 티켓 예매</title>
+    <link rel="stylesheet" href="/static/css/admin.css">
+</head>
+
+<body>
+    <header class="header">
+        <a href="/performances" class="logo">TICKET<span>PARK</span></a>
+        <div class="nav-links">
+            <a href="/performances">공연 목록</a>
+            <a href="/logout">로그아웃</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">📊 로그 뷰어</h1>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalLogs">{{ log_files|length }}</div>
+                <div class="stat-label">전체 로그</div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-value" id="humanLogs">{{ log_files|selectattr('is_bot', 'false')|list|length }}</div>
+                <div class="stat-label">정상 사용자</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-value" id="botLogs">{{ log_files|selectattr('is_bot')|list|length }}</div>
+                <div class="stat-label">봇 탐지</div>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="card">
+                <div class="card-header">세션 로그 목록</div>
+                <div class="log-list">
+                    {% if log_files %}
+                    {% for log in log_files %}
+                    <div class="log-item {% if log.is_bot %}bot{% endif %}" onclick="loadLog('{{ log.filename }}')"
+                        id="log-{{ loop.index }}">
+                        <div class="log-filename">{{ log.created_at[:19] if log.created_at else '-' }} | {{
+                            log.session_id }} | {{ log.display_stage }}</div>
+                        <div class="log-info">
+                            <span class="log-badge {% if log.is_bot %}bot{% else %}human{% endif %}">
+                                {% if log.is_bot %}🤖 BOT{% else %}👤 {{ log.user_email or 'Human' }}{% endif %}
+                            </span>
+                            <span class="log-duration">{{ (log.duration / 1000)|round(1) }}초</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>로그가 없습니다</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">상세 정보</div>
+                <div id="detailContent">
+                    <div class="empty-state">
+                        <div class="icon">👈</div>
+                        <p>로그를 선택해주세요</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/admin.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,230 @@
+/* 대기열 페이지 전용 스타일 */
+
+body {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+}
+
+/* 헤더 */
+.header {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 16px 40px;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+  text-decoration: none;
+}
+
+.logo span {
+  color: #ff6b6b;
+}
+
+/* 메인 */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.queue-icon {
+  font-size: 80px;
+  margin-bottom: 30px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.queue-title {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.perf-name {
+  font-size: 18px;
+  color: #aaa;
+  margin-bottom: 40px;
+}
+
+/* 대기열 정보 */
+.queue-box {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 40px 60px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  margin-bottom: 30px;
+}
+
+.queue-label {
+  font-size: 14px;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.queue-position {
+  font-size: 72px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.queue-total {
+  font-size: 16px;
+  color: #666;
+}
+
+/* 프로그레스 바 */
+.progress-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 30px 0;
+}
+
+.progress-bar {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #888;
+}
+
+/* 예상 시간 */
+.estimated-time {
+  font-size: 18px;
+  color: #aaa;
+}
+
+.estimated-time strong {
+  color: #fff;
+  font-size: 24px;
+}
+
+/* 안내 메시지 */
+.notice {
+  background: rgba(255, 107, 107, 0.1);
+  border: 1px solid rgba(255, 107, 107, 0.3);
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-top: 30px;
+  max-width: 500px;
+}
+
+.notice p {
+  font-size: 14px;
+  color: #ff8a8a;
+  line-height: 1.6;
+}
+
+/* 로딩 애니메이션 */
+.loading-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.loading-dots span {
+  width: 10px;
+  height: 10px;
+  background: #667eea;
+  border-radius: 50%;
+  animation: bounce 1.4s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-12px);
+  }
+}
+
+/* 입장 버튼 */
+.btn-enter {
+  display: none;
+  padding: 18px 60px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+.btn-enter.show {
+  display: inline-block;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+  }
+
+  to {
+    box-shadow: 0 0 40px rgba(102, 126, 234, 0.8);
+  }
+}
+
+.btn-enter:hover {
+  transform: scale(1.05);
+}
