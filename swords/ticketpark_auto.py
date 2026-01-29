@@ -29,6 +29,10 @@ class TicketParkWatcher(PopupWatcher):
         super().__init__(callback)
         self.enable_auto_enter = False
         self.enable_date_time = False
+        
+        # CAPTCHA retry tracking
+        self.captcha_attempt_count = 0
+        self.last_captcha_text = None
 
     def _detect_and_handle_popup(self):
         """Override to handle multiple tasks"""
@@ -47,12 +51,14 @@ Example: If an element is at pixel (960, 540) on a 1920x1080 screen, return x=0.
 
 1. **CAPTCHA**: 
    - At the top: distorted/striped CAPTCHA image with 6 letters (like "MJTAFS")
-   - In the middle: EMPTY WHITE INPUT BOX with gray placeholder "문자 입력" - THIS IS YOUR TARGET!
+   - To the RIGHT of CAPTCHA image: Blue circular refresh icon (회오리 아이콘) - can be clicked to get new CAPTCHA
+   - In the middle: EMPTY WHITE INPUT BOX with gray placeholder "문자 입력" - THIS IS YOUR INPUT TARGET!
    - At the bottom: Purple "확인" button
    - The INPUT BOX is located DIRECTLY ABOVE the purple "확인" button (just a small gap between them)
    - DO NOT target the striped CAPTCHA image at the top!
-   - READ the 6 letters from the CAPTCHA image, but return coordinates for the INPUT BOX (above the button)
-   - Return x,y = CENTER of the WHITE INPUT BOX (직접 "확인" 버튼 위), NORMALIZED 0-1
+   - READ the 6 letters from the CAPTCHA image, but return coordinates for BOTH the INPUT BOX and REFRESH BUTTON
+   - Return input_x, input_y = CENTER of the WHITE INPUT BOX, NORMALIZED 0-1
+   - Return refresh_x, refresh_y = CENTER of the BLUE REFRESH ICON (to the right of CAPTCHA image), NORMALIZED 0-1
 
 2. **Performance Icons**: Colorful rectangular icons/cards for shows/concerts (like theater masks, music notes, emoji-style icons)
    - Return NORMALIZED coordinates (0-1) for ALL detected icons (up to 5)
@@ -70,16 +76,23 @@ Example: If an element is at pixel (960, 540) on a 1920x1080 screen, return x=0.
    - **IMPORTANT**: Return NORMALIZED coordinates (0.0-1.0) with 3 decimal places
    - Be precise! The buttons are small, so accuracy is critical.
 
+4. **Timeout Alert**: A popup/alert with message like "시간이 초과되었습니다" or "다시 시도해주세요"
+   - Look for a "확인" (OK/Confirm) button
+   - Return NORMALIZED coordinates (0-1) for the confirm button
+
 RETURN JSON ONLY. Choose ONE best action.
 
 Type "CAPTCHA":
-{{"type":"CAPTCHA", "text":"6CHARS", "x":0.xxx, "y":0.xxx}} 
+{{"type":"CAPTCHA", "text":"6CHARS", "input_x":0.xxx, "input_y":0.xxx, "refresh_x":0.xxx, "refresh_y":0.xxx}} 
 
 Type "PERFORMANCE_ICONS":
 {{"type":"PERFORMANCE_ICONS", "icons":[{{"x":0.xxx, "y":0.xxx}}, {{"x":0.xxx, "y":0.xxx}}]}}
 
 Type "DATE_TIME":
 {{"type":"DATE_TIME", "date_x":0.xxx, "date_y":0.xxx, "time_x":0.xxx, "time_y":0.xxx, "reserve_x":0.xxx, "reserve_y":0.xxx}}
+
+Type "TIMEOUT_ALERT":
+{{"type":"TIMEOUT_ALERT", "confirm_x":0.xxx, "confirm_y":0.xxx}}
 
 Type "NONE":
 {{"type":"NONE"}}"""
@@ -91,38 +104,93 @@ Type "NONE":
             
         p_type = result.get("type", "NONE").upper()
         
-        # 1. CAPTCHA (Highest Priority) - with strict validation
+        # 1. CAPTCHA (Highest Priority) - with refresh and retry logic
         if p_type == "CAPTCHA":
              p_text = result.get("text", "")
-             raw_x = float(result.get("x", 0))
-             raw_y = float(result.get("y", 0))
+             input_x = float(result.get("input_x", 0))
+             input_y = float(result.get("input_y", 0))
+             refresh_x = float(result.get("refresh_x", 0))
+             refresh_y = float(result.get("refresh_y", 0))
              
              # Validate CAPTCHA format: exactly 6 uppercase letters
              captcha_str = "".join(e for e in p_text if e.isalnum()).upper()
              
-             if (len(captcha_str) == 6 and
-                 captcha_str.isalpha() and
-                 0.1 < raw_x < 0.9 and 0.1 < raw_y < 0.9):
-                 
-                 # Convert coordinates
-                 if raw_x > 1.0: raw_x /= width
-                 if raw_y > 1.0: raw_y /= height
-                 
-                 abs_x = self.mon_x + int(raw_x * width)
-                 abs_y = self.mon_y + int(raw_y * height)
-                 
-                 self.update_status(f"🔐 CAPTCHA DETECTED: '{captcha_str}' (Click: {abs_x}, {abs_y})")
-                 
-                 click_and_restore(abs_x, abs_y)
-                 time.sleep(0.2)
-                 human_type(captcha_str)
-                 time.sleep(0.2)
-                 pyautogui.press('enter')
-                 return True
-             else:
-                 # Invalid CAPTCHA format, ignore
-                 self.update_status(f"⚠️ Invalid CAPTCHA format: '{p_text}' (len={len(captcha_str)}) - Ignored")
+             # Helper function to click refresh button
+             def click_refresh():
+                 if refresh_x > 0 and refresh_y > 0:
+                     # Convert coordinates
+                     ref_x = refresh_x if refresh_x <= 1.0 else refresh_x / width
+                     ref_y = refresh_y if refresh_y <= 1.0 else refresh_y / height
+                     abs_ref_x = self.mon_x + int(ref_x * width)
+                     abs_ref_y = self.mon_y + int(ref_y * height)
+                     
+                     self.update_status(f"🔄 Clicking CAPTCHA refresh button ({abs_ref_x},{abs_ref_y})")
+                     click_and_restore(abs_ref_x, abs_ref_y)
+                     time.sleep(1.0)  # Wait for new CAPTCHA to load
+                     self.captcha_attempt_count = 0
+                     self.last_captcha_text = None
+                     return True
                  return False
+             
+             # Case 1: Invalid length (< 6 or > 6) - refresh immediately
+             if len(captcha_str) != 6:
+                 self.update_status(f"⚠️ Invalid CAPTCHA length ({len(captcha_str)}): '{p_text}' -> '{captcha_str}'")
+                 if click_refresh():
+                     return True
+                 else:
+                     self.update_status("❌ No refresh button detected, skipping...")
+                     return False
+             
+             # Case 2: Valid length but not alphabetic
+             if not captcha_str.isalpha():
+                 self.update_status(f"⚠️ CAPTCHA contains non-letters: '{captcha_str}'")
+                 if click_refresh():
+                     return True
+                 return False
+             
+             # Case 3: Check retry counter for same CAPTCHA
+             if captcha_str == self.last_captcha_text:
+                 self.captcha_attempt_count += 1
+                 self.update_status(f"⚠️ Same CAPTCHA '{captcha_str}' - Attempt {self.captcha_attempt_count}/3")
+                 
+                 if self.captcha_attempt_count >= 3:
+                     self.update_status(f"❌ Failed 3 times on '{captcha_str}', refreshing...")
+                     if click_refresh():
+                         return True
+                     return False
+             else:
+                 # New CAPTCHA text
+                 self.captcha_attempt_count = 1
+                 self.last_captcha_text = captcha_str
+             
+             # Case 4: Validate coordinates (DISABLED - using hardcoded position)
+             # if not (0.1 < input_x < 0.9 and 0.1 < input_y < 0.9):
+             #     self.update_status(f"⚠️ Invalid input coordinates: ({input_x:.3f},{input_y:.3f})")
+             #     return False
+             
+             # Convert coordinates (DISABLED - using hardcoded position)
+             # if input_x > 1.0: input_x /= width
+             # if input_y > 1.0: input_y /= height
+             # 
+             # abs_x = self.mon_x + int(input_x * width)
+             # abs_y = self.mon_y + int(input_y * height)
+             
+             # Hardcoded position for CAPTCHA input field
+             abs_x = 755
+             abs_y = 755
+             
+             self.update_status(f"🔐 CAPTCHA DETECTED: '{captcha_str}' (Hardcoded Click: {abs_x}, {abs_y})")
+             
+             click_and_restore(abs_x, abs_y)
+             time.sleep(0.2)
+             human_type(captcha_str)
+             time.sleep(0.2)
+             pyautogui.press('enter')
+             return True
+        elif p_type == "CAPTCHA":
+             # Invalid CAPTCHA format, already handled above
+             self.update_status(f"⚠️ Skipping invalid CAPTCHA")
+             return False
 
         # 2. Date/Time Selection (If Enabled)
         elif p_type == "DATE_TIME" and self.enable_date_time:
@@ -196,6 +264,34 @@ Type "NONE":
                         return True
             except Exception as e:
                 self.update_status(f"⚠️ Icon click error: {e}")
+            
+            return False
+
+        # 4. Timeout Alert
+        elif p_type == "TIMEOUT_ALERT":
+            try:
+                confirm_x = float(result.get("confirm_x", 0))
+                confirm_y = float(result.get("confirm_y", 0))
+                
+                # Ignore if button is in lower half (likely CAPTCHA input, not timeout)
+                if confirm_y > 0.4:
+                    self.update_status(f"⚠️ Ignoring TIMEOUT_ALERT at y={confirm_y:.3f} (too low, likely CAPTCHA)")
+                    return False
+                
+                if confirm_x > 0 and confirm_y > 0:
+                    # Convert coordinates
+                    if confirm_x > 1.0: confirm_x /= width
+                    if confirm_y > 1.0: confirm_y /= height
+                    
+                    abs_x = self.mon_x + int(confirm_x * width)
+                    abs_y = self.mon_y + int(confirm_y * height)
+                    
+                    self.update_status(f"⏱️ Timeout Alert - clicking OK ({abs_x},{abs_y})")
+                    click_and_restore(abs_x, abs_y)
+                    time.sleep(0.5)
+                    return True
+            except Exception as e:
+                self.update_status(f"⚠️ Timeout alert error: {e}")
             
             return False
 
