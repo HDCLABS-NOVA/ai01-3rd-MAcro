@@ -1,0 +1,184 @@
+{
+    "performances": [
+        {
+            "id": "perf001",
+            "title": "아이유 콘서트 <The Golden Hour>",
+            "category": "concert",
+            "venue": "고척스카이돔",
+            "dates": [
+                "2026-02-15",
+                "2026-02-16",
+                "2026-02-17"
+            ],
+            "times": [
+                "18:00"
+            ],
+            "grades": [
+                {
+                    "name": "VIP",
+                    "price": 180000
+                },
+                {
+                    "name": "R석",
+                    "price": 150000
+                },
+                {
+                    "name": "S석",
+                    "price": 120000
+                },
+                {
+                    "name": "A석",
+                    "price": 90000
+                }
+            ],
+            "image": "images/concert01.jpg",
+            "description": "아이유의 2026년 첫 단독 콘서트"
+        },
+        {
+            "id": "perf002",
+            "title": "뮤지컬 <웃는남자>",
+            "category": "musical",
+            "venue": "샤롯데씨어터",
+            "dates": [
+                "2026-02-01",
+                "2026-02-02",
+                "2026-02-08",
+                "2026-02-09"
+            ],
+            "times": [
+                "14:00",
+                "19:00"
+            ],
+            "grades": [
+                {
+                    "name": "VIP",
+                    "price": 150000
+                },
+                {
+                    "name": "R석",
+                    "price": 120000
+                },
+                {
+                    "name": "S석",
+                    "price": 90000
+                }
+            ],
+            "image": "images/musical01.jpg",
+            "description": "빅토르 위고 원작의 감동 뮤지컬"
+        },
+        {
+            "id": "perf003",
+            "title": "FC 서울 vs 수원 삼성",
+            "category": "sports",
+            "venue": "서울월드컵경기장",
+            "dates": [
+                "2026-03-01"
+            ],
+            "times": [
+                "19:00"
+            ],
+            "grades": [
+                {
+                    "name": "프리미엄석",
+                    "price": 80000
+                },
+                {
+                    "name": "지정석",
+                    "price": 50000
+                },
+                {
+                    "name": "자유석",
+                    "price": 30000
+                }
+            ],
+            "image": "images/sports01.jpg",
+            "description": "K리그 라이벌 매치"
+        },
+        {
+            "id": "perf004",
+            "title": "싸이흠뻑쇼 2026",
+            "category": "concert",
+            "venue": "잠실종합운동장",
+            "dates": [
+                "2026-07-15",
+                "2026-07-16"
+            ],
+            "times": [
+                "19:00"
+            ],
+            "grades": [
+                {
+                    "name": "스탠딩",
+                    "price": 110000
+                },
+                {
+                    "name": "R석",
+                    "price": 99000
+                }
+            ],
+            "image": "images/concert02.jpg",
+            "description": "여름 페스티벌의 절대강자"
+        },
+        {
+            "id": "perf005",
+            "title": "뮤지컬 <레베카>",
+            "category": "musical",
+            "venue": "블루스퀘어 신한카드홀",
+            "dates": [
+                "2026-02-20",
+                "2026-02-21",
+                "2026-02-27",
+                "2026-02-28"
+            ],
+            "times": [
+                "14:00",
+                "19:00"
+            ],
+            "grades": [
+                {
+                    "name": "VIP석",
+                    "price": 140000
+                },
+                {
+                    "name": "R석",
+                    "price": 110000
+                },
+                {
+                    "name": "S석",
+                    "price": 80000
+                }
+            ],
+            "image": "images/musical02.jpg",
+            "description": "고딕 로맨스 뮤지컬의 걸작"
+        },
+        {
+            "id": "perf006",
+            "title": "모네 인상주의 전시",
+            "category": "exhibition",
+            "venue": "국립중앙박물관",
+            "dates": [
+                "2026-02-01",
+                "2026-02-02",
+                "2026-02-03",
+                "2026-02-04",
+                "2026-02-05"
+            ],
+            "times": [
+                "10:00",
+                "14:00"
+            ],
+            "grades": [
+                {
+                    "name": "성인",
+                    "price": 20000
+                },
+                {
+                    "name": "청소년",
+                    "price": 15000
+                }
+            ],
+            "image": "images/exhibition01.jpg",
+            "description": "모네의 대표작을 한자리에"
+        }
+    ]
+}

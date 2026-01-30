@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구역 선택 - 티켓 예매</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">🎫 Ticket</a>
+            <div class="user-menu"></div>
+        </div>
+    </header>
+
+    <main class="page-wrapper">
+        <div class="container">
+            <h1 class="page-title">좌석 구역 선택</h1>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-xl);">
+                <div>
+                    <div class="card mb-lg">
+                        <h3 class="mb-md">공연장 배치도</h3>
+                        <div id="venue-map"
+                            style="background: #f8f9fa; padding: var(--spacing-xl); border-radius: var(--border-radius); min-height: 400px;">
+                            <svg width="100%" height="400" id="section-map"></svg>
+                        </div>
+                    </div>
+
+                    <div id="grade-options" class="grid grid-2"></div>
+                </div>
+
+                <div>
+                    <div class="selection-summary">
+                        <div class="summary-title">선택 정보</div>
+                        <div class="summary-item">
+                            <span>공연</span>
+                            <span id="summary-perf">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>날짜/시간</span>
+                            <span id="summary-datetime">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>선택 구역</span>
+                            <span id="summary-section">미선택</span>
+                        </div>
+                        <button id="next-btn" class="btn btn-primary btn-block mt-lg" style="display: none;"
+                            onclick="goToSeatSelect()">
+                            좌석 선택하기
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/logger.js"></script>
+    <script src="js/browser-info.js"></script>
+    <script src="js/flow-manager.js"></script>
+
+    <script>
+        loadLogFromSession();
+        logStageEntry('section');
+        enableMouseTracking();
+        // preventBackNavigation() 제거 - 뒤로가기 허용
+
+        // 뒤로가기로 돌아온 경우 좌석 정보 초기화
+        clearSeatSelections();
+
+        const flowData = getFlowData();
+        let selectedSection = '';
+        let selectedGrade = '';
+
+        if (!flowData) {
+            navigateTo('index.html');
+        }
+
+        // 요약 정보 표시
+        document.getElementById('summary-perf').textContent = flowData.performanceTitle;
+        document.getElementById('summary-datetime').textContent = `${formatDateKorean(flowData.selectedDate)} ${flowData.selectedTime}`;
+
+        // 구역 버튼 생성
+        async function loadGrades() {
+            const response = await fetch('data/performances.json');
+            const data = await response.json();
+            const perf = data.performances.find(p => p.id === flowData.performanceId);
+
+            const gradesDiv = document.getElementById('grade-options');
+            gradesDiv.innerHTML = perf.grades.map(grade => `
+        <div class="card" style="cursor: pointer; transition: all 0.3s;" onclick="selectGrade('${grade.name}', ${grade.price})">
+          <h3 style="color: var(--primary-color);">${grade.name}</h3>
+          <p style="font-size: 24px; font-weight: 700; margin-top: var(--spacing-sm);">${formatPrice(grade.price)}</p>
+          <p style="color: var(--text-secondary); margin-top: var(--spacing-sm);">잔여석 있음</p>
+        </div>
+      `).join('');
+
+            // 간단한 SVG 구역 맵
+            drawSectionMap(perf.grades);
+        }
+
+        function drawSectionMap(grades) {
+            const svg = document.getElementById('section-map');
+            const width = svg.clientWidth;
+            const height = 400;
+
+            // 무대
+            svg.innerHTML = `
+        <rect x="${width / 2 - 100}" y="20" width="200" height="30" fill="#FF3D7F" rx="4"/>
+        <text x="${width / 2}" y="40" text-anchor="middle" fill="white" font-weight="bold">무대</text>
+      `;
+
+            // 구역들
+            grades.forEach((grade, idx) => {
+                const y = 80 + idx * 80;
+                const rect = `<rect x="${width / 2 - 150}" y="${y}" width="300" height="60" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="8" style="cursor: pointer;" onclick="selectSection('${grade.name}-L', '${grade.name}', ${grade.price})"/>`;
+                const text = `<text x="${width / 2}" y="${y + 35}" text-anchor="middle" font-size="16" font-weight="bold" fill="#1976D2">${grade.name}</text>`;
+                svg.innerHTML += rect + text;
+            });
+        }
+
+        function selectSection(section, grade, price) {
+            selectedSection = section;
+            selectedGrade = grade;
+
+            updateFlowData({
+                selectedSection: section,
+                selectedGrade: grade,
+                seatPrice: price
+            });
+
+            document.getElementById('summary-section').textContent = grade;
+            document.getElementById('next-btn').style.display = 'block';
+
+            trackClick(event, { section, grade, price });
+        }
+
+        function selectGrade(grade, price) {
+            selectSection(`${grade}-L`, grade, price);
+        }
+
+        function goToSeatSelect() {
+            if (!selectedSection) {
+                showAlert('구역을 선택해주세요.', 'warning');
+                return;
+            }
+
+            logStageExit('section', {
+                final_section: selectedSection,
+                final_grade: selectedGrade,
+                clicks: []
+            });
+
+            disableMouseTracking();
+            navigateTo('seat_select.html');
+        }
+
+        loadGrades();
+    </script>
+</body>
+
+</html>

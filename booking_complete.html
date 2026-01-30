@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예매 완료 - 티켓 예매</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">🎫 Ticket</a>
+            <div class="user-menu"></div>
+        </div>
+    </header>
+
+    <main class="page-wrapper">
+        <div class="container-narrow">
+            <div style="text-align: center; margin-bottom: var(--spacing-xl);">
+                <div
+                    style="width: 100px; height: 100px; margin: 0 auto var(--spacing-lg); background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 60px box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3);">
+                    ✓</div>
+                <h1 class="page-title"
+                    style="background: linear-gradient(135deg, #FF3D7F 0%, #9C27B0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    예매 완료!</h1>
+                <p class="page-subtitle">티켓 예매가 성공적으로 완료되었습니다</p>
+            </div>
+
+            <div class="card mb-lg"
+                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: var(--spacing-xl); box-shadow: var(--shadow-lg);">
+                <div style="text-align: center;">
+                    <div style="font-size: 14px; opacity: 0.9; margin-bottom: var(--spacing-sm); letter-spacing: 2px;">
+                        BOOKING NUMBER</div>
+                    <div style="font-size: 40px; font-weight: 800; letter-spacing: 4px; text-shadow: 0 4px 8px rgba(0,0,0,0.2);"
+                        id="booking-number">-</div>
+                </div>
+            </div>
+
+            <div class="card mb-lg">
+                <h3 style="margin-bottom: var(--spacing-md); color: var(--primary-color);">예매 정보</h3>
+                <div class="summary-item">
+                    <span>공연명</span>
+                    <span id="perf-title">-</span>
+                </div>
+                <div class="summary-item">
+                    <span>날짜</span>
+                    <span id="perf-date">-</span>
+                </div>
+                <div class="summary-item">
+                    <span>시간</span>
+                    <span id="perf-time">-</span>
+                </div>
+                <div class="summary-item">
+                    <span>장소</span>
+                    <span id="perf-venue">-</span>
+                </div>
+                <div class="summary-item">
+                    <span>좌석</span>
+                    <span id="perf-seats">-</span>
+                </div>
+                <div class="summary-item">
+                    <span>결제 금액</span>
+                    <span id="perf-price"
+                        style="font-size: 20px; font-weight: 700; color: var(--primary-color);">-</span>
+                </div>
+            </div>
+
+            <div class="alert alert-info mb-lg">
+                <strong>📧 예매 확인 이메일이 발송되었습니다</strong><br>
+                <span id="user-email">-</span> 으로 예매 확인 메일이 발송되었습니다.
+            </div>
+
+            <div class="alert alert-warning mb-lg">
+                <strong>⏰ 공연 시작 30분 전까지 현장에 도착해주세요</strong><br>
+                티켓 수령 및 입장을 위해 공연 시작 30분 전까지 현장에 도착해주시기 바랍니다.
+            </div>
+
+            <button class="btn btn-primary btn-lg btn-block mb-sm" onclick="navigateTo('index.html')">공연 더 보기</button>
+            <button class="btn btn-secondary btn-block" onclick="clearFlowData(); navigateTo('index.html')">확인</button>
+        </div>
+    </main>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/flow-manager.js"></script>
+
+    <script>
+        const bookingId = getQueryParam('id');
+        const flowData = getFlowData();
+        const currentUser = getCurrentUser();
+
+        if (!bookingId || !flowData) {
+            showAlert('예매 정보를 찾을 수 없습니다.', 'error');
+            setTimeout(() => navigateTo('index.html'), 2000);
+        } else {
+            document.getElementById('booking-number').textContent = bookingId;
+            document.getElementById('perf-title').textContent = flowData.performanceTitle;
+            document.getElementById('perf-date').textContent = formatDateKorean(flowData.selectedDate);
+            document.getElementById('perf-time').textContent = flowData.selectedTime;
+            document.getElementById('perf-venue').textContent = flowData.venue;
+            document.getElementById('perf-seats').textContent = flowData.selectedSeats.map(s => s.split('-')[1]).join(', ');
+
+            const totalPrice = calculateTotalPrice();
+            const deliveryFee = flowData.deliveryType === 'delivery' ? 3000 : 0;
+            document.getElementById('perf-price').textContent = formatPrice(totalPrice + deliveryFee);
+
+            document.getElementById('user-email').textContent = currentUser.email;
+
+            // 예매 완료 후 플로우 데이터 정리
+            setTimeout(() => {
+                clearFlowData();
+            }, 5000);
+        }
+    </script>
+</body>
+
+</html>

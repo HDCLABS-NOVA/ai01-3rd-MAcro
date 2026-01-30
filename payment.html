@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 - 티켓 예매</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">🎫 Ticket</a>
+            <div class="user-menu"></div>
+        </div>
+    </header>
+
+    <main class="page-wrapper">
+        <div class="container-narrow">
+            <h1 class="page-title">결제</h1>
+
+            <div class="card mb-lg">
+                <h3 class="mb-md">결제 금액</h3>
+                <div class="summary-item">
+                    <span>티켓 금액</span>
+                    <span id="ticket-price">-</span>
+                </div>
+                <div class="summary-item" id="delivery-fee-row" style="display: none;">
+                    <span>배송비</span>
+                    <span>+ 3,000원</span>
+                </div>
+                <div class="summary-item">
+                    <span>최종 결제 금액</span>
+                    <span id="total-price" style="font-size: 24px;">-</span>
+                </div>
+            </div>
+
+            <div class="card mb-lg">
+                <h3 class="mb-md">결제 수단 선택</h3>
+
+                <div class="payment-method selected" data-type="card" onclick="selectPayment('card', this)">
+                    <div class="payment-icon">💳</div>
+                    <div class="payment-info">
+                        <div class="payment-name">신용/체크카드</div>
+                        <div class="payment-desc">모든 카드 사용 가능</div>
+                    </div>
+                </div>
+
+                <div class="payment-method" data-type="bank" onclick="selectPayment('bank', this)">
+                    <div class="payment-icon">🏦</div>
+                    <div class="payment-info">
+                        <div class="payment-name">무통장 입금</div>
+                        <div class="payment-desc">계좌 이체</div>
+                    </div>
+                </div>
+
+                <div class="payment-method" data-type="mobile" onclick="selectPayment('mobile', this)">
+                    <div class="payment-icon">📱</div>
+                    <div class="payment-info">
+                        <div class="payment-name">간편결제</div>
+                        <div class="payment-desc">카카오페이, 네이버페이 등</div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <button class="btn btn-primary btn-lg btn-block" onclick="processPayment()">결제하기</button>
+        </div>
+    </main>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/logger.js"></script>
+    <script src="js/browser-info.js"></script>
+    <script src="js/flow-manager.js"></script>
+
+    <script>
+        loadLogFromSession();
+        logStageEntry('payment');
+        // preventBackNavigation() 제거 - 뒤로가기 허용
+
+        const flowData = getFlowData();
+        if (!flowData) {
+            navigateTo('index.html');
+        }
+
+        const totalPrice = calculateTotalPrice();
+        const deliveryFee = flowData.deliveryType === 'delivery' ? 3000 : 0;
+        const finalPrice = totalPrice + deliveryFee;
+
+        document.getElementById('ticket-price').textContent = formatPrice(totalPrice);
+        document.getElementById('total-price').textContent = formatPrice(finalPrice);
+
+        if (deliveryFee > 0) {
+            document.getElementById('delivery-fee-row').style.display = 'flex';
+        }
+
+        let selectedPaymentType = 'card';
+
+        function selectPayment(type, element) {
+            document.querySelectorAll('.payment-method').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedPaymentType = type;
+        }
+
+        async function processPayment() {
+
+            showLoading();
+
+            // 시뮬레이션: 결제 처리
+            await sleep(2000);
+
+            const bookingId = generateBookingNumber();
+
+            logStageExit('payment', {
+                payment_type: selectedPaymentType,
+                completed: true,
+                completed_time: getISOTimestamp()
+            });
+
+            // 최종 로그 완료
+            await finalizeLog(true, bookingId);
+
+            hideLoading();
+
+            navigateTo(`booking_complete.html?id=${bookingId}`);
+        }
+
+
+    </script>
+</body>
+
+</html>
