@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 매크로 시뮬레이터 - 교육용 탐지 시스템</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .macro-type {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .macro-type:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .macro-type.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .macro-type h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .macro-type p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .log-container {
+            height: 600px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #00ff00;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-left: 3px solid #00ff00;
+            padding-left: 12px;
+            animation: fadeIn 0.3s;
+        }
+
+        .log-entry.bot {
+            border-left-color: #ff4444;
+            color: #ff4444;
+        }
+
+        .log-entry.success {
+            border-left-color: #44ff44;
+            color: #44ff44;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+        }
+
+        .stat-box h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-box p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            border-radius: 4px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 4px solid #17a2b8;
+        }
+
+        .log-timestamp {
+            color: #888;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 매크로 탐지 시뮬레이터</h1>
+            <p>교육용 티켓팅 매크로 행동 패턴 분석 시스템</p>
+        </div>
+
+        <div class="alert alert-info">
+            ⚠️ 이 시스템은 <strong>교육 목적</strong>으로 제작되었습니다. 매크로 사용 패턴을 이해하고 탐지 알고리즘을 학습하기 위한 도구입니다.
+        </div>
+
+        <div class="main-grid">
+            <!-- 왼쪽: 매크로 타입 선택 -->
+            <div class="card">
+                <h2>🎯 매크로 유형 선택</h2>
+                <div class="macro-types">
+                    <div class="macro-type" data-type="fast_click">
+                        <h3>⚡ 빠른 클릭 봇</h3>
+                        <p>초고속 클릭 (0.05~0.2초), 최소 궤적, 호버 없음</p>
+                    </div>
+                    <div class="macro-type" data-type="linear_move">
+                        <h3>📐 직선 이동 봇</h3>
+                        <p>일정한 속도의 직선 이동, 자연스럽지 않은 궤적</p>
+                    </div>
+                    <div class="macro-type" data-type="repeat_pattern">
+                        <h3>🔄 반복 패턴 봇</h3>
+                        <p>정확히 1초 간격의 일정한 클릭 패턴</p>
+                    </div>
+                    <div class="macro-type" data-type="slow_auto">
+                        <h3>🐢 느린 자동화 봇</h3>
+                        <p>느린 클릭을 통한 탐지 회피 시도</p>
+                    </div>
+                    <div class="macro-type" data-type="fixed_coord">
+                        <h3>📍 좌표 고정 봇</h3>
+                        <p>픽셀 단위로 정확한 고정 좌표 클릭</p>
+                    </div>
+                    <div class="macro-type" data-type="queue_bypass">
+                        <h3>🚀 대기열 우회 봇</h3>
+                        <p>직접 링크를 통한 대기열 무시</p>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" id="startBtn">🎬 시뮬레이션 시작</button>
+                    <button class="btn btn-secondary" id="clearBtn">🗑️ 로그 초기화</button>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+            </div>
+
+            <!-- 오른쪽: 실시간 로그 -->
+            <div class="card">
+                <h2>📊 실시간 행동 로그</h2>
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry">시스템 준비 완료. 매크로 유형을 선택하고 시뮬레이션을 시작하세요.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 하단: 통계 -->
+        <div class="card">
+            <h2>📈 탐지 통계</h2>
+            <div class="stats">
+                <div class="stat-box">
+                    <h3 id="totalLogs">0</h3>
+                    <p>생성된 로그</p>
+                </div>
+                <div class="stat-box">
+                    <h3 id="botDetected">0</h3>
+                    <p>매크로 탐지</p>
+                </div>
+                <div class="stat-box">
+                    <h3 id="avgScore">0.0</h3>
+                    <p>평균 의심 점수</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedType = null;
+        let totalLogs = 0;
+        let botCount = 0;
+        let scoreSum = 0;
+
+        // 매크로 타입 선택
+        document.querySelectorAll('.macro-type').forEach(el => {
+            el.addEventListener('click', () => {
+                document.querySelectorAll('.macro-type').forEach(e => e.classList.remove('active'));
+                el.classList.add('active');
+                selectedType = el.dataset.type;
+                addLog(`선택됨: ${el.querySelector('h3').textContent}`, 'success');
+            });
+        });
+
+        // 시작 버튼
+        document.getElementById('startBtn').addEventListener('click', async () => {
+            if (!selectedType) {
+                alert('매크로 유형을 먼저 선택해주세요!');
+                return;
+            }
+
+            const btn = document.getElementById('startBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ 시뮬레이션 중...';
+
+            addLog('='.repeat(60), 'success');
+            addLog(`🚀 ${selectedType} 매크로 시뮬레이션 시작...`, 'success');
+            addLog('='.repeat(60), 'success');
+
+            // 10개의 로그 생성
+            for (let i = 1; i <= 10; i++) {
+                await generateBotLog(selectedType, i);
+                updateProgress(i * 10);
+                await sleep(500); // 0.5초 대기
+            }
+
+            addLog('='.repeat(60), 'success');
+            addLog('✅ 시뮬레이션 완료! 로그 파일이 저장되었습니다.', 'success');
+            addLog('='.repeat(60), 'success');
+
+            btn.disabled = false;
+            btn.textContent = '🎬 시뮬레이션 시작';
+        });
+
+        // 초기화 버튼
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            document.getElementById('logContainer').innerHTML = '<div class="log-entry">로그가 초기화되었습니다.</div>';
+            totalLogs = 0;
+            botCount = 0;
+            scoreSum = 0;
+            updateStats();
+            updateProgress(0);
+        });
+
+        async function generateBotLog(botType, index) {
+            try {
+                const response = await fetch('/api/generate-macro-log', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        bot_type: botType,
+                        index: index
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    totalLogs++;
+                    botCount++;
+                    scoreSum += data.bot_info.confidence;
+
+                    addLog(`[${index}/10] 📝 로그 생성됨: ${data.filename}`, 'bot');
+                    addLog(`    ├─ 봇 타입: ${data.bot_info.description}`, 'bot');
+                    addLog(`    ├─ 의심 점수: ${(data.bot_info.confidence * 100).toFixed(1)}%`, 'bot');
+                    addLog(`    └─ 탐지 특징: ${data.bot_info.detected_features.join(', ') || '없음'}`, 'bot');
+
+                    updateStats();
+                } else {
+                    addLog(`❌ 로그 생성 실패: ${data.error}`, 'bot');
+                }
+            } catch (error) {
+                addLog(`❌ 오류: ${error.message}`, 'bot');
+            }
+        }
+
+        function addLog(message, type = '') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString('ko-KR');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.innerHTML = `<span class="log-timestamp">[${timestamp}]</span> ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function updateStats() {
+            document.getElementById('totalLogs').textContent = totalLogs;
+            document.getElementById('botDetected').textContent = botCount;
+            document.getElementById('avgScore').textContent = totalLogs > 0 ? ((scoreSum / totalLogs) * 100).toFixed(1) + '%' : '0.0';
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progressBar').style.width = percent + '%';
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+
+</html>

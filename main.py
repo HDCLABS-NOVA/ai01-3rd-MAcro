@@ -10,7 +10,7 @@ import uuid
 import hashlib
 import random
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 
 from fastapi import FastAPI, Request, Form, HTTPException, Depends
@@ -207,100 +207,309 @@ async def save_session_log(session_data: dict):
     return filename
 
 def generate_bot_log(bot_type: str) -> dict:
-    """봇 로그 생성"""
-    session_id = str(uuid.uuid4())
+    """봇 로그 생성 - 기존 정상 로그 구조와 동일한 포맷"""
+    flow_id = f"flow_{datetime.now().strftime('%Y%m%d')}_{uuid.uuid4().hex[:6]}"
+    session_id = f"sess_{uuid.uuid4().hex[:8]}"
     now = datetime.now()
     
+    # 봇 유형별 패턴 정의
     bot_patterns = {
         "fast_click": {
             "description": "빠른 클릭 봇",
-            "click_interval": random.uniform(0.05, 0.2),
-            "trajectory_points": random.randint(3, 10),
-            "hover_count": 0,
-            "completion_time": random.uniform(3, 8)
+            "avg_click_interval": 0.15,  # 매우 빠른 클릭
+            "trajectory_smoothness": 0.3,  # 낮음 = 직선적
+            "hover_duration": 0,
+            "total_time": random.uniform(5, 10),
+            "captcha_solve_time": random.uniform(0.1, 0.5),
+            "queue_bypass": False
         },
         "linear_move": {
             "description": "직선 이동 봇",
-            "click_interval": random.uniform(0.3, 0.8),
-            "trajectory_points": random.randint(5, 15),
-            "hover_count": random.randint(0, 2),
-            "completion_time": random.uniform(8, 15)
+            "avg_click_interval": 0.5,
+            "trajectory_smoothness": 0.2,  # 매우 직선적
+            "hover_duration": 0.1,
+            "total_time": random.uniform(10, 15),
+            "captcha_solve_time": random.uniform(0.3, 1.0),
+            "queue_bypass": False
         },
         "repeat_pattern": {
             "description": "반복 패턴 봇",
-            "click_interval": 1.0,  # 정확히 1초
-            "trajectory_points": random.randint(10, 20),
-            "hover_count": random.randint(1, 3),
-            "completion_time": random.uniform(10, 20)
+            "avg_click_interval": 1.0,  # 정확히 1초
+            "trajectory_smoothness": 0.4,
+            "hover_duration": 0.2,
+            "total_time": random.uniform(15, 25),
+            "captcha_solve_time": random.uniform(0.5, 1.5),
+            "queue_bypass": False
         },
         "slow_auto": {
-            "description": "느린 자동화 봇",
-            "click_interval": random.uniform(1.5, 3.0),
-            "trajectory_points": random.randint(15, 30),
-            "hover_count": random.randint(2, 5),
-            "completion_time": random.uniform(20, 40)
+            "description": "느린 자동화 봇 (탐지 회피)",
+            "avg_click_interval": 2.5,
+            "trajectory_smoothness": 0.6,  # 좀 더 자연스럽게
+            "hover_duration": 0.5,
+            "total_time": random.uniform(25, 45),
+            "captcha_solve_time": random.uniform(2.0, 4.0),
+            "queue_bypass": False
         },
         "fixed_coord": {
             "description": "좌표 고정 봇",
-            "click_interval": random.uniform(0.2, 0.5),
-            "trajectory_points": 0,
-            "hover_count": 0,
-            "completion_time": random.uniform(5, 10)
+            "avg_click_interval": 0.3,
+            "trajectory_smoothness": 0.1,  # 직선에 가까움
+            "hover_duration": 0,
+            "total_time": random.uniform(7, 12),
+            "captcha_solve_time": random.uniform(0.2, 0.8),
+            "queue_bypass": False,
+            "fixed_positions": True  # 항상 같은 좌표
         },
         "queue_bypass": {
-            "description": "대기열 우회 봇",
-            "click_interval": random.uniform(0.1, 0.3),
-            "trajectory_points": random.randint(0, 5),
-            "hover_count": 0,
-            "completion_time": random.uniform(2, 5),
-            "queue_wait_time": random.uniform(0.5, 2)
+            "description": "대기열 우회 봇 (직접링크)",
+            "avg_click_interval": 0.2,
+            "trajectory_smoothness": 0.3,
+            "hover_duration": 0,
+            "total_time": random.uniform(3, 6),
+            "captcha_solve_time": random.uniform(0.1, 0.3),
+            "queue_bypass": True  # 대기열 건너뜀
         }
     }
     
     pattern = bot_patterns.get(bot_type, bot_patterns["fast_click"])
     
-    # 마우스 궤적 생성 (직선적)
-    trajectory = []
-    start_x, start_y = random.randint(100, 300), random.randint(100, 300)
-    end_x, end_y = random.randint(400, 700), random.randint(300, 500)
+    # 공연 선택
+    perf = random.choice(PERFORMANCES)
+    selected_date = random.choice(perf["dates"])
+    selected_time = random.choice(perf["times"])
     
-    for i in range(pattern["trajectory_points"]):
-        t = i / max(pattern["trajectory_points"] - 1, 1)
-        trajectory.append({
-            "x": int(start_x + (end_x - start_x) * t),
-            "y": int(start_y + (end_y - start_y) * t),
-            "timestamp": i * 50
+    # 타임스탬프 생성
+    flow_start = now
+    perf_duration = random.uniform(2, 5)  # 공연 선택 단계
+    queue_duration = 0 if pattern["queue_bypass"] else random.uniform(3, 8)
+    captcha_duration = pattern["captcha_solve_time"]
+    section_duration = random.uniform(1, 3)
+    booking_duration = random.uniform(3, 8)
+    
+    perf_end = flow_start + timedelta(seconds=perf_duration)
+    queue_end = perf_end + timedelta(seconds=queue_duration)
+    captcha_end = queue_end + timedelta(seconds=captcha_duration)
+    section_end = captcha_end + timedelta(seconds=section_duration)
+    booking_end = section_end + timedelta(seconds=booking_duration)
+    
+    total_duration_ms = int((booking_end - flow_start).total_seconds() * 1000)
+    
+    # 좌석 선택 (봇은 빠르게 선택)
+    final_seats = [f"R-{random.choice(['D','E','F','G','H'])}{random.randint(1,50)}" 
+                   for _ in range(random.randint(1, 2))]
+    
+    # 마우스 궤적 생성 함수
+    def generate_trajectory(start_x, start_y, end_x, end_y, duration_ms, smoothness):
+        """마우스 궤적 생성 - smoothness가 낮을수록 직선적"""
+        points = []
+        num_points = max(5, int(duration_ms / 100))  # 100ms마다 1포인트
+        
+        for i in range(num_points):
+            t = i / (num_points - 1) if num_points > 1 else 0
+            
+            if smoothness < 0.3:  # 매우 직선적 (봇 특징)
+                x = int(start_x + (end_x - start_x) * t)
+                y = int(start_y + (end_y - start_y) * t)
+            else:  # 약간의 노이즈 추가
+                noise_x = random.randint(-5, 5) * smoothness
+                noise_y = random.randint(-5, 5) * smoothness
+                x = int(start_x + (end_x - start_x) * t + noise_x)
+                y = int(start_y + (end_y - start_y) * t + noise_y)
+            
+            timestamp = int(i * 100)
+            points.append([x, y, timestamp])
+        
+        return points
+    
+    # 클릭 생성 함수
+    def generate_click(x, y, timestamp_iso, target="", is_integer_coord=True):
+        """클릭 이벤트 생성"""
+        return {
+            "x": x,
+            "y": y,
+            "nx": round(x / 1920, 4),
+            "ny": round(y / 953, 4),
+            "viewport": {"w": 1920, "h": 953},
+            "timestamp": timestamp_iso,
+            "is_trusted": False,  # 봇이므로 False
+            "click_duration": random.randint(50, 150) if pattern["hover_duration"] > 0 else 20,
+            "is_integer": is_integer_coord
+        }
+    
+    # Stages 데이터 생성
+    stages = {}
+    
+    # 1. 공연 선택 단계 (perf)
+    perf_trajectory = generate_trajectory(800, 400, 900, 600, int(perf_duration * 1000), pattern["trajectory_smoothness"])
+    stages["perf"] = {
+        "entry_time": flow_start.isoformat() + "Z",
+        "exit_time": perf_end.isoformat() + "Z",
+        "duration_ms": int(perf_duration * 1000),
+        "card_clicks": [{
+            "performance_id": perf["id"],
+            "performance_title": perf["title"],
+            "timestamp": (flow_start + timedelta(seconds=1)).isoformat() + "Z"
+        }],
+        "date_selections": [{
+            "date": selected_date,
+            "timestamp": (flow_start + timedelta(seconds=2)).isoformat() + "Z"
+        }],
+        "time_selections": [{
+            "time": selected_time,
+            "timestamp": (flow_start + timedelta(seconds=3)).isoformat() + "Z"
+        }],
+        "actions": [
+            {"action": "card_click", "target": perf["id"], "timestamp": (flow_start + timedelta(seconds=1)).isoformat() + "Z"},
+            {"action": "date_select", "target": selected_date, "timestamp": (flow_start + timedelta(seconds=2)).isoformat() + "Z"},
+            {"action": "time_select", "target": selected_time, "timestamp": (flow_start + timedelta(seconds=3)).isoformat() + "Z"},
+            {"action": "booking_start", "target": perf["id"], "date": selected_date, "time": selected_time, "timestamp": perf_end.isoformat() + "Z"}
+        ],
+        "mouse_trajectory": perf_trajectory
+    }
+    
+    # 2. 대기열 단계 (queue) - 우회 봇은 건너뜀
+    if not pattern["queue_bypass"]:
+        queue_trajectory = generate_trajectory(900, 600, 1000, 800, int(queue_duration * 1000), pattern["trajectory_smoothness"])
+        initial_pos = random.randint(500, perf.get("queue_size", 3000))
+        stages["queue"] = {
+            "entry_time": perf_end.isoformat() + "Z",
+            "exit_time": queue_end.isoformat() + "Z",
+            "duration_ms": int(queue_duration * 1000),
+            "initial_position": initial_pos,
+            "final_position": 0,
+            "total_queue": perf.get("queue_size", 3000),
+            "wait_duration_ms": int(queue_duration * 1000),
+            "position_updates": [
+                {"position": max(0, initial_pos - i * 100), "progress": min(99, int((i / 5) * 100)), 
+                 "estimated_minutes": max(1, 5 - i), "timestamp": (perf_end + timedelta(seconds=i)).isoformat() + "Z"}
+                for i in range(1, 6)
+            ] + [{"position": 0, "status": "ready", "timestamp": queue_end.isoformat() + "Z"}],
+            "mouse_trajectory": queue_trajectory
+        }
+    
+    # 3. 캡챠 단계 (captcha)
+    stages["captcha"] = {
+        "entry_time": queue_end.isoformat() + "Z",
+        "exit_time": captcha_end.isoformat() + "Z",
+        "duration_ms": int(captcha_duration * 1000),
+        "attempts": 1 if captcha_duration < 2 else random.randint(2, 3),  # 빠르면 의심
+        "time_to_solve_ms": int(captcha_duration * 1000)
+    }
+    
+    # 4. 구역 선택 단계 (section)
+    section_traj = generate_trajectory(900, 700, 1110, 668, int(section_duration * 1000), pattern["trajectory_smoothness"])
+    stages["section"] = {
+        "entry_time": captcha_end.isoformat() + "Z",
+        "exit_time": section_end.isoformat() + "Z",
+        "duration_ms": int(section_duration * 1000),
+        "final_section": "R-R",
+        "final_grade": "R",
+        "clicks": [
+            {
+                "section": "R-R",
+                "grade": "R",
+                "price": perf["price"].get("R", 140000),
+                **generate_click(1110, 668, (captcha_end + timedelta(seconds=section_duration/2)).isoformat() + "Z", "R-R", 
+                                pattern.get("fixed_positions", False))
+            }
+        ],
+        "mouse_trajectory": section_traj
+    }
+    
+    # 5. 좌석 선택 단계 (booking)
+    booking_traj = generate_trajectory(1000, 650, 1200, 400, int(booking_duration * 1000), pattern["trajectory_smoothness"])
+    
+    # 봇은 클릭 간격이 일정함
+    seat_clicks = []
+    for i, seat in enumerate(final_seats):
+        click_time = section_end + timedelta(seconds=i * pattern["avg_click_interval"])
+        seat_clicks.append({
+            "seat_id": seat,
+            "grade": "R",
+            "price": perf["price"].get("R", 140000),
+            **generate_click(random.randint(800, 1200), random.randint(300, 600), 
+                           click_time.isoformat() + "Z", seat,
+                           pattern.get("fixed_positions", False))
         })
     
-    # 클릭 생성 (일정한 간격)
-    clicks = []
-    for i in range(random.randint(5, 15)):
-        clicks.append({
-            "x": random.randint(300, 600),
-            "y": random.randint(200, 400),
-            "target": f"seat_{random.randint(1, 600)}",
-            "timestamp": int(i * pattern["click_interval"] * 1000)
-        })
+    stages["booking"] = {
+        "entry_time": section_end.isoformat() + "Z",
+        "exit_time": booking_end.isoformat() + "Z",
+        "duration_ms": int(booking_duration * 1000),
+        "selected_seats": final_seats,
+        "seat_clicks": seat_clicks,
+        "mouse_trajectory": booking_traj,
+        "keyboard_events": [],  # 봇은 키보드 사용 없음
+        "scroll_events": []      # 봇은 스크롤 거의 없음
+    }
+    
+    # 메타데이터
+    metadata = {
+        "flow_id": flow_id,
+        "session_id": session_id,
+        "user_id": f"bot_{bot_type}_{random.randint(1000, 9999)}",
+        "user_email": f"bot_{random.randint(1000, 9999)}@fake.com",
+        "user_ip": f"192.168.{random.randint(1, 255)}.{random.randint(1, 255)}",
+        "created_at": flow_start.isoformat() + "Z",
+        "performance_id": perf["id"],
+        "performance_title": perf["title"],
+        "selected_date": selected_date,
+        "selected_time": selected_time,
+        "flow_start_time": flow_start.isoformat() + "Z",
+        "flow_end_time": booking_end.isoformat() + "Z",
+        "total_duration_ms": total_duration_ms,
+        "is_completed": True,
+        "completion_status": "success",
+        "final_seats": final_seats,
+        "booking_id": f"M{random.randint(10000000, 99999999)}",
+        "browser_info": {
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "platform": "Win32",
+            "cookieEnabled": True,
+            "doNotTrack": None,
+            "hardwareConcurrency": 16,
+            "deviceMemory": 8,
+            "maxTouchPoints": 0,
+            "language": "ko-KR",
+            "webdriver": True,  # 봇 탐지 포인트!
+            "screen": {"width": 1920, "height": 1080, "colorDepth": 24, "pixelRatio": 1},
+            "window": {"outerWidth": 1920, "outerHeight": 1040, "innerWidth": 1920, "innerHeight": 953},
+            "timezone": "Asia/Seoul"
+        }
+    }
+    
+    # 봇 탐지 정보 (간단한 구조)
+    bot_info = {
+        "is_bot": True,
+        "type": bot_type,
+        "description": pattern["description"],
+        "confidence": round(random.uniform(0.75, 0.98), 2),
+        "detected_features": []
+    }
+    
+    # 탐지된 특징들 추가
+    features = []
+    if pattern["avg_click_interval"] < 0.5:
+        features.append("fast_clicking")
+    if pattern["avg_click_interval"] == 1.0:
+        features.append("uniform_intervals")
+    if pattern["trajectory_smoothness"] < 0.4:
+        features.append("linear_trajectory")
+    if captcha_duration < 1.0:
+        features.append("fast_captcha")
+    if total_duration_ms < 15000:
+        features.append("suspiciously_fast")
+    if pattern["queue_bypass"]:
+        features.append("queue_bypass")
+    
+    bot_info["detected_features"] = features
     
     return {
-        "session_id": session_id,
-        "is_bot": True,
-        "bot_type": bot_type,
-        "bot_description": pattern["description"],
-        "mode": random.choice(["A", "B", "C"]),
-        "page_entry_time": now.isoformat(),
-        "page_exit_time": (now.replace(second=now.second + int(pattern["completion_time"]))).isoformat(),
-        "total_duration_ms": int(pattern["completion_time"] * 1000),
-        "user_ip": f"192.168.{random.randint(1, 255)}.{random.randint(1, 255)}",
-        "user_id": f"bot_{bot_type}_{random.randint(1000, 9999)}",
-        "mouse_trajectory": trajectory,
-        "clicks": clicks,
-        "hovers": [{"target": f"elem_{i}", "duration": random.randint(10, 100)} 
-                   for i in range(pattern["hover_count"])],
-        "captcha_attempts": random.randint(1, 2) if bot_type != "queue_bypass" else 1,
-        "captcha_time_ms": random.randint(100, 500),
-        "bot_score": random.uniform(0.7, 0.95)
+        "metadata": metadata,
+        "stages": stages,
+        "bot": bot_info  # 간단한 구조
     }
+
 
 # ============== 페이지 라우트 ==============
 @app.get("/", response_class=HTMLResponse)
@@ -1011,6 +1220,55 @@ async def get_log_file(filename: str):
         with open(filepath, 'r', encoding='utf-8') as f:
             return json.load(f)
     raise HTTPException(status_code=404, detail="로그 파일을 찾을 수 없습니다.")
+
+# ============== 매크로 시뮬레이터 ==============
+@app.get("/macro-simulator", response_class=HTMLResponse)
+async def macro_simulator_page(request: Request):
+    """매크로 시뮬레이터 페이지 (교육용)"""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse(url="/login", status_code=302)
+    
+    return templates.TemplateResponse("macro_simulator.html", {
+        "request": request,
+        "user": user
+    })
+
+@app.post("/api/generate-macro-log")
+async def generate_macro_log_api(request: Request):
+    """매크로 로그 생성 API"""
+    try:
+        data = await request.json()
+        bot_type = data.get("bot_type", "fast_click")
+        index = data.get("index", 1)
+        
+        # 봇 로그 생성
+        log_data = generate_bot_log(bot_type)
+        
+        # 파일명 생성: 정상 로그와 완전히 동일한 형식
+        # 예: 20260129_perf005_flow_20260129_abc123_success.json
+        date_str = datetime.now().strftime("%Y%m%d")
+        perf_id = log_data["metadata"]["performance_id"]
+        flow_id = log_data["metadata"]["flow_id"]
+        completion = log_data["metadata"]["completion_status"]  # success
+        
+        filename = f"{date_str}_{perf_id}_{flow_id}_{completion}.json"
+        filepath = os.path.join(LOGS_DIR, filename)
+        
+        # 로그 파일 저장 (bot 필드 포함)
+        async with aiofiles.open(filepath, 'w', encoding='utf-8') as f:
+            await f.write(json.dumps(log_data, ensure_ascii=False, indent=2))
+        
+        return {
+            "success": True,
+            "filename": filename,
+            "bot_info": log_data["bot"]
+        }
+    except Exception as e:
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 # ============== 서버 시작 ==============
 if __name__ == "__main__":
