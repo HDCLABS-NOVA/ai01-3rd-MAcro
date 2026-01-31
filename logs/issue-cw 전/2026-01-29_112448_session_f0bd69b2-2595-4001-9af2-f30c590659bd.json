@@ -1,0 +1,55 @@
+{
+  "session_id": "f0bd69b2-2595-4001-9af2-f30c590659bd",
+  "page": "seat_selection",
+  "mode": "A",
+  "selected_seats": [
+    "VIP-A4"
+  ],
+  "page_entry_time": "2026-01-29T02:24:43.602Z",
+  "page_exit_time": "2026-01-29T02:24:48.926Z",
+  "total_duration_ms": 5324,
+  "mouse_trajectory": [
+    {
+      "x": 1263,
+      "y": 330,
+      "timestamp": 4679
+    },
+    {
+      "x": 1267,
+      "y": 317,
+      "timestamp": 4747
+    },
+    {
+      "x": 1294,
+      "y": 290,
+      "timestamp": 4803
+    },
+    {
+      "x": 1297,
+      "y": 266,
+      "timestamp": 4858
+    },
+    {
+      "x": 1310,
+      "y": 217,
+      "timestamp": 4914
+    },
+    {
+      "x": 1308,
+      "y": 101,
+      "timestamp": 4968
+    }
+  ],
+  "clicks": [
+    {
+      "x": 446.05905866622925,
+      "y": 397.8125071525574,
+      "target": "VIP-A4",
+      "timestamp": 1477
+    }
+  ],
+  "hovers": [],
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "saved_at": "2026-01-29T11:24:48.928223"
+}

@@ -1,0 +1,271 @@
+{
+  "session_id": "perf_353pmwx6",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-29T18:31:22.675866",
+  "page_entry_time": "2026-01-29T09:30:42.714Z",
+  "performance_id": "perf001",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf003",
+      "timestamp": "2026-01-29T09:30:49.117Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-04-20",
+      "timestamp": "2026-01-29T09:30:58.485Z"
+    },
+    {
+      "action": "modal_close",
+      "timestamp": "2026-01-29T09:31:01.872Z"
+    },
+    {
+      "action": "card_click",
+      "target": "perf001",
+      "timestamp": "2026-01-29T09:31:09.658Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-03-15",
+      "timestamp": "2026-01-29T09:31:19.019Z"
+    },
+    {
+      "action": "time_select",
+      "target": "19:00",
+      "timestamp": "2026-01-29T09:31:20.800Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf001",
+      "date": "2026-03-15",
+      "time": "19:00",
+      "timestamp": "2026-01-29T09:31:22.358Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 735,
+      "y": 589,
+      "timestamp": 5833
+    },
+    {
+      "x": 825,
+      "y": 558,
+      "timestamp": 5942
+    },
+    {
+      "x": 983,
+      "y": 505,
+      "timestamp": 6054
+    },
+    {
+      "x": 1073,
+      "y": 474,
+      "timestamp": 6158
+    },
+    {
+      "x": 1072,
+      "y": 468,
+      "timestamp": 15159
+    },
+    {
+      "x": 977,
+      "y": 456,
+      "timestamp": 15269
+    },
+    {
+      "x": 794,
+      "y": 431,
+      "timestamp": 15381
+    },
+    {
+      "x": 651,
+      "y": 412,
+      "timestamp": 15491
+    },
+    {
+      "x": 604,
+      "y": 406,
+      "timestamp": 15602
+    },
+    {
+      "x": 604,
+      "y": 407,
+      "timestamp": 16756
+    },
+    {
+      "x": 604,
+      "y": 427,
+      "timestamp": 16902
+    },
+    {
+      "x": 604,
+      "y": 454,
+      "timestamp": 17006
+    },
+    {
+      "x": 604,
+      "y": 485,
+      "timestamp": 17110
+    },
+    {
+      "x": 604,
+      "y": 513,
+      "timestamp": 17256
+    },
+    {
+      "x": 604,
+      "y": 518,
+      "timestamp": 17361
+    },
+    {
+      "x": 615,
+      "y": 519,
+      "timestamp": 18527
+    },
+    {
+      "x": 701,
+      "y": 531,
+      "timestamp": 18631
+    },
+    {
+      "x": 868,
+      "y": 554,
+      "timestamp": 18742
+    },
+    {
+      "x": 998,
+      "y": 572,
+      "timestamp": 18846
+    },
+    {
+      "x": 1041,
+      "y": 578,
+      "timestamp": 18957
+    },
+    {
+      "x": 1032,
+      "y": 577,
+      "timestamp": 26096
+    },
+    {
+      "x": 964,
+      "y": 566,
+      "timestamp": 26207
+    },
+    {
+      "x": 827,
+      "y": 546,
+      "timestamp": 26324
+    },
+    {
+      "x": 625,
+      "y": 516,
+      "timestamp": 26428
+    },
+    {
+      "x": 453,
+      "y": 490,
+      "timestamp": 26540
+    },
+    {
+      "x": 350,
+      "y": 475,
+      "timestamp": 26644
+    },
+    {
+      "x": 316,
+      "y": 470,
+      "timestamp": 26755
+    },
+    {
+      "x": 332,
+      "y": 466,
+      "timestamp": 35818
+    },
+    {
+      "x": 460,
+      "y": 438,
+      "timestamp": 35929
+    },
+    {
+      "x": 588,
+      "y": 410,
+      "timestamp": 36046
+    },
+    {
+      "x": 604,
+      "y": 408,
+      "timestamp": 37422
+    },
+    {
+      "x": 604,
+      "y": 426,
+      "timestamp": 37526
+    },
+    {
+      "x": 604,
+      "y": 462,
+      "timestamp": 37637
+    },
+    {
+      "x": 604,
+      "y": 498,
+      "timestamp": 37748
+    },
+    {
+      "x": 604,
+      "y": 516,
+      "timestamp": 37859
+    },
+    {
+      "x": 611,
+      "y": 522,
+      "timestamp": 39158
+    },
+    {
+      "x": 671,
+      "y": 553,
+      "timestamp": 39262
+    },
+    {
+      "x": 731,
+      "y": 585,
+      "timestamp": 39366
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf003",
+      "performance_title": "2026 세븐틴 월드투어 [FOLLOW]",
+      "timestamp": "2026-01-29T09:30:49.117Z"
+    },
+    {
+      "performance_id": "perf001",
+      "performance_title": "2026 아이유 콘서트 [The Golden Hour]",
+      "timestamp": "2026-01-29T09:31:09.658Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-04-20",
+      "timestamp": "2026-01-29T09:30:58.485Z"
+    },
+    {
+      "date": "2026-03-15",
+      "timestamp": "2026-01-29T09:31:19.019Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "19:00",
+      "timestamp": "2026-01-29T09:31:20.800Z"
+    }
+  ],
+  "page_exit_time": "2026-01-29T09:31:22.358Z",
+  "selected_date": "2026-03-15",
+  "selected_time": "19:00"
+}

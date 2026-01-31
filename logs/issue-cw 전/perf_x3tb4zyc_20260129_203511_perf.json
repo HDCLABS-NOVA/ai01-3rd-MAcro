@@ -1,0 +1,261 @@
+{
+  "session_id": "perf_x3tb4zyc",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-29T20:35:11.804718",
+  "page_entry_time": "2026-01-29T11:34:34.919Z",
+  "performance_id": "perf002",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf003",
+      "timestamp": "2026-01-29T11:34:46.854Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-04-20",
+      "timestamp": "2026-01-29T11:34:56.404Z"
+    },
+    {
+      "action": "modal_close",
+      "timestamp": "2026-01-29T11:34:58.355Z"
+    },
+    {
+      "action": "card_click",
+      "target": "perf002",
+      "timestamp": "2026-01-29T11:34:59.983Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-02-01",
+      "timestamp": "2026-01-29T11:35:07.756Z"
+    },
+    {
+      "action": "time_select",
+      "target": "14:00",
+      "timestamp": "2026-01-29T11:35:09.583Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf002",
+      "date": "2026-02-01",
+      "time": "14:00",
+      "timestamp": "2026-01-29T11:35:11.487Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 750,
+      "y": 617,
+      "timestamp": 11434
+    },
+    {
+      "x": 869,
+      "y": 558,
+      "timestamp": 11544
+    },
+    {
+      "x": 1084,
+      "y": 451,
+      "timestamp": 11697
+    },
+    {
+      "x": 1089,
+      "y": 443,
+      "timestamp": 20767
+    },
+    {
+      "x": 1007,
+      "y": 436,
+      "timestamp": 20871
+    },
+    {
+      "x": 844,
+      "y": 423,
+      "timestamp": 20982
+    },
+    {
+      "x": 682,
+      "y": 409,
+      "timestamp": 21092
+    },
+    {
+      "x": 600,
+      "y": 402,
+      "timestamp": 21203
+    },
+    {
+      "x": 585,
+      "y": 402,
+      "timestamp": 22628
+    },
+    {
+      "x": 547,
+      "y": 413,
+      "timestamp": 22732
+    },
+    {
+      "x": 470,
+      "y": 434,
+      "timestamp": 22836
+    },
+    {
+      "x": 303,
+      "y": 478,
+      "timestamp": 22989
+    },
+    {
+      "x": 226,
+      "y": 499,
+      "timestamp": 23093
+    },
+    {
+      "x": 183,
+      "y": 511,
+      "timestamp": 23246
+    },
+    {
+      "x": 200,
+      "y": 513,
+      "timestamp": 24454
+    },
+    {
+      "x": 335,
+      "y": 533,
+      "timestamp": 24565
+    },
+    {
+      "x": 572,
+      "y": 567,
+      "timestamp": 24677
+    },
+    {
+      "x": 707,
+      "y": 587,
+      "timestamp": 24800
+    },
+    {
+      "x": 722,
+      "y": 587,
+      "timestamp": 31996
+    },
+    {
+      "x": 710,
+      "y": 570,
+      "timestamp": 32100
+    },
+    {
+      "x": 684,
+      "y": 535,
+      "timestamp": 32205
+    },
+    {
+      "x": 647,
+      "y": 484,
+      "timestamp": 32314
+    },
+    {
+      "x": 615,
+      "y": 441,
+      "timestamp": 32418
+    },
+    {
+      "x": 596,
+      "y": 415,
+      "timestamp": 32530
+    },
+    {
+      "x": 590,
+      "y": 406,
+      "timestamp": 32634
+    },
+    {
+      "x": 589,
+      "y": 408,
+      "timestamp": 33955
+    },
+    {
+      "x": 580,
+      "y": 435,
+      "timestamp": 34107
+    },
+    {
+      "x": 562,
+      "y": 485,
+      "timestamp": 34259
+    },
+    {
+      "x": 555,
+      "y": 507,
+      "timestamp": 34363
+    },
+    {
+      "x": 552,
+      "y": 514,
+      "timestamp": 34467
+    },
+    {
+      "x": 555,
+      "y": 515,
+      "timestamp": 35788
+    },
+    {
+      "x": 581,
+      "y": 525,
+      "timestamp": 35899
+    },
+    {
+      "x": 631,
+      "y": 545,
+      "timestamp": 36003
+    },
+    {
+      "x": 693,
+      "y": 569,
+      "timestamp": 36114
+    },
+    {
+      "x": 731,
+      "y": 584,
+      "timestamp": 36225
+    },
+    {
+      "x": 744,
+      "y": 589,
+      "timestamp": 36336
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf003",
+      "performance_title": "2026 세븐틴 월드투어 [FOLLOW]",
+      "timestamp": "2026-01-29T11:34:46.854Z"
+    },
+    {
+      "performance_id": "perf002",
+      "performance_title": "뮤지컬 <웃는남자>",
+      "timestamp": "2026-01-29T11:34:59.983Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-04-20",
+      "timestamp": "2026-01-29T11:34:56.404Z"
+    },
+    {
+      "date": "2026-02-01",
+      "timestamp": "2026-01-29T11:35:07.756Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "14:00",
+      "timestamp": "2026-01-29T11:35:09.583Z"
+    }
+  ],
+  "page_exit_time": "2026-01-29T11:35:11.487Z",
+  "selected_date": "2026-02-01",
+  "selected_time": "14:00"
+}

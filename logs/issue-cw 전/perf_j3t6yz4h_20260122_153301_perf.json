@@ -1,0 +1,248 @@
+{
+  "session_id": "perf_j3t6yz4h",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-22T15:33:01.109871",
+  "page_entry_time": "2026-01-22T06:29:20.493Z",
+  "performance_id": "perf008",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf008",
+      "timestamp": "2026-01-22T06:32:58.732Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-07-05",
+      "timestamp": "2026-01-22T06:32:59.876Z"
+    },
+    {
+      "action": "time_select",
+      "target": "18:00",
+      "timestamp": "2026-01-22T06:33:00.356Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf008",
+      "date": "2026-07-05",
+      "time": "18:00",
+      "timestamp": "2026-01-22T06:33:00.804Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 1427,
+      "y": 0,
+      "timestamp": 2863
+    },
+    {
+      "x": 1322,
+      "y": 53,
+      "timestamp": 2966
+    },
+    {
+      "x": 1199,
+      "y": 83,
+      "timestamp": 3071
+    },
+    {
+      "x": 765,
+      "y": 83,
+      "timestamp": 3175
+    },
+    {
+      "x": 613,
+      "y": 72,
+      "timestamp": 3285
+    },
+    {
+      "x": 663,
+      "y": 11,
+      "timestamp": 3389
+    },
+    {
+      "x": 1047,
+      "y": 28,
+      "timestamp": 213743
+    },
+    {
+      "x": 1105,
+      "y": 306,
+      "timestamp": 213847
+    },
+    {
+      "x": 1171,
+      "y": 359,
+      "timestamp": 213954
+    },
+    {
+      "x": 1305,
+      "y": 362,
+      "timestamp": 214063
+    },
+    {
+      "x": 1304,
+      "y": 361,
+      "timestamp": 214207
+    },
+    {
+      "x": 1303,
+      "y": 361,
+      "timestamp": 214511
+    },
+    {
+      "x": 1296,
+      "y": 378,
+      "timestamp": 214769
+    },
+    {
+      "x": 1300,
+      "y": 372,
+      "timestamp": 215885
+    },
+    {
+      "x": 1301,
+      "y": 372,
+      "timestamp": 216041
+    },
+    {
+      "x": 1302,
+      "y": 373,
+      "timestamp": 216151
+    },
+    {
+      "x": 1306,
+      "y": 368,
+      "timestamp": 216260
+    },
+    {
+      "x": 1306,
+      "y": 369,
+      "timestamp": 216603
+    },
+    {
+      "x": 1306,
+      "y": 375,
+      "timestamp": 216839
+    },
+    {
+      "x": 1307,
+      "y": 373,
+      "timestamp": 217211
+    },
+    {
+      "x": 1305,
+      "y": 373,
+      "timestamp": 217378
+    },
+    {
+      "x": 1052,
+      "y": 423,
+      "timestamp": 217482
+    },
+    {
+      "x": 1049,
+      "y": 344,
+      "timestamp": 217583
+    },
+    {
+      "x": 1121,
+      "y": 327,
+      "timestamp": 217690
+    },
+    {
+      "x": 979,
+      "y": 404,
+      "timestamp": 217794
+    },
+    {
+      "x": 829,
+      "y": 388,
+      "timestamp": 217899
+    },
+    {
+      "x": 786,
+      "y": 336,
+      "timestamp": 218003
+    },
+    {
+      "x": 782,
+      "y": 328,
+      "timestamp": 218538
+    },
+    {
+      "x": 785,
+      "y": 327,
+      "timestamp": 218855
+    },
+    {
+      "x": 782,
+      "y": 329,
+      "timestamp": 218968
+    },
+    {
+      "x": 631,
+      "y": 361,
+      "timestamp": 219073
+    },
+    {
+      "x": 557,
+      "y": 361,
+      "timestamp": 219392
+    },
+    {
+      "x": 562,
+      "y": 438,
+      "timestamp": 219496
+    },
+    {
+      "x": 562,
+      "y": 451,
+      "timestamp": 219614
+    },
+    {
+      "x": 555,
+      "y": 466,
+      "timestamp": 219727
+    },
+    {
+      "x": 555,
+      "y": 467,
+      "timestamp": 219885
+    },
+    {
+      "x": 600,
+      "y": 512,
+      "timestamp": 219989
+    },
+    {
+      "x": 622,
+      "y": 539,
+      "timestamp": 220093
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf008",
+      "performance_title": "2026 NCT 127 월드투어",
+      "timestamp": "2026-01-22T06:32:58.732Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-07-05",
+      "timestamp": "2026-01-22T06:32:59.876Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "18:00",
+      "timestamp": "2026-01-22T06:33:00.356Z"
+    }
+  ],
+  "page_exit_time": "2026-01-22T06:33:00.804Z",
+  "selected_date": "2026-07-05",
+  "selected_time": "18:00"
+}

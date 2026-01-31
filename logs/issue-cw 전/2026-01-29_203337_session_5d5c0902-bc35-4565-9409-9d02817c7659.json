@@ -1,0 +1,117 @@
+{
+  "session_id": "5d5c0902-bc35-4565-9409-9d02817c7659",
+  "is_bot": true,
+  "bot_type": "queue_bypass",
+  "bot_description": "대기열 우회 봇",
+  "mode": "B",
+  "page_entry_time": "2026-01-29T20:33:37.599443",
+  "page_exit_time": "2026-01-29T20:33:39.599443",
+  "total_duration_ms": 2826,
+  "user_ip": "192.168.63.100",
+  "user_id": "bot_queue_bypass_4544",
+  "mouse_trajectory": [
+    {
+      "x": 231,
+      "y": 289,
+      "timestamp": 0
+    },
+    {
+      "x": 297,
+      "y": 331,
+      "timestamp": 50
+    },
+    {
+      "x": 363,
+      "y": 374,
+      "timestamp": 100
+    },
+    {
+      "x": 429,
+      "y": 416,
+      "timestamp": 150
+    },
+    {
+      "x": 495,
+      "y": 459,
+      "timestamp": 200
+    }
+  ],
+  "clicks": [
+    {
+      "x": 511,
+      "y": 400,
+      "target": "seat_424",
+      "timestamp": 0
+    },
+    {
+      "x": 432,
+      "y": 228,
+      "target": "seat_294",
+      "timestamp": 245
+    },
+    {
+      "x": 427,
+      "y": 354,
+      "target": "seat_8",
+      "timestamp": 491
+    },
+    {
+      "x": 505,
+      "y": 378,
+      "target": "seat_300",
+      "timestamp": 736
+    },
+    {
+      "x": 540,
+      "y": 296,
+      "target": "seat_594",
+      "timestamp": 982
+    },
+    {
+      "x": 489,
+      "y": 208,
+      "target": "seat_494",
+      "timestamp": 1227
+    },
+    {
+      "x": 559,
+      "y": 285,
+      "target": "seat_368",
+      "timestamp": 1473
+    },
+    {
+      "x": 457,
+      "y": 264,
+      "target": "seat_537",
+      "timestamp": 1719
+    },
+    {
+      "x": 430,
+      "y": 200,
+      "target": "seat_564",
+      "timestamp": 1964
+    },
+    {
+      "x": 501,
+      "y": 205,
+      "target": "seat_552",
+      "timestamp": 2210
+    },
+    {
+      "x": 402,
+      "y": 303,
+      "target": "seat_536",
+      "timestamp": 2455
+    },
+    {
+      "x": 553,
+      "y": 205,
+      "target": "seat_345",
+      "timestamp": 2701
+    }
+  ],
+  "hovers": [],
+  "captcha_attempts": 1,
+  "captcha_time_ms": 179,
+  "bot_score": 0.7646026319131121
+}

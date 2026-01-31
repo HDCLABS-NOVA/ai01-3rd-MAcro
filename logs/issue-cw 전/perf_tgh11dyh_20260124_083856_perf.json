@@ -1,0 +1,238 @@
+{
+  "session_id": "perf_tgh11dyh",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-24T08:38:56.071938",
+  "page_entry_time": "2026-01-23T23:38:45.731Z",
+  "performance_id": "perf007",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf007",
+      "timestamp": "2026-01-23T23:38:53.104Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-12-25",
+      "timestamp": "2026-01-23T23:38:54.392Z"
+    },
+    {
+      "action": "time_select",
+      "target": "15:00",
+      "timestamp": "2026-01-23T23:38:54.966Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf007",
+      "date": "2026-12-25",
+      "time": "15:00",
+      "timestamp": "2026-01-23T23:38:55.759Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 622,
+      "y": 600,
+      "timestamp": 4382
+    },
+    {
+      "x": 678,
+      "y": 600,
+      "timestamp": 4486
+    },
+    {
+      "x": 756,
+      "y": 610,
+      "timestamp": 4652
+    },
+    {
+      "x": 761,
+      "y": 607,
+      "timestamp": 4765
+    },
+    {
+      "x": 551,
+      "y": 631,
+      "timestamp": 4881
+    },
+    {
+      "x": 470,
+      "y": 630,
+      "timestamp": 4986
+    },
+    {
+      "x": 444,
+      "y": 626,
+      "timestamp": 5132
+    },
+    {
+      "x": 444,
+      "y": 630,
+      "timestamp": 5239
+    },
+    {
+      "x": 450,
+      "y": 640,
+      "timestamp": 5350
+    },
+    {
+      "x": 455,
+      "y": 638,
+      "timestamp": 5454
+    },
+    {
+      "x": 460,
+      "y": 636,
+      "timestamp": 5951
+    },
+    {
+      "x": 516,
+      "y": 637,
+      "timestamp": 6069
+    },
+    {
+      "x": 526,
+      "y": 635,
+      "timestamp": 6201
+    },
+    {
+      "x": 532,
+      "y": 643,
+      "timestamp": 6302
+    },
+    {
+      "x": 533,
+      "y": 643,
+      "timestamp": 6419
+    },
+    {
+      "x": 534,
+      "y": 643,
+      "timestamp": 6572
+    },
+    {
+      "x": 536,
+      "y": 645,
+      "timestamp": 6916
+    },
+    {
+      "x": 485,
+      "y": 652,
+      "timestamp": 7021
+    },
+    {
+      "x": 365,
+      "y": 647,
+      "timestamp": 7132
+    },
+    {
+      "x": 350,
+      "y": 647,
+      "timestamp": 7236
+    },
+    {
+      "x": 350,
+      "y": 646,
+      "timestamp": 7816
+    },
+    {
+      "x": 562,
+      "y": 517,
+      "timestamp": 7937
+    },
+    {
+      "x": 698,
+      "y": 482,
+      "timestamp": 8042
+    },
+    {
+      "x": 741,
+      "y": 492,
+      "timestamp": 8147
+    },
+    {
+      "x": 747,
+      "y": 497,
+      "timestamp": 8264
+    },
+    {
+      "x": 668,
+      "y": 465,
+      "timestamp": 8381
+    },
+    {
+      "x": 655,
+      "y": 442,
+      "timestamp": 8486
+    },
+    {
+      "x": 653,
+      "y": 434,
+      "timestamp": 8597
+    },
+    {
+      "x": 652,
+      "y": 434,
+      "timestamp": 8715
+    },
+    {
+      "x": 620,
+      "y": 466,
+      "timestamp": 8819
+    },
+    {
+      "x": 570,
+      "y": 514,
+      "timestamp": 8937
+    },
+    {
+      "x": 531,
+      "y": 538,
+      "timestamp": 9055
+    },
+    {
+      "x": 522,
+      "y": 545,
+      "timestamp": 9270
+    },
+    {
+      "x": 527,
+      "y": 548,
+      "timestamp": 9402
+    },
+    {
+      "x": 607,
+      "y": 581,
+      "timestamp": 9520
+    },
+    {
+      "x": 652,
+      "y": 592,
+      "timestamp": 9646
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf007",
+      "performance_title": "발레 <호두까기 인형>",
+      "timestamp": "2026-01-23T23:38:53.104Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-12-25",
+      "timestamp": "2026-01-23T23:38:54.392Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "15:00",
+      "timestamp": "2026-01-23T23:38:54.966Z"
+    }
+  ],
+  "page_exit_time": "2026-01-23T23:38:55.759Z",
+  "selected_date": "2026-12-25",
+  "selected_time": "15:00"
+}

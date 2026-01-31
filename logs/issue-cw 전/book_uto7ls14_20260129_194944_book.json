@@ -1,0 +1,115 @@
+{
+  "session_id": "book_uto7ls14",
+  "stage": "book",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-29T19:49:44.798664",
+  "performance_id": "perf002",
+  "selected_date": "2026-02-01",
+  "selected_time": "14:00",
+  "booking_start_time": "2026-01-29T10:49:16.510Z",
+  "captcha": {
+    "start_time": "2026-01-29T10:49:16.511Z",
+    "end_time": "2026-01-29T10:49:29.348Z",
+    "attempts": [
+      {
+        "action": "attempt",
+        "input": "XQBNJV",
+        "correct": true,
+        "time_ms": 12837,
+        "attempt_number": 1,
+        "timestamp": "2026-01-29T10:49:29.348Z"
+      }
+    ],
+    "success": true,
+    "mouse_trajectory": [
+      {
+        "x": 739,
+        "y": 587,
+        "t": 10290
+      },
+      {
+        "x": 746,
+        "y": 590,
+        "t": 10394
+      },
+      {
+        "x": 752,
+        "y": 593,
+        "t": 10498
+      },
+      {
+        "x": 753,
+        "y": 593,
+        "t": 10549
+      }
+    ]
+  },
+  "seats": {
+    "selected": [],
+    "taken_by_others": [],
+    "selection_time": null
+  },
+  "discount": {
+    "type": "normal",
+    "selection_time": "2026-01-29T10:49:40.620Z"
+  },
+  "delivery": {
+    "method": "pickup",
+    "fee": 0,
+    "selection_time": "2026-01-29T10:49:42.675Z"
+  },
+  "payment": {
+    "method": "bank",
+    "selection_time": "2026-01-29T10:49:44.796Z"
+  },
+  "booking_end_time": "2026-01-29T10:49:44.796Z",
+  "section_selection": {
+    "start_time": "2026-01-29T10:49:29.378Z",
+    "clicks": [
+      {
+        "section": "VIP-L",
+        "timestamp": "2026-01-29T10:49:31.000Z"
+      }
+    ],
+    "final_section": "VIP-L",
+    "end_time": "2026-01-29T10:49:31.786Z",
+    "final_grade": "VIP",
+    "mouse_trajectory": []
+  },
+  "seat_selection": {
+    "seats": [
+      "VIP-B5"
+    ],
+    "section": "VIP-L",
+    "grade": "VIP",
+    "start_time": "2026-01-29T10:49:31.826Z",
+    "end_time": "2026-01-29T10:49:38.439Z",
+    "duration_ms": 6613,
+    "clicks": [
+      {
+        "x": 448.5,
+        "y": 394,
+        "target": "VIP-A5",
+        "timestamp": 1644
+      },
+      {
+        "x": 448.5,
+        "y": 416,
+        "target": "VIP-B5",
+        "timestamp": 2481
+      }
+    ],
+    "hovers": []
+  },
+  "mouse_trajectory_seats": [],
+  "mouse_trajectory_discount": [],
+  "booker": {
+    "phone": "1111111111",
+    "email": "magellankr@outlook.kr",
+    "input_time": "2026-01-29T10:49:42.675Z"
+  },
+  "mouse_trajectory_booker": [],
+  "mouse_trajectory_payment": []
+}

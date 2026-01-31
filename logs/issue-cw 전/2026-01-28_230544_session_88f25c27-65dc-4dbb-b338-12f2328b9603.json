@@ -1,0 +1,47 @@
+{
+  "session_id": "88f25c27-65dc-4dbb-b338-12f2328b9603",
+  "page": "step4_payment",
+  "selected_seats": [
+    "VIP-A21",
+    "VIP-A22"
+  ],
+  "discount_type": "normal",
+  "delivery_type": "pickup",
+  "payment_type": "card",
+  "page_entry_time": "2026-01-28T14:05:08.411Z",
+  "page_exit_time": "2026-01-28T14:05:44.157Z",
+  "total_duration_ms": 35746,
+  "mouse_trajectory": [
+    {
+      "x": 771,
+      "y": 567,
+      "t": 5687
+    },
+    {
+      "x": 791,
+      "y": 573,
+      "t": 5749
+    },
+    {
+      "x": 683,
+      "y": 617,
+      "t": 5819
+    },
+    {
+      "x": 23,
+      "y": 631,
+      "t": 5881
+    }
+  ],
+  "clicks": [
+    {
+      "action": "page_enter",
+      "target": "step4_payment",
+      "timestamp": 0
+    }
+  ],
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "is_bot": false,
+  "completed_at": "2026-01-28T23:05:44.159554"
+}

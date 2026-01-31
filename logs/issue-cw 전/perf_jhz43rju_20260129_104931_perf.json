@@ -1,0 +1,68 @@
+{
+  "session_id": "perf_jhz43rju",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-29T10:49:31.549956",
+  "page_entry_time": "2026-01-29T01:49:15.453Z",
+  "performance_id": "perf001",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf001",
+      "timestamp": "2026-01-29T01:49:20.844Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-03-15",
+      "timestamp": "2026-01-29T01:49:27.791Z"
+    },
+    {
+      "action": "time_select",
+      "target": "18:00",
+      "timestamp": "2026-01-29T01:49:29.659Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf001",
+      "date": "2026-03-15",
+      "time": "18:00",
+      "timestamp": "2026-01-29T01:49:31.546Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 351,
+      "y": 253,
+      "timestamp": 1208
+    },
+    {
+      "x": 241,
+      "y": 151,
+      "timestamp": 1310
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf001",
+      "performance_title": "2026 아이유 콘서트 [The Golden Hour]",
+      "timestamp": "2026-01-29T01:49:20.844Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-03-15",
+      "timestamp": "2026-01-29T01:49:27.791Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "18:00",
+      "timestamp": "2026-01-29T01:49:29.659Z"
+    }
+  ],
+  "page_exit_time": "2026-01-29T01:49:31.546Z",
+  "selected_date": "2026-03-15",
+  "selected_time": "18:00"
+}

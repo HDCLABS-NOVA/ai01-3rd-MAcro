@@ -1,0 +1,208 @@
+{
+  "session_id": "perf_lnb8w6fz",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-23T16:02:13.992285",
+  "page_entry_time": "2026-01-23T07:02:06.845Z",
+  "performance_id": "perf006",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf006",
+      "timestamp": "2026-01-23T07:02:08.597Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-06-16",
+      "timestamp": "2026-01-23T07:02:10.293Z"
+    },
+    {
+      "action": "time_select",
+      "target": "19:00",
+      "timestamp": "2026-01-23T07:02:10.781Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf006",
+      "date": "2026-06-16",
+      "time": "19:00",
+      "timestamp": "2026-01-23T07:02:13.988Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 117,
+      "y": 32,
+      "timestamp": 136
+    },
+    {
+      "x": 447,
+      "y": 173,
+      "timestamp": 239
+    },
+    {
+      "x": 598,
+      "y": 436,
+      "timestamp": 343
+    },
+    {
+      "x": 622,
+      "y": 437,
+      "timestamp": 448
+    },
+    {
+      "x": 682,
+      "y": 437,
+      "timestamp": 551
+    },
+    {
+      "x": 825,
+      "y": 482,
+      "timestamp": 655
+    },
+    {
+      "x": 825,
+      "y": 486,
+      "timestamp": 783
+    },
+    {
+      "x": 835,
+      "y": 490,
+      "timestamp": 887
+    },
+    {
+      "x": 877,
+      "y": 522,
+      "timestamp": 1023
+    },
+    {
+      "x": 900,
+      "y": 518,
+      "timestamp": 1127
+    },
+    {
+      "x": 933,
+      "y": 510,
+      "timestamp": 1231
+    },
+    {
+      "x": 940,
+      "y": 505,
+      "timestamp": 1343
+    },
+    {
+      "x": 958,
+      "y": 441,
+      "timestamp": 1447
+    },
+    {
+      "x": 984,
+      "y": 326,
+      "timestamp": 1559
+    },
+    {
+      "x": 984,
+      "y": 325,
+      "timestamp": 2312
+    },
+    {
+      "x": 907,
+      "y": 352,
+      "timestamp": 2415
+    },
+    {
+      "x": 781,
+      "y": 471,
+      "timestamp": 2519
+    },
+    {
+      "x": 687,
+      "y": 488,
+      "timestamp": 2623
+    },
+    {
+      "x": 586,
+      "y": 474,
+      "timestamp": 2728
+    },
+    {
+      "x": 567,
+      "y": 465,
+      "timestamp": 2839
+    },
+    {
+      "x": 578,
+      "y": 445,
+      "timestamp": 2944
+    },
+    {
+      "x": 591,
+      "y": 437,
+      "timestamp": 3055
+    },
+    {
+      "x": 588,
+      "y": 437,
+      "timestamp": 3503
+    },
+    {
+      "x": 518,
+      "y": 521,
+      "timestamp": 3607
+    },
+    {
+      "x": 517,
+      "y": 525,
+      "timestamp": 4015
+    },
+    {
+      "x": 572,
+      "y": 554,
+      "timestamp": 4119
+    },
+    {
+      "x": 654,
+      "y": 574,
+      "timestamp": 4231
+    },
+    {
+      "x": 691,
+      "y": 574,
+      "timestamp": 4335
+    },
+    {
+      "x": 700,
+      "y": 574,
+      "timestamp": 4463
+    },
+    {
+      "x": 866,
+      "y": 508,
+      "timestamp": 4567
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf006",
+      "performance_title": "2026 BTS 단독 콘서트 [Yet To Come]",
+      "timestamp": "2026-01-23T07:02:08.597Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-06-16",
+      "timestamp": "2026-01-23T07:02:10.293Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "19:00",
+      "timestamp": "2026-01-23T07:02:10.781Z"
+    }
+  ],
+  "page_exit_time": "2026-01-23T07:02:13.988Z",
+  "selected_date": "2026-06-16",
+  "selected_time": "19:00"
+}

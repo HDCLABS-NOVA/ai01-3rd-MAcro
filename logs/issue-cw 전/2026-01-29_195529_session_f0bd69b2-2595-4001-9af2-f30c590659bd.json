@@ -1,0 +1,65 @@
+{
+  "session_id": "f0bd69b2-2595-4001-9af2-f30c590659bd",
+  "page": "seat_selection",
+  "mode": "B",
+  "selected_seats": [
+    "VIP-B5"
+  ],
+  "page_entry_time": "2026-01-29T10:55:23.271Z",
+  "page_exit_time": "2026-01-29T10:55:29.129Z",
+  "total_duration_ms": 5858,
+  "mouse_trajectory": [
+    {
+      "x": 728,
+      "y": 589,
+      "timestamp": 4013
+    },
+    {
+      "x": 740,
+      "y": 578,
+      "timestamp": 4069
+    },
+    {
+      "x": 790,
+      "y": 532,
+      "timestamp": 4166
+    },
+    {
+      "x": 827,
+      "y": 498,
+      "timestamp": 4228
+    },
+    {
+      "x": 864,
+      "y": 464,
+      "timestamp": 4278
+    },
+    {
+      "x": 893,
+      "y": 437,
+      "timestamp": 4339
+    },
+    {
+      "x": 926,
+      "y": 407,
+      "timestamp": 4445
+    },
+    {
+      "x": 930,
+      "y": 403,
+      "timestamp": 4499
+    }
+  ],
+  "clicks": [
+    {
+      "x": 448.5,
+      "y": 416,
+      "target": "VIP-B5",
+      "timestamp": 1703
+    }
+  ],
+  "hovers": [],
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "saved_at": "2026-01-29T19:55:29.131080"
+}

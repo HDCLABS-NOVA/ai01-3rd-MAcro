@@ -1,0 +1,675 @@
+{
+  "session_id": "perf_tsa9sgd2",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-23T15:39:17.283872",
+  "page_entry_time": "2026-01-23T06:37:37.884Z",
+  "performance_id": "perf006",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf006",
+      "timestamp": "2026-01-23T06:37:39.765Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-06-16",
+      "timestamp": "2026-01-23T06:37:40.845Z"
+    },
+    {
+      "action": "time_select",
+      "target": "19:00",
+      "timestamp": "2026-01-23T06:37:41.613Z"
+    },
+    {
+      "action": "modal_close",
+      "timestamp": "2026-01-23T06:37:45.462Z"
+    },
+    {
+      "action": "card_click",
+      "target": "perf006",
+      "timestamp": "2026-01-23T06:37:49.436Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-06-16",
+      "timestamp": "2026-01-23T06:37:50.661Z"
+    },
+    {
+      "action": "modal_close",
+      "timestamp": "2026-01-23T06:37:51.176Z"
+    },
+    {
+      "action": "card_click",
+      "target": "perf006",
+      "timestamp": "2026-01-23T06:37:52.381Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-06-16",
+      "timestamp": "2026-01-23T06:37:53.460Z"
+    },
+    {
+      "action": "time_select",
+      "target": "18:00",
+      "timestamp": "2026-01-23T06:37:54.149Z"
+    },
+    {
+      "action": "modal_close",
+      "timestamp": "2026-01-23T06:37:57.269Z"
+    },
+    {
+      "action": "card_click",
+      "target": "perf006",
+      "timestamp": "2026-01-23T06:39:02.116Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-06-16",
+      "timestamp": "2026-01-23T06:39:03.309Z"
+    },
+    {
+      "action": "time_select",
+      "target": "18:00",
+      "timestamp": "2026-01-23T06:39:03.836Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf006",
+      "date": "2026-06-16",
+      "time": "18:00",
+      "timestamp": "2026-01-23T06:39:16.978Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 205,
+      "y": 36,
+      "timestamp": 128
+    },
+    {
+      "x": 224,
+      "y": 36,
+      "timestamp": 233
+    },
+    {
+      "x": 395,
+      "y": 126,
+      "timestamp": 336
+    },
+    {
+      "x": 772,
+      "y": 477,
+      "timestamp": 440
+    },
+    {
+      "x": 935,
+      "y": 514,
+      "timestamp": 544
+    },
+    {
+      "x": 1030,
+      "y": 490,
+      "timestamp": 648
+    },
+    {
+      "x": 1057,
+      "y": 477,
+      "timestamp": 841
+    },
+    {
+      "x": 1030,
+      "y": 467,
+      "timestamp": 945
+    },
+    {
+      "x": 1025,
+      "y": 481,
+      "timestamp": 1048
+    },
+    {
+      "x": 1008,
+      "y": 507,
+      "timestamp": 1256
+    },
+    {
+      "x": 1006,
+      "y": 502,
+      "timestamp": 1424
+    },
+    {
+      "x": 1077,
+      "y": 403,
+      "timestamp": 1528
+    },
+    {
+      "x": 1105,
+      "y": 323,
+      "timestamp": 1632
+    },
+    {
+      "x": 1102,
+      "y": 316,
+      "timestamp": 1937
+    },
+    {
+      "x": 1101,
+      "y": 316,
+      "timestamp": 2137
+    },
+    {
+      "x": 1027,
+      "y": 330,
+      "timestamp": 2241
+    },
+    {
+      "x": 700,
+      "y": 533,
+      "timestamp": 2345
+    },
+    {
+      "x": 632,
+      "y": 531,
+      "timestamp": 2449
+    },
+    {
+      "x": 590,
+      "y": 483,
+      "timestamp": 2552
+    },
+    {
+      "x": 590,
+      "y": 436,
+      "timestamp": 2657
+    },
+    {
+      "x": 591,
+      "y": 425,
+      "timestamp": 2776
+    },
+    {
+      "x": 592,
+      "y": 427,
+      "timestamp": 3017
+    },
+    {
+      "x": 544,
+      "y": 477,
+      "timestamp": 3120
+    },
+    {
+      "x": 521,
+      "y": 487,
+      "timestamp": 3225
+    },
+    {
+      "x": 484,
+      "y": 501,
+      "timestamp": 3328
+    },
+    {
+      "x": 471,
+      "y": 513,
+      "timestamp": 3432
+    },
+    {
+      "x": 518,
+      "y": 517,
+      "timestamp": 3536
+    },
+    {
+      "x": 520,
+      "y": 517,
+      "timestamp": 3761
+    },
+    {
+      "x": 554,
+      "y": 451,
+      "timestamp": 3864
+    },
+    {
+      "x": 1235,
+      "y": 116,
+      "timestamp": 3968
+    },
+    {
+      "x": 852,
+      "y": 302,
+      "timestamp": 7561
+    },
+    {
+      "x": 1265,
+      "y": 92,
+      "timestamp": 10481
+    },
+    {
+      "x": 455,
+      "y": 312,
+      "timestamp": 10585
+    },
+    {
+      "x": 438,
+      "y": 317,
+      "timestamp": 10712
+    },
+    {
+      "x": 472,
+      "y": 567,
+      "timestamp": 10817
+    },
+    {
+      "x": 685,
+      "y": 688,
+      "timestamp": 10968
+    },
+    {
+      "x": 697,
+      "y": 685,
+      "timestamp": 11072
+    },
+    {
+      "x": 978,
+      "y": 560,
+      "timestamp": 11176
+    },
+    {
+      "x": 1003,
+      "y": 411,
+      "timestamp": 11280
+    },
+    {
+      "x": 1005,
+      "y": 392,
+      "timestamp": 11466
+    },
+    {
+      "x": 1005,
+      "y": 390,
+      "timestamp": 11568
+    },
+    {
+      "x": 1098,
+      "y": 352,
+      "timestamp": 11672
+    },
+    {
+      "x": 1250,
+      "y": 298,
+      "timestamp": 11776
+    },
+    {
+      "x": 1258,
+      "y": 295,
+      "timestamp": 11888
+    },
+    {
+      "x": 785,
+      "y": 435,
+      "timestamp": 11992
+    },
+    {
+      "x": 646,
+      "y": 514,
+      "timestamp": 12136
+    },
+    {
+      "x": 626,
+      "y": 503,
+      "timestamp": 12240
+    },
+    {
+      "x": 608,
+      "y": 456,
+      "timestamp": 12344
+    },
+    {
+      "x": 585,
+      "y": 438,
+      "timestamp": 12448
+    },
+    {
+      "x": 580,
+      "y": 430,
+      "timestamp": 12561
+    },
+    {
+      "x": 578,
+      "y": 422,
+      "timestamp": 12784
+    },
+    {
+      "x": 541,
+      "y": 471,
+      "timestamp": 12888
+    },
+    {
+      "x": 511,
+      "y": 503,
+      "timestamp": 12992
+    },
+    {
+      "x": 483,
+      "y": 508,
+      "timestamp": 13097
+    },
+    {
+      "x": 466,
+      "y": 515,
+      "timestamp": 13200
+    },
+    {
+      "x": 466,
+      "y": 516,
+      "timestamp": 13393
+    },
+    {
+      "x": 544,
+      "y": 467,
+      "timestamp": 13496
+    },
+    {
+      "x": 875,
+      "y": 284,
+      "timestamp": 13600
+    },
+    {
+      "x": 982,
+      "y": 242,
+      "timestamp": 14177
+    },
+    {
+      "x": 983,
+      "y": 326,
+      "timestamp": 14288
+    },
+    {
+      "x": 984,
+      "y": 326,
+      "timestamp": 14769
+    },
+    {
+      "x": 983,
+      "y": 327,
+      "timestamp": 14921
+    },
+    {
+      "x": 697,
+      "y": 461,
+      "timestamp": 15024
+    },
+    {
+      "x": 640,
+      "y": 457,
+      "timestamp": 15128
+    },
+    {
+      "x": 630,
+      "y": 418,
+      "timestamp": 15232
+    },
+    {
+      "x": 608,
+      "y": 395,
+      "timestamp": 15336
+    },
+    {
+      "x": 602,
+      "y": 395,
+      "timestamp": 15448
+    },
+    {
+      "x": 600,
+      "y": 395,
+      "timestamp": 15657
+    },
+    {
+      "x": 575,
+      "y": 434,
+      "timestamp": 15760
+    },
+    {
+      "x": 516,
+      "y": 475,
+      "timestamp": 15864
+    },
+    {
+      "x": 480,
+      "y": 490,
+      "timestamp": 15968
+    },
+    {
+      "x": 458,
+      "y": 494,
+      "timestamp": 16080
+    },
+    {
+      "x": 458,
+      "y": 495,
+      "timestamp": 16776
+    },
+    {
+      "x": 507,
+      "y": 487,
+      "timestamp": 16880
+    },
+    {
+      "x": 842,
+      "y": 326,
+      "timestamp": 16984
+    },
+    {
+      "x": 840,
+      "y": 314,
+      "timestamp": 19369
+    },
+    {
+      "x": 1203,
+      "y": 196,
+      "timestamp": 20537
+    },
+    {
+      "x": 507,
+      "y": 104,
+      "timestamp": 20640
+    },
+    {
+      "x": 636,
+      "y": 7,
+      "timestamp": 20745
+    },
+    {
+      "x": 1276,
+      "y": 175,
+      "timestamp": 53744
+    },
+    {
+      "x": 1270,
+      "y": 145,
+      "timestamp": 53848
+    },
+    {
+      "x": 1738,
+      "y": 4,
+      "timestamp": 83224
+    },
+    {
+      "x": 1626,
+      "y": 26,
+      "timestamp": 83328
+    },
+    {
+      "x": 1581,
+      "y": 45,
+      "timestamp": 83432
+    },
+    {
+      "x": 1524,
+      "y": 106,
+      "timestamp": 83537
+    },
+    {
+      "x": 1483,
+      "y": 286,
+      "timestamp": 83640
+    },
+    {
+      "x": 1480,
+      "y": 313,
+      "timestamp": 83744
+    },
+    {
+      "x": 1420,
+      "y": 350,
+      "timestamp": 83848
+    },
+    {
+      "x": 1297,
+      "y": 390,
+      "timestamp": 83984
+    },
+    {
+      "x": 1305,
+      "y": 390,
+      "timestamp": 84089
+    },
+    {
+      "x": 1307,
+      "y": 390,
+      "timestamp": 84448
+    },
+    {
+      "x": 1307,
+      "y": 388,
+      "timestamp": 84633
+    },
+    {
+      "x": 1153,
+      "y": 526,
+      "timestamp": 84736
+    },
+    {
+      "x": 1091,
+      "y": 590,
+      "timestamp": 84840
+    },
+    {
+      "x": 1005,
+      "y": 551,
+      "timestamp": 84944
+    },
+    {
+      "x": 978,
+      "y": 503,
+      "timestamp": 85048
+    },
+    {
+      "x": 974,
+      "y": 460,
+      "timestamp": 85152
+    },
+    {
+      "x": 977,
+      "y": 428,
+      "timestamp": 85256
+    },
+    {
+      "x": 976,
+      "y": 426,
+      "timestamp": 85424
+    },
+    {
+      "x": 921,
+      "y": 477,
+      "timestamp": 85528
+    },
+    {
+      "x": 870,
+      "y": 514,
+      "timestamp": 85632
+    },
+    {
+      "x": 851,
+      "y": 514,
+      "timestamp": 85736
+    },
+    {
+      "x": 846,
+      "y": 514,
+      "timestamp": 85977
+    },
+    {
+      "x": 1026,
+      "y": 442,
+      "timestamp": 86080
+    },
+    {
+      "x": 1533,
+      "y": 242,
+      "timestamp": 86184
+    },
+    {
+      "x": 1030,
+      "y": 592,
+      "timestamp": 99081
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf006",
+      "performance_title": "2026 BTS 단독 콘서트 [Yet To Come]",
+      "timestamp": "2026-01-23T06:37:39.765Z"
+    },
+    {
+      "performance_id": "perf006",
+      "performance_title": "2026 BTS 단독 콘서트 [Yet To Come]",
+      "timestamp": "2026-01-23T06:37:49.436Z"
+    },
+    {
+      "performance_id": "perf006",
+      "performance_title": "2026 BTS 단독 콘서트 [Yet To Come]",
+      "timestamp": "2026-01-23T06:37:52.381Z"
+    },
+    {
+      "performance_id": "perf006",
+      "performance_title": "2026 BTS 단독 콘서트 [Yet To Come]",
+      "timestamp": "2026-01-23T06:39:02.116Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-06-16",
+      "timestamp": "2026-01-23T06:37:40.845Z"
+    },
+    {
+      "date": "2026-06-16",
+      "timestamp": "2026-01-23T06:37:50.661Z"
+    },
+    {
+      "date": "2026-06-16",
+      "timestamp": "2026-01-23T06:37:53.460Z"
+    },
+    {
+      "date": "2026-06-16",
+      "timestamp": "2026-01-23T06:39:03.309Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "19:00",
+      "timestamp": "2026-01-23T06:37:41.613Z"
+    },
+    {
+      "time": "18:00",
+      "timestamp": "2026-01-23T06:37:54.149Z"
+    },
+    {
+      "time": "18:00",
+      "timestamp": "2026-01-23T06:39:03.836Z"
+    }
+  ],
+  "page_exit_time": "2026-01-23T06:39:16.978Z",
+  "selected_date": "2026-06-16",
+  "selected_time": "18:00"
+}

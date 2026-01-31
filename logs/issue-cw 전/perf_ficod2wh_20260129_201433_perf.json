@@ -1,0 +1,494 @@
+{
+  "session_id": "perf_ficod2wh",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-29T20:14:33.143212",
+  "page_entry_time": "2026-01-29T11:13:29.326Z",
+  "performance_id": "perf002",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf002",
+      "timestamp": "2026-01-29T11:13:32.596Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-02-01",
+      "timestamp": "2026-01-29T11:13:40.205Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-02-01",
+      "timestamp": "2026-01-29T11:13:51.118Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-02-01",
+      "timestamp": "2026-01-29T11:14:01.908Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-02-01",
+      "timestamp": "2026-01-29T11:14:12.672Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-02-01",
+      "timestamp": "2026-01-29T11:14:23.097Z"
+    },
+    {
+      "action": "time_select",
+      "target": "14:00",
+      "timestamp": "2026-01-29T11:14:30.999Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf002",
+      "date": "2026-02-01",
+      "time": "14:00",
+      "timestamp": "2026-01-29T11:14:32.835Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 589,
+      "y": 408,
+      "timestamp": 999
+    },
+    {
+      "x": 578,
+      "y": 423,
+      "timestamp": 1108
+    },
+    {
+      "x": 558,
+      "y": 449,
+      "timestamp": 1213
+    },
+    {
+      "x": 547,
+      "y": 464,
+      "timestamp": 1324
+    },
+    {
+      "x": 552,
+      "y": 473,
+      "timestamp": 2547
+    },
+    {
+      "x": 602,
+      "y": 531,
+      "timestamp": 2657
+    },
+    {
+      "x": 702,
+      "y": 647,
+      "timestamp": 2768
+    },
+    {
+      "x": 803,
+      "y": 763,
+      "timestamp": 2872
+    },
+    {
+      "x": 859,
+      "y": 828,
+      "timestamp": 3026
+    },
+    {
+      "x": 854,
+      "y": 820,
+      "timestamp": 10186
+    },
+    {
+      "x": 811,
+      "y": 752,
+      "timestamp": 10290
+    },
+    {
+      "x": 724,
+      "y": 617,
+      "timestamp": 10394
+    },
+    {
+      "x": 638,
+      "y": 482,
+      "timestamp": 10498
+    },
+    {
+      "x": 595,
+      "y": 414,
+      "timestamp": 10602
+    },
+    {
+      "x": 589,
+      "y": 407,
+      "timestamp": 11887
+    },
+    {
+      "x": 583,
+      "y": 416,
+      "timestamp": 11991
+    },
+    {
+      "x": 572,
+      "y": 432,
+      "timestamp": 12095
+    },
+    {
+      "x": 558,
+      "y": 453,
+      "timestamp": 12200
+    },
+    {
+      "x": 547,
+      "y": 469,
+      "timestamp": 12353
+    },
+    {
+      "x": 548,
+      "y": 471,
+      "timestamp": 13596
+    },
+    {
+      "x": 565,
+      "y": 482,
+      "timestamp": 13700
+    },
+    {
+      "x": 599,
+      "y": 502,
+      "timestamp": 13817
+    },
+    {
+      "x": 648,
+      "y": 532,
+      "timestamp": 13921
+    },
+    {
+      "x": 690,
+      "y": 558,
+      "timestamp": 14032
+    },
+    {
+      "x": 716,
+      "y": 573,
+      "timestamp": 14143
+    },
+    {
+      "x": 719,
+      "y": 571,
+      "timestamp": 21276
+    },
+    {
+      "x": 675,
+      "y": 515,
+      "timestamp": 21394
+    },
+    {
+      "x": 612,
+      "y": 434,
+      "timestamp": 21511
+    },
+    {
+      "x": 590,
+      "y": 406,
+      "timestamp": 21617
+    },
+    {
+      "x": 588,
+      "y": 410,
+      "timestamp": 22963
+    },
+    {
+      "x": 568,
+      "y": 438,
+      "timestamp": 23074
+    },
+    {
+      "x": 548,
+      "y": 466,
+      "timestamp": 23192
+    },
+    {
+      "x": 549,
+      "y": 472,
+      "timestamp": 24526
+    },
+    {
+      "x": 572,
+      "y": 486,
+      "timestamp": 24630
+    },
+    {
+      "x": 620,
+      "y": 515,
+      "timestamp": 24741
+    },
+    {
+      "x": 677,
+      "y": 549,
+      "timestamp": 24858
+    },
+    {
+      "x": 712,
+      "y": 571,
+      "timestamp": 24969
+    },
+    {
+      "x": 717,
+      "y": 568,
+      "timestamp": 32165
+    },
+    {
+      "x": 657,
+      "y": 492,
+      "timestamp": 32269
+    },
+    {
+      "x": 597,
+      "y": 416,
+      "timestamp": 32379
+    },
+    {
+      "x": 589,
+      "y": 407,
+      "timestamp": 33664
+    },
+    {
+      "x": 582,
+      "y": 418,
+      "timestamp": 33768
+    },
+    {
+      "x": 568,
+      "y": 438,
+      "timestamp": 33880
+    },
+    {
+      "x": 554,
+      "y": 458,
+      "timestamp": 33991
+    },
+    {
+      "x": 547,
+      "y": 469,
+      "timestamp": 34095
+    },
+    {
+      "x": 553,
+      "y": 474,
+      "timestamp": 35380
+    },
+    {
+      "x": 611,
+      "y": 506,
+      "timestamp": 35491
+    },
+    {
+      "x": 695,
+      "y": 553,
+      "timestamp": 35608
+    },
+    {
+      "x": 724,
+      "y": 569,
+      "timestamp": 35719
+    },
+    {
+      "x": 721,
+      "y": 565,
+      "timestamp": 42740
+    },
+    {
+      "x": 671,
+      "y": 505,
+      "timestamp": 42893
+    },
+    {
+      "x": 620,
+      "y": 442,
+      "timestamp": 43003
+    },
+    {
+      "x": 590,
+      "y": 406,
+      "timestamp": 43150
+    },
+    {
+      "x": 588,
+      "y": 409,
+      "timestamp": 44400
+    },
+    {
+      "x": 574,
+      "y": 430,
+      "timestamp": 44511
+    },
+    {
+      "x": 553,
+      "y": 460,
+      "timestamp": 44622
+    },
+    {
+      "x": 546,
+      "y": 470,
+      "timestamp": 44733
+    },
+    {
+      "x": 552,
+      "y": 473,
+      "timestamp": 45908
+    },
+    {
+      "x": 596,
+      "y": 500,
+      "timestamp": 46011
+    },
+    {
+      "x": 674,
+      "y": 548,
+      "timestamp": 46115
+    },
+    {
+      "x": 718,
+      "y": 575,
+      "timestamp": 46219
+    },
+    {
+      "x": 717,
+      "y": 568,
+      "timestamp": 53261
+    },
+    {
+      "x": 657,
+      "y": 492,
+      "timestamp": 53366
+    },
+    {
+      "x": 597,
+      "y": 416,
+      "timestamp": 53482
+    },
+    {
+      "x": 588,
+      "y": 409,
+      "timestamp": 54872
+    },
+    {
+      "x": 574,
+      "y": 430,
+      "timestamp": 54990
+    },
+    {
+      "x": 553,
+      "y": 460,
+      "timestamp": 55101
+    },
+    {
+      "x": 546,
+      "y": 470,
+      "timestamp": 55212
+    },
+    {
+      "x": 550,
+      "y": 472,
+      "timestamp": 56490
+    },
+    {
+      "x": 578,
+      "y": 489,
+      "timestamp": 56594
+    },
+    {
+      "x": 635,
+      "y": 524,
+      "timestamp": 56698
+    },
+    {
+      "x": 692,
+      "y": 559,
+      "timestamp": 56802
+    },
+    {
+      "x": 724,
+      "y": 578,
+      "timestamp": 56948
+    },
+    {
+      "x": 537,
+      "y": 499,
+      "timestamp": 61658
+    },
+    {
+      "x": 539,
+      "y": 501,
+      "timestamp": 61968
+    },
+    {
+      "x": 553,
+      "y": 522,
+      "timestamp": 62167
+    },
+    {
+      "x": 562,
+      "y": 528,
+      "timestamp": 62289
+    },
+    {
+      "x": 592,
+      "y": 548,
+      "timestamp": 62434
+    },
+    {
+      "x": 596,
+      "y": 550,
+      "timestamp": 62817
+    },
+    {
+      "x": 596,
+      "y": 575,
+      "timestamp": 62920
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf002",
+      "performance_title": "뮤지컬 <웃는남자>",
+      "timestamp": "2026-01-29T11:13:32.596Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-02-01",
+      "timestamp": "2026-01-29T11:13:40.205Z"
+    },
+    {
+      "date": "2026-02-01",
+      "timestamp": "2026-01-29T11:13:51.118Z"
+    },
+    {
+      "date": "2026-02-01",
+      "timestamp": "2026-01-29T11:14:01.908Z"
+    },
+    {
+      "date": "2026-02-01",
+      "timestamp": "2026-01-29T11:14:12.672Z"
+    },
+    {
+      "date": "2026-02-01",
+      "timestamp": "2026-01-29T11:14:23.097Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "14:00",
+      "timestamp": "2026-01-29T11:14:30.999Z"
+    }
+  ],
+  "page_exit_time": "2026-01-29T11:14:32.835Z",
+  "selected_date": "2026-02-01",
+  "selected_time": "14:00"
+}

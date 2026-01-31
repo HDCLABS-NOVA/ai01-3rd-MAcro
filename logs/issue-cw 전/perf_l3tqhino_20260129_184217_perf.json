@@ -1,0 +1,188 @@
+{
+  "session_id": "perf_l3tqhino",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-29T18:42:17.694571",
+  "page_entry_time": "2026-01-29T09:41:48.780Z",
+  "performance_id": "perf003",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf003",
+      "timestamp": "2026-01-29T09:42:04.131Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-04-20",
+      "timestamp": "2026-01-29T09:42:13.631Z"
+    },
+    {
+      "action": "time_select",
+      "target": "18:00",
+      "timestamp": "2026-01-29T09:42:15.512Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf003",
+      "date": "2026-04-20",
+      "time": "18:00",
+      "timestamp": "2026-01-29T09:42:17.387Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 749,
+      "y": 583,
+      "timestamp": 5100
+    },
+    {
+      "x": 718,
+      "y": 533,
+      "timestamp": 5210
+    },
+    {
+      "x": 655,
+      "y": 434,
+      "timestamp": 5314
+    },
+    {
+      "x": 579,
+      "y": 313,
+      "timestamp": 5418
+    },
+    {
+      "x": 521,
+      "y": 220,
+      "timestamp": 5571
+    },
+    {
+      "x": 540,
+      "y": 224,
+      "timestamp": 14851
+    },
+    {
+      "x": 725,
+      "y": 308,
+      "timestamp": 14960
+    },
+    {
+      "x": 991,
+      "y": 428,
+      "timestamp": 15065
+    },
+    {
+      "x": 1084,
+      "y": 470,
+      "timestamp": 15175
+    },
+    {
+      "x": 1078,
+      "y": 469,
+      "timestamp": 24044
+    },
+    {
+      "x": 1033,
+      "y": 463,
+      "timestamp": 24148
+    },
+    {
+      "x": 942,
+      "y": 450,
+      "timestamp": 24252
+    },
+    {
+      "x": 808,
+      "y": 432,
+      "timestamp": 24356
+    },
+    {
+      "x": 695,
+      "y": 416,
+      "timestamp": 24466
+    },
+    {
+      "x": 627,
+      "y": 406,
+      "timestamp": 24571
+    },
+    {
+      "x": 604,
+      "y": 403,
+      "timestamp": 24674
+    },
+    {
+      "x": 603,
+      "y": 405,
+      "timestamp": 26023
+    },
+    {
+      "x": 595,
+      "y": 422,
+      "timestamp": 26134
+    },
+    {
+      "x": 578,
+      "y": 457,
+      "timestamp": 26238
+    },
+    {
+      "x": 561,
+      "y": 492,
+      "timestamp": 26343
+    },
+    {
+      "x": 553,
+      "y": 509,
+      "timestamp": 26452
+    },
+    {
+      "x": 555,
+      "y": 512,
+      "timestamp": 27800
+    },
+    {
+      "x": 575,
+      "y": 521,
+      "timestamp": 27904
+    },
+    {
+      "x": 645,
+      "y": 549,
+      "timestamp": 28057
+    },
+    {
+      "x": 715,
+      "y": 577,
+      "timestamp": 28210
+    },
+    {
+      "x": 738,
+      "y": 587,
+      "timestamp": 28363
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf003",
+      "performance_title": "2026 세븐틴 월드투어 [FOLLOW]",
+      "timestamp": "2026-01-29T09:42:04.131Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-04-20",
+      "timestamp": "2026-01-29T09:42:13.631Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "18:00",
+      "timestamp": "2026-01-29T09:42:15.512Z"
+    }
+  ],
+  "page_exit_time": "2026-01-29T09:42:17.387Z",
+  "selected_date": "2026-04-20",
+  "selected_time": "18:00"
+}

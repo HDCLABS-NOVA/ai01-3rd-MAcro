@@ -1,0 +1,123 @@
+{
+  "session_id": "perf_jfvbpmut",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-29T16:51:11.205881",
+  "page_entry_time": "2026-01-29T07:50:55.451Z",
+  "performance_id": "perf003",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf003",
+      "timestamp": "2026-01-29T07:50:57.800Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-04-20",
+      "timestamp": "2026-01-29T07:51:07.357Z"
+    },
+    {
+      "action": "time_select",
+      "target": "18:00",
+      "timestamp": "2026-01-29T07:51:09.169Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf003",
+      "date": "2026-04-20",
+      "time": "18:00",
+      "timestamp": "2026-01-29T07:51:10.898Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 1024,
+      "y": 454,
+      "timestamp": 11411
+    },
+    {
+      "x": 861,
+      "y": 455,
+      "timestamp": 11522
+    },
+    {
+      "x": 627,
+      "y": 456,
+      "timestamp": 11626
+    },
+    {
+      "x": 546,
+      "y": 456,
+      "timestamp": 11744
+    },
+    {
+      "x": 545,
+      "y": 458,
+      "timestamp": 13029
+    },
+    {
+      "x": 534,
+      "y": 474,
+      "timestamp": 13140
+    },
+    {
+      "x": 511,
+      "y": 505,
+      "timestamp": 13244
+    },
+    {
+      "x": 488,
+      "y": 535,
+      "timestamp": 13355
+    },
+    {
+      "x": 477,
+      "y": 551,
+      "timestamp": 13472
+    },
+    {
+      "x": 483,
+      "y": 556,
+      "timestamp": 14897
+    },
+    {
+      "x": 537,
+      "y": 582,
+      "timestamp": 15001
+    },
+    {
+      "x": 616,
+      "y": 618,
+      "timestamp": 15112
+    },
+    {
+      "x": 643,
+      "y": 631,
+      "timestamp": 15216
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf003",
+      "performance_title": "2026 세븐틴 월드투어 [FOLLOW]",
+      "timestamp": "2026-01-29T07:50:57.800Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-04-20",
+      "timestamp": "2026-01-29T07:51:07.357Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "18:00",
+      "timestamp": "2026-01-29T07:51:09.169Z"
+    }
+  ],
+  "page_exit_time": "2026-01-29T07:51:10.898Z",
+  "selected_date": "2026-04-20",
+  "selected_time": "18:00"
+}

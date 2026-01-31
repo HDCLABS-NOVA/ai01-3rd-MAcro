@@ -1,0 +1,143 @@
+{
+  "session_id": "perf_netgydif",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-29T18:51:55.581928",
+  "page_entry_time": "2026-01-29T09:51:31.782Z",
+  "performance_id": "perf001",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf001",
+      "timestamp": "2026-01-29T09:51:42.591Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-03-15",
+      "timestamp": "2026-01-29T09:51:51.812Z"
+    },
+    {
+      "action": "time_select",
+      "target": "18:00",
+      "timestamp": "2026-01-29T09:51:53.671Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf001",
+      "date": "2026-03-15",
+      "time": "18:00",
+      "timestamp": "2026-01-29T09:51:55.271Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 925,
+      "y": 411,
+      "timestamp": 10210
+    },
+    {
+      "x": 801,
+      "y": 423,
+      "timestamp": 10313
+    },
+    {
+      "x": 563,
+      "y": 446,
+      "timestamp": 10417
+    },
+    {
+      "x": 378,
+      "y": 464,
+      "timestamp": 10521
+    },
+    {
+      "x": 325,
+      "y": 468,
+      "timestamp": 19467
+    },
+    {
+      "x": 397,
+      "y": 451,
+      "timestamp": 19578
+    },
+    {
+      "x": 523,
+      "y": 422,
+      "timestamp": 19689
+    },
+    {
+      "x": 595,
+      "y": 405,
+      "timestamp": 19813
+    },
+    {
+      "x": 603,
+      "y": 405,
+      "timestamp": 21127
+    },
+    {
+      "x": 597,
+      "y": 417,
+      "timestamp": 21230
+    },
+    {
+      "x": 575,
+      "y": 457,
+      "timestamp": 21383
+    },
+    {
+      "x": 559,
+      "y": 487,
+      "timestamp": 21488
+    },
+    {
+      "x": 549,
+      "y": 505,
+      "timestamp": 21591
+    },
+    {
+      "x": 546,
+      "y": 511,
+      "timestamp": 21695
+    },
+    {
+      "x": 557,
+      "y": 515,
+      "timestamp": 23001
+    },
+    {
+      "x": 642,
+      "y": 549,
+      "timestamp": 23119
+    },
+    {
+      "x": 727,
+      "y": 583,
+      "timestamp": 23237
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf001",
+      "performance_title": "2026 아이유 콘서트 [The Golden Hour]",
+      "timestamp": "2026-01-29T09:51:42.591Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-03-15",
+      "timestamp": "2026-01-29T09:51:51.812Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "18:00",
+      "timestamp": "2026-01-29T09:51:53.671Z"
+    }
+  ],
+  "page_exit_time": "2026-01-29T09:51:55.271Z",
+  "selected_date": "2026-03-15",
+  "selected_time": "18:00"
+}

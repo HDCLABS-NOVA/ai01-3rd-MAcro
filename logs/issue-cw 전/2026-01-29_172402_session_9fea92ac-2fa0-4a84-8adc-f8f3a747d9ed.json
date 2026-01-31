@@ -1,0 +1,109 @@
+{
+  "session_id": "9fea92ac-2fa0-4a84-8adc-f8f3a747d9ed",
+  "is_bot": true,
+  "bot_type": "queue_bypass",
+  "bot_description": "대기열 우회 봇",
+  "mode": "B",
+  "page_entry_time": "2026-01-29T17:24:02.603113",
+  "page_exit_time": "2026-01-29T17:24:04.603113",
+  "total_duration_ms": 2560,
+  "user_ip": "192.168.2.197",
+  "user_id": "bot_queue_bypass_1473",
+  "mouse_trajectory": [],
+  "clicks": [
+    {
+      "x": 448,
+      "y": 310,
+      "target": "seat_189",
+      "timestamp": 0
+    },
+    {
+      "x": 429,
+      "y": 267,
+      "target": "seat_125",
+      "timestamp": 214
+    },
+    {
+      "x": 350,
+      "y": 257,
+      "target": "seat_518",
+      "timestamp": 428
+    },
+    {
+      "x": 473,
+      "y": 333,
+      "target": "seat_553",
+      "timestamp": 642
+    },
+    {
+      "x": 592,
+      "y": 323,
+      "target": "seat_501",
+      "timestamp": 856
+    },
+    {
+      "x": 452,
+      "y": 229,
+      "target": "seat_491",
+      "timestamp": 1071
+    },
+    {
+      "x": 573,
+      "y": 240,
+      "target": "seat_583",
+      "timestamp": 1285
+    },
+    {
+      "x": 559,
+      "y": 347,
+      "target": "seat_239",
+      "timestamp": 1499
+    },
+    {
+      "x": 316,
+      "y": 333,
+      "target": "seat_310",
+      "timestamp": 1713
+    },
+    {
+      "x": 525,
+      "y": 246,
+      "target": "seat_157",
+      "timestamp": 1928
+    },
+    {
+      "x": 342,
+      "y": 390,
+      "target": "seat_551",
+      "timestamp": 2142
+    },
+    {
+      "x": 367,
+      "y": 278,
+      "target": "seat_561",
+      "timestamp": 2356
+    },
+    {
+      "x": 413,
+      "y": 372,
+      "target": "seat_427",
+      "timestamp": 2570
+    },
+    {
+      "x": 435,
+      "y": 246,
+      "target": "seat_145",
+      "timestamp": 2785
+    },
+    {
+      "x": 591,
+      "y": 307,
+      "target": "seat_132",
+      "timestamp": 2999
+    }
+  ],
+  "hovers": [],
+  "captcha_attempts": 1,
+  "captcha_time_ms": 172,
+  "bot_score": 0.9131956173472275
+}

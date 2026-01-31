@@ -1,0 +1,85 @@
+{
+  "session_id": "f0bd69b2-2595-4001-9af2-f30c590659bd",
+  "page": "seat_selection",
+  "mode": "A",
+  "selected_seats": [
+    "VIP-A4"
+  ],
+  "page_entry_time": "2026-01-29T02:25:11.203Z",
+  "page_exit_time": "2026-01-29T02:25:16.513Z",
+  "total_duration_ms": 5310,
+  "mouse_trajectory": [
+    {
+      "x": 811,
+      "y": 414,
+      "timestamp": 568
+    },
+    {
+      "x": 810,
+      "y": 414,
+      "timestamp": 1791
+    },
+    {
+      "x": 808,
+      "y": 414,
+      "timestamp": 2465
+    },
+    {
+      "x": 807,
+      "y": 414,
+      "timestamp": 2924
+    },
+    {
+      "x": 806,
+      "y": 414,
+      "timestamp": 3201
+    },
+    {
+      "x": 805,
+      "y": 414,
+      "timestamp": 4035
+    },
+    {
+      "x": 804,
+      "y": 414,
+      "timestamp": 4104
+    },
+    {
+      "x": 803,
+      "y": 414,
+      "timestamp": 4194
+    },
+    {
+      "x": 802,
+      "y": 414,
+      "timestamp": 4444
+    },
+    {
+      "x": 801,
+      "y": 414,
+      "timestamp": 4555
+    },
+    {
+      "x": 800,
+      "y": 414,
+      "timestamp": 5087
+    },
+    {
+      "x": 798,
+      "y": 414,
+      "timestamp": 5248
+    }
+  ],
+  "clicks": [
+    {
+      "x": 446.05905866622925,
+      "y": 397.8125071525574,
+      "target": "VIP-A4",
+      "timestamp": 1475
+    }
+  ],
+  "hovers": [],
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "saved_at": "2026-01-29T11:25:16.514811"
+}

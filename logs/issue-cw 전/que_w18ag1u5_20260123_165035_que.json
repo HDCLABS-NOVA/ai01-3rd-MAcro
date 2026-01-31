@@ -1,0 +1,408 @@
+{
+  "session_id": "que_w18ag1u5",
+  "stage": "que",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-23T16:50:35.203421",
+  "performance_id": "perf003",
+  "selected_date": "2026-04-21",
+  "selected_time": "18:00",
+  "queue_start_time": "2026-01-23T07:49:52.679Z",
+  "initial_position": 6093,
+  "total_queue": 8000,
+  "position_updates": [
+    {
+      "position": 5921,
+      "progress": 26,
+      "estimated_minutes": 59,
+      "timestamp": "2026-01-23T07:49:52.695Z"
+    },
+    {
+      "position": 5744,
+      "progress": 28,
+      "estimated_minutes": 57,
+      "timestamp": "2026-01-23T07:49:53.699Z"
+    },
+    {
+      "position": 5601,
+      "progress": 30,
+      "estimated_minutes": 56,
+      "timestamp": "2026-01-23T07:49:54.699Z"
+    },
+    {
+      "position": 5449,
+      "progress": 32,
+      "estimated_minutes": 54,
+      "timestamp": "2026-01-23T07:49:55.698Z"
+    },
+    {
+      "position": 5308,
+      "progress": 34,
+      "estimated_minutes": 53,
+      "timestamp": "2026-01-23T07:49:56.700Z"
+    },
+    {
+      "position": 5137,
+      "progress": 36,
+      "estimated_minutes": 51,
+      "timestamp": "2026-01-23T07:49:57.703Z"
+    },
+    {
+      "position": 4946,
+      "progress": 38,
+      "estimated_minutes": 49,
+      "timestamp": "2026-01-23T07:49:58.699Z"
+    },
+    {
+      "position": 4832,
+      "progress": 40,
+      "estimated_minutes": 48,
+      "timestamp": "2026-01-23T07:49:59.701Z"
+    },
+    {
+      "position": 4656,
+      "progress": 42,
+      "estimated_minutes": 46,
+      "timestamp": "2026-01-23T07:50:00.704Z"
+    },
+    {
+      "position": 4531,
+      "progress": 43,
+      "estimated_minutes": 45,
+      "timestamp": "2026-01-23T07:50:01.696Z"
+    },
+    {
+      "position": 4332,
+      "progress": 46,
+      "estimated_minutes": 43,
+      "timestamp": "2026-01-23T07:50:02.697Z"
+    },
+    {
+      "position": 4207,
+      "progress": 47,
+      "estimated_minutes": 42,
+      "timestamp": "2026-01-23T07:50:03.702Z"
+    },
+    {
+      "position": 4063,
+      "progress": 49,
+      "estimated_minutes": 40,
+      "timestamp": "2026-01-23T07:50:04.703Z"
+    },
+    {
+      "position": 3910,
+      "progress": 51,
+      "estimated_minutes": 39,
+      "timestamp": "2026-01-23T07:50:05.704Z"
+    },
+    {
+      "position": 3720,
+      "progress": 53,
+      "estimated_minutes": 37,
+      "timestamp": "2026-01-23T07:50:06.699Z"
+    },
+    {
+      "position": 3595,
+      "progress": 55,
+      "estimated_minutes": 35,
+      "timestamp": "2026-01-23T07:50:07.700Z"
+    },
+    {
+      "position": 3437,
+      "progress": 57,
+      "estimated_minutes": 34,
+      "timestamp": "2026-01-23T07:50:08.705Z"
+    },
+    {
+      "position": 3241,
+      "progress": 59,
+      "estimated_minutes": 32,
+      "timestamp": "2026-01-23T07:50:09.699Z"
+    },
+    {
+      "position": 3138,
+      "progress": 61,
+      "estimated_minutes": 31,
+      "timestamp": "2026-01-23T07:50:10.701Z"
+    },
+    {
+      "position": 2978,
+      "progress": 63,
+      "estimated_minutes": 29,
+      "timestamp": "2026-01-23T07:50:11.699Z"
+    },
+    {
+      "position": 2793,
+      "progress": 65,
+      "estimated_minutes": 27,
+      "timestamp": "2026-01-23T07:50:12.709Z"
+    },
+    {
+      "position": 2643,
+      "progress": 67,
+      "estimated_minutes": 26,
+      "timestamp": "2026-01-23T07:50:13.712Z"
+    },
+    {
+      "position": 2499,
+      "progress": 69,
+      "estimated_minutes": 24,
+      "timestamp": "2026-01-23T07:50:14.705Z"
+    },
+    {
+      "position": 2386,
+      "progress": 70,
+      "estimated_minutes": 23,
+      "timestamp": "2026-01-23T07:50:15.698Z"
+    },
+    {
+      "position": 2204,
+      "progress": 72,
+      "estimated_minutes": 22,
+      "timestamp": "2026-01-23T07:50:16.706Z"
+    },
+    {
+      "position": 2093,
+      "progress": 74,
+      "estimated_minutes": 20,
+      "timestamp": "2026-01-23T07:50:17.700Z"
+    },
+    {
+      "position": 1940,
+      "progress": 76,
+      "estimated_minutes": 19,
+      "timestamp": "2026-01-23T07:50:18.699Z"
+    },
+    {
+      "position": 1787,
+      "progress": 78,
+      "estimated_minutes": 17,
+      "timestamp": "2026-01-23T07:50:19.703Z"
+    },
+    {
+      "position": 1683,
+      "progress": 79,
+      "estimated_minutes": 16,
+      "timestamp": "2026-01-23T07:50:20.703Z"
+    },
+    {
+      "position": 1575,
+      "progress": 80,
+      "estimated_minutes": 15,
+      "timestamp": "2026-01-23T07:50:21.703Z"
+    },
+    {
+      "position": 1454,
+      "progress": 82,
+      "estimated_minutes": 14,
+      "timestamp": "2026-01-23T07:50:22.718Z"
+    },
+    {
+      "position": 1269,
+      "progress": 84,
+      "estimated_minutes": 12,
+      "timestamp": "2026-01-23T07:50:23.701Z"
+    },
+    {
+      "position": 1130,
+      "progress": 86,
+      "estimated_minutes": 11,
+      "timestamp": "2026-01-23T07:50:24.704Z"
+    },
+    {
+      "position": 944,
+      "progress": 88,
+      "estimated_minutes": 9,
+      "timestamp": "2026-01-23T07:50:25.706Z"
+    },
+    {
+      "position": 797,
+      "progress": 90,
+      "estimated_minutes": 7,
+      "timestamp": "2026-01-23T07:50:26.698Z"
+    },
+    {
+      "position": 696,
+      "progress": 91,
+      "estimated_minutes": 6,
+      "timestamp": "2026-01-23T07:50:27.701Z"
+    },
+    {
+      "position": 525,
+      "progress": 93,
+      "estimated_minutes": 5,
+      "timestamp": "2026-01-23T07:50:28.707Z"
+    },
+    {
+      "position": 375,
+      "progress": 95,
+      "estimated_minutes": 3,
+      "timestamp": "2026-01-23T07:50:29.705Z"
+    },
+    {
+      "position": 265,
+      "progress": 97,
+      "estimated_minutes": 2,
+      "timestamp": "2026-01-23T07:50:30.703Z"
+    },
+    {
+      "position": 126,
+      "progress": 98,
+      "estimated_minutes": 1,
+      "timestamp": "2026-01-23T07:50:31.706Z"
+    },
+    {
+      "position": 5,
+      "progress": 100,
+      "estimated_minutes": 1,
+      "timestamp": "2026-01-23T07:50:32.706Z"
+    },
+    {
+      "position": 0,
+      "status": "ready",
+      "timestamp": "2026-01-23T07:50:33.699Z"
+    },
+    {
+      "position": 0,
+      "status": "ready",
+      "timestamp": "2026-01-23T07:50:34.699Z"
+    }
+  ],
+  "queue_end_time": "2026-01-23T07:50:34.699Z",
+  "final_position": 0,
+  "wait_duration_ms": 42020,
+  "mouse_trajectory": [
+    {
+      "x": 838,
+      "y": 698,
+      "t": 1191
+    },
+    {
+      "x": 840,
+      "y": 697,
+      "t": 1413
+    },
+    {
+      "x": 845,
+      "y": 694,
+      "t": 1517
+    },
+    {
+      "x": 929,
+      "y": 690,
+      "t": 1621
+    },
+    {
+      "x": 1093,
+      "y": 690,
+      "t": 1725
+    },
+    {
+      "x": 1250,
+      "y": 690,
+      "t": 1830
+    },
+    {
+      "x": 1338,
+      "y": 677,
+      "t": 1934
+    },
+    {
+      "x": 1357,
+      "y": 672,
+      "t": 2705
+    },
+    {
+      "x": 1360,
+      "y": 670,
+      "t": 5086
+    },
+    {
+      "x": 1364,
+      "y": 665,
+      "t": 5191
+    },
+    {
+      "x": 1401,
+      "y": 670,
+      "t": 5295
+    },
+    {
+      "x": 1437,
+      "y": 604,
+      "t": 5920
+    },
+    {
+      "x": 1453,
+      "y": 602,
+      "t": 6093
+    },
+    {
+      "x": 1258,
+      "y": 622,
+      "t": 6198
+    },
+    {
+      "x": 1068,
+      "y": 637,
+      "t": 6302
+    },
+    {
+      "x": 1128,
+      "y": 636,
+      "t": 6406
+    },
+    {
+      "x": 1344,
+      "y": 638,
+      "t": 6510
+    },
+    {
+      "x": 1361,
+      "y": 638,
+      "t": 6830
+    },
+    {
+      "x": 1380,
+      "y": 636,
+      "t": 6934
+    },
+    {
+      "x": 1698,
+      "y": 370,
+      "t": 16538
+    },
+    {
+      "x": 1473,
+      "y": 1117,
+      "t": 41898
+    },
+    {
+      "x": 1497,
+      "y": 1028,
+      "t": 42002
+    },
+    {
+      "x": 1541,
+      "y": 993,
+      "t": 42114
+    },
+    {
+      "x": 1545,
+      "y": 992,
+      "t": 42280
+    },
+    {
+      "x": 1566,
+      "y": 992,
+      "t": 42384
+    },
+    {
+      "x": 1638,
+      "y": 992,
+      "t": 42489
+    }
+  ],
+  "entry_time": "2026-01-23T07:50:35.201Z"
+}

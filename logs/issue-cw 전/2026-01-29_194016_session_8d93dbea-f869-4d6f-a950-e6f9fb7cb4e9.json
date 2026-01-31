@@ -1,0 +1,154 @@
+{
+  "session_id": "8d93dbea-f869-4d6f-a950-e6f9fb7cb4e9",
+  "is_bot": true,
+  "bot_type": "repeat_pattern",
+  "bot_description": "반복 패턴 봇",
+  "mode": "A",
+  "page_entry_time": "2026-01-29T19:40:16.548475",
+  "page_exit_time": "2026-01-29T19:40:28.548475",
+  "total_duration_ms": 12644,
+  "user_ip": "192.168.168.12",
+  "user_id": "bot_repeat_pattern_1437",
+  "mouse_trajectory": [
+    {
+      "x": 228,
+      "y": 248,
+      "timestamp": 0
+    },
+    {
+      "x": 272,
+      "y": 269,
+      "timestamp": 50
+    },
+    {
+      "x": 317,
+      "y": 291,
+      "timestamp": 100
+    },
+    {
+      "x": 361,
+      "y": 312,
+      "timestamp": 150
+    },
+    {
+      "x": 406,
+      "y": 334,
+      "timestamp": 200
+    },
+    {
+      "x": 451,
+      "y": 356,
+      "timestamp": 250
+    },
+    {
+      "x": 495,
+      "y": 377,
+      "timestamp": 300
+    },
+    {
+      "x": 540,
+      "y": 399,
+      "timestamp": 350
+    },
+    {
+      "x": 584,
+      "y": 420,
+      "timestamp": 400
+    },
+    {
+      "x": 629,
+      "y": 442,
+      "timestamp": 450
+    },
+    {
+      "x": 674,
+      "y": 464,
+      "timestamp": 500
+    }
+  ],
+  "clicks": [
+    {
+      "x": 428,
+      "y": 294,
+      "target": "seat_216",
+      "timestamp": 0
+    },
+    {
+      "x": 502,
+      "y": 358,
+      "target": "seat_37",
+      "timestamp": 1000
+    },
+    {
+      "x": 596,
+      "y": 223,
+      "target": "seat_118",
+      "timestamp": 2000
+    },
+    {
+      "x": 433,
+      "y": 398,
+      "target": "seat_564",
+      "timestamp": 3000
+    },
+    {
+      "x": 546,
+      "y": 279,
+      "target": "seat_232",
+      "timestamp": 4000
+    },
+    {
+      "x": 449,
+      "y": 325,
+      "target": "seat_528",
+      "timestamp": 5000
+    },
+    {
+      "x": 542,
+      "y": 334,
+      "target": "seat_319",
+      "timestamp": 6000
+    },
+    {
+      "x": 498,
+      "y": 289,
+      "target": "seat_569",
+      "timestamp": 7000
+    },
+    {
+      "x": 584,
+      "y": 215,
+      "target": "seat_461",
+      "timestamp": 8000
+    },
+    {
+      "x": 376,
+      "y": 363,
+      "target": "seat_36",
+      "timestamp": 9000
+    },
+    {
+      "x": 499,
+      "y": 374,
+      "target": "seat_535",
+      "timestamp": 10000
+    }
+  ],
+  "hovers": [
+    {
+      "target": "elem_0",
+      "duration": 81
+    },
+    {
+      "target": "elem_1",
+      "duration": 18
+    },
+    {
+      "target": "elem_2",
+      "duration": 95
+    }
+  ],
+  "captcha_attempts": 2,
+  "captcha_time_ms": 139,
+  "bot_score": 0.7692604962844661
+}

@@ -1,0 +1,248 @@
+{
+  "session_id": "perf_zbvow90j",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-23T17:43:37.627999",
+  "page_entry_time": "2026-01-23T08:43:32.582Z",
+  "performance_id": "perf008",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf008",
+      "timestamp": "2026-01-23T08:43:35.196Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-07-06",
+      "timestamp": "2026-01-23T08:43:36.685Z"
+    },
+    {
+      "action": "time_select",
+      "target": "18:00",
+      "timestamp": "2026-01-23T08:43:37.212Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf008",
+      "date": "2026-07-06",
+      "time": "18:00",
+      "timestamp": "2026-01-23T08:43:37.622Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 828,
+      "y": 70,
+      "timestamp": 30
+    },
+    {
+      "x": 681,
+      "y": 93,
+      "timestamp": 133
+    },
+    {
+      "x": 677,
+      "y": 93,
+      "timestamp": 334
+    },
+    {
+      "x": 682,
+      "y": 93,
+      "timestamp": 462
+    },
+    {
+      "x": 691,
+      "y": 92,
+      "timestamp": 574
+    },
+    {
+      "x": 768,
+      "y": 101,
+      "timestamp": 676
+    },
+    {
+      "x": 1115,
+      "y": 370,
+      "timestamp": 780
+    },
+    {
+      "x": 1165,
+      "y": 522,
+      "timestamp": 884
+    },
+    {
+      "x": 1173,
+      "y": 526,
+      "timestamp": 988
+    },
+    {
+      "x": 1022,
+      "y": 561,
+      "timestamp": 1092
+    },
+    {
+      "x": 923,
+      "y": 631,
+      "timestamp": 1204
+    },
+    {
+      "x": 842,
+      "y": 646,
+      "timestamp": 1308
+    },
+    {
+      "x": 801,
+      "y": 666,
+      "timestamp": 1412
+    },
+    {
+      "x": 820,
+      "y": 663,
+      "timestamp": 1523
+    },
+    {
+      "x": 827,
+      "y": 617,
+      "timestamp": 1630
+    },
+    {
+      "x": 805,
+      "y": 600,
+      "timestamp": 1734
+    },
+    {
+      "x": 788,
+      "y": 585,
+      "timestamp": 1839
+    },
+    {
+      "x": 802,
+      "y": 533,
+      "timestamp": 1943
+    },
+    {
+      "x": 785,
+      "y": 536,
+      "timestamp": 2047
+    },
+    {
+      "x": 688,
+      "y": 565,
+      "timestamp": 2151
+    },
+    {
+      "x": 613,
+      "y": 617,
+      "timestamp": 2254
+    },
+    {
+      "x": 621,
+      "y": 613,
+      "timestamp": 2359
+    },
+    {
+      "x": 708,
+      "y": 600,
+      "timestamp": 2460
+    },
+    {
+      "x": 710,
+      "y": 600,
+      "timestamp": 3270
+    },
+    {
+      "x": 690,
+      "y": 615,
+      "timestamp": 3373
+    },
+    {
+      "x": 690,
+      "y": 614,
+      "timestamp": 3510
+    },
+    {
+      "x": 662,
+      "y": 572,
+      "timestamp": 3614
+    },
+    {
+      "x": 598,
+      "y": 485,
+      "timestamp": 3717
+    },
+    {
+      "x": 640,
+      "y": 444,
+      "timestamp": 3821
+    },
+    {
+      "x": 656,
+      "y": 430,
+      "timestamp": 3953
+    },
+    {
+      "x": 660,
+      "y": 427,
+      "timestamp": 4103
+    },
+    {
+      "x": 596,
+      "y": 494,
+      "timestamp": 4211
+    },
+    {
+      "x": 571,
+      "y": 522,
+      "timestamp": 4328
+    },
+    {
+      "x": 548,
+      "y": 522,
+      "timestamp": 4433
+    },
+    {
+      "x": 532,
+      "y": 526,
+      "timestamp": 4641
+    },
+    {
+      "x": 565,
+      "y": 546,
+      "timestamp": 4745
+    },
+    {
+      "x": 606,
+      "y": 582,
+      "timestamp": 4849
+    },
+    {
+      "x": 621,
+      "y": 592,
+      "timestamp": 4953
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf008",
+      "performance_title": "2026 NCT 127 월드투어",
+      "timestamp": "2026-01-23T08:43:35.196Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-07-06",
+      "timestamp": "2026-01-23T08:43:36.685Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "18:00",
+      "timestamp": "2026-01-23T08:43:37.212Z"
+    }
+  ],
+  "page_exit_time": "2026-01-23T08:43:37.622Z",
+  "selected_date": "2026-07-06",
+  "selected_time": "18:00"
+}

@@ -1,0 +1,321 @@
+{
+  "session_id": "que_7uqv6ddg",
+  "stage": "que",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-23T17:47:05.165449",
+  "performance_id": "perf003",
+  "selected_date": "2026-04-20",
+  "selected_time": "18:00",
+  "queue_start_time": "2026-01-23T08:46:19.647Z",
+  "initial_position": 7015,
+  "total_queue": 8000,
+  "position_updates": [
+    {
+      "position": 6873,
+      "progress": 14,
+      "estimated_minutes": 68,
+      "timestamp": "2026-01-23T08:46:19.674Z"
+    },
+    {
+      "position": 6694,
+      "progress": 16,
+      "estimated_minutes": 66,
+      "timestamp": "2026-01-23T08:46:20.681Z"
+    },
+    {
+      "position": 6547,
+      "progress": 18,
+      "estimated_minutes": 65,
+      "timestamp": "2026-01-23T08:46:21.684Z"
+    },
+    {
+      "position": 6372,
+      "progress": 20,
+      "estimated_minutes": 63,
+      "timestamp": "2026-01-23T08:46:22.684Z"
+    },
+    {
+      "position": 6192,
+      "progress": 23,
+      "estimated_minutes": 61,
+      "timestamp": "2026-01-23T08:46:23.690Z"
+    },
+    {
+      "position": 6007,
+      "progress": 25,
+      "estimated_minutes": 60,
+      "timestamp": "2026-01-23T08:46:24.663Z"
+    },
+    {
+      "position": 5840,
+      "progress": 27,
+      "estimated_minutes": 58,
+      "timestamp": "2026-01-23T08:46:25.673Z"
+    },
+    {
+      "position": 5667,
+      "progress": 29,
+      "estimated_minutes": 56,
+      "timestamp": "2026-01-23T08:46:26.669Z"
+    },
+    {
+      "position": 5499,
+      "progress": 31,
+      "estimated_minutes": 54,
+      "timestamp": "2026-01-23T08:46:27.668Z"
+    },
+    {
+      "position": 5321,
+      "progress": 33,
+      "estimated_minutes": 53,
+      "timestamp": "2026-01-23T08:46:28.667Z"
+    },
+    {
+      "position": 5143,
+      "progress": 36,
+      "estimated_minutes": 51,
+      "timestamp": "2026-01-23T08:46:29.663Z"
+    },
+    {
+      "position": 5031,
+      "progress": 37,
+      "estimated_minutes": 50,
+      "timestamp": "2026-01-23T08:46:30.667Z"
+    },
+    {
+      "position": 4866,
+      "progress": 39,
+      "estimated_minutes": 48,
+      "timestamp": "2026-01-23T08:46:31.668Z"
+    },
+    {
+      "position": 4710,
+      "progress": 41,
+      "estimated_minutes": 47,
+      "timestamp": "2026-01-23T08:46:32.668Z"
+    },
+    {
+      "position": 4566,
+      "progress": 43,
+      "estimated_minutes": 45,
+      "timestamp": "2026-01-23T08:46:33.669Z"
+    },
+    {
+      "position": 4382,
+      "progress": 45,
+      "estimated_minutes": 43,
+      "timestamp": "2026-01-23T08:46:34.711Z"
+    },
+    {
+      "position": 4264,
+      "progress": 47,
+      "estimated_minutes": 42,
+      "timestamp": "2026-01-23T08:46:35.666Z"
+    },
+    {
+      "position": 4157,
+      "progress": 48,
+      "estimated_minutes": 41,
+      "timestamp": "2026-01-23T08:46:36.666Z"
+    },
+    {
+      "position": 4028,
+      "progress": 50,
+      "estimated_minutes": 40,
+      "timestamp": "2026-01-23T08:46:37.666Z"
+    },
+    {
+      "position": 3853,
+      "progress": 52,
+      "estimated_minutes": 38,
+      "timestamp": "2026-01-23T08:46:38.667Z"
+    },
+    {
+      "position": 3655,
+      "progress": 54,
+      "estimated_minutes": 36,
+      "timestamp": "2026-01-23T08:46:39.666Z"
+    },
+    {
+      "position": 3497,
+      "progress": 56,
+      "estimated_minutes": 34,
+      "timestamp": "2026-01-23T08:46:40.673Z"
+    },
+    {
+      "position": 3330,
+      "progress": 58,
+      "estimated_minutes": 33,
+      "timestamp": "2026-01-23T08:46:41.671Z"
+    },
+    {
+      "position": 3150,
+      "progress": 61,
+      "estimated_minutes": 31,
+      "timestamp": "2026-01-23T08:46:42.665Z"
+    },
+    {
+      "position": 2966,
+      "progress": 63,
+      "estimated_minutes": 29,
+      "timestamp": "2026-01-23T08:46:43.668Z"
+    },
+    {
+      "position": 2766,
+      "progress": 65,
+      "estimated_minutes": 27,
+      "timestamp": "2026-01-23T08:46:44.668Z"
+    },
+    {
+      "position": 2632,
+      "progress": 67,
+      "estimated_minutes": 26,
+      "timestamp": "2026-01-23T08:46:45.668Z"
+    },
+    {
+      "position": 2502,
+      "progress": 69,
+      "estimated_minutes": 25,
+      "timestamp": "2026-01-23T08:46:46.663Z"
+    },
+    {
+      "position": 2401,
+      "progress": 70,
+      "estimated_minutes": 24,
+      "timestamp": "2026-01-23T08:46:47.668Z"
+    },
+    {
+      "position": 2257,
+      "progress": 72,
+      "estimated_minutes": 22,
+      "timestamp": "2026-01-23T08:46:48.668Z"
+    },
+    {
+      "position": 2081,
+      "progress": 74,
+      "estimated_minutes": 20,
+      "timestamp": "2026-01-23T08:46:49.667Z"
+    },
+    {
+      "position": 1897,
+      "progress": 76,
+      "estimated_minutes": 18,
+      "timestamp": "2026-01-23T08:46:50.668Z"
+    },
+    {
+      "position": 1733,
+      "progress": 78,
+      "estimated_minutes": 17,
+      "timestamp": "2026-01-23T08:46:51.665Z"
+    },
+    {
+      "position": 1572,
+      "progress": 80,
+      "estimated_minutes": 15,
+      "timestamp": "2026-01-23T08:46:52.666Z"
+    },
+    {
+      "position": 1441,
+      "progress": 82,
+      "estimated_minutes": 14,
+      "timestamp": "2026-01-23T08:46:53.668Z"
+    },
+    {
+      "position": 1307,
+      "progress": 84,
+      "estimated_minutes": 13,
+      "timestamp": "2026-01-23T08:46:54.667Z"
+    },
+    {
+      "position": 1196,
+      "progress": 85,
+      "estimated_minutes": 11,
+      "timestamp": "2026-01-23T08:46:55.662Z"
+    },
+    {
+      "position": 1053,
+      "progress": 87,
+      "estimated_minutes": 10,
+      "timestamp": "2026-01-23T08:46:56.669Z"
+    },
+    {
+      "position": 927,
+      "progress": 88,
+      "estimated_minutes": 9,
+      "timestamp": "2026-01-23T08:46:57.668Z"
+    },
+    {
+      "position": 827,
+      "progress": 90,
+      "estimated_minutes": 8,
+      "timestamp": "2026-01-23T08:46:58.666Z"
+    },
+    {
+      "position": 642,
+      "progress": 92,
+      "estimated_minutes": 6,
+      "timestamp": "2026-01-23T08:46:59.666Z"
+    },
+    {
+      "position": 450,
+      "progress": 94,
+      "estimated_minutes": 4,
+      "timestamp": "2026-01-23T08:47:00.668Z"
+    },
+    {
+      "position": 264,
+      "progress": 97,
+      "estimated_minutes": 2,
+      "timestamp": "2026-01-23T08:47:01.666Z"
+    },
+    {
+      "position": 107,
+      "progress": 99,
+      "estimated_minutes": 1,
+      "timestamp": "2026-01-23T08:47:02.668Z"
+    },
+    {
+      "position": 0,
+      "status": "ready",
+      "timestamp": "2026-01-23T08:47:03.661Z"
+    },
+    {
+      "position": 0,
+      "status": "ready",
+      "timestamp": "2026-01-23T08:47:04.666Z"
+    }
+  ],
+  "queue_end_time": "2026-01-23T08:47:04.666Z",
+  "final_position": 0,
+  "wait_duration_ms": 45019,
+  "mouse_trajectory": [
+    {
+      "x": 1060,
+      "y": 460,
+      "t": 4964
+    },
+    {
+      "x": 1060,
+      "y": 460,
+      "t": 10721
+    },
+    {
+      "x": 1355,
+      "y": 426,
+      "t": 16596
+    },
+    {
+      "x": 1060,
+      "y": 460,
+      "t": 27318
+    },
+    {
+      "x": 1060,
+      "y": 460,
+      "t": 33102
+    }
+  ],
+  "entry_time": "2026-01-23T08:47:05.163Z"
+}

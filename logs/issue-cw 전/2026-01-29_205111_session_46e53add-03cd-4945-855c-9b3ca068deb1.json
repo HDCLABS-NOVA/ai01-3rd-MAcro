@@ -1,0 +1,111 @@
+{
+  "session_id": "46e53add-03cd-4945-855c-9b3ca068deb1",
+  "is_bot": true,
+  "bot_type": "queue_bypass",
+  "bot_description": "대기열 우회 봇",
+  "mode": "B",
+  "page_entry_time": "2026-01-29T20:51:11.028691",
+  "page_exit_time": "2026-01-29T20:51:13.028691",
+  "total_duration_ms": 2534,
+  "user_ip": "192.168.206.142",
+  "user_id": "bot_queue_bypass_9692",
+  "mouse_trajectory": [
+    {
+      "x": 259,
+      "y": 230,
+      "timestamp": 0
+    },
+    {
+      "x": 309,
+      "y": 279,
+      "timestamp": 50
+    },
+    {
+      "x": 360,
+      "y": 328,
+      "timestamp": 100
+    },
+    {
+      "x": 410,
+      "y": 377,
+      "timestamp": 150
+    },
+    {
+      "x": 461,
+      "y": 427,
+      "timestamp": 200
+    }
+  ],
+  "clicks": [
+    {
+      "x": 322,
+      "y": 309,
+      "target": "seat_461",
+      "timestamp": 0
+    },
+    {
+      "x": 556,
+      "y": 267,
+      "target": "seat_150",
+      "timestamp": 159
+    },
+    {
+      "x": 541,
+      "y": 240,
+      "target": "seat_265",
+      "timestamp": 318
+    },
+    {
+      "x": 424,
+      "y": 223,
+      "target": "seat_211",
+      "timestamp": 478
+    },
+    {
+      "x": 464,
+      "y": 318,
+      "target": "seat_141",
+      "timestamp": 637
+    },
+    {
+      "x": 437,
+      "y": 288,
+      "target": "seat_449",
+      "timestamp": 797
+    },
+    {
+      "x": 462,
+      "y": 377,
+      "target": "seat_291",
+      "timestamp": 956
+    },
+    {
+      "x": 554,
+      "y": 246,
+      "target": "seat_134",
+      "timestamp": 1115
+    },
+    {
+      "x": 343,
+      "y": 204,
+      "target": "seat_61",
+      "timestamp": 1275
+    },
+    {
+      "x": 574,
+      "y": 320,
+      "target": "seat_367",
+      "timestamp": 1434
+    },
+    {
+      "x": 478,
+      "y": 275,
+      "target": "seat_211",
+      "timestamp": 1594
+    }
+  ],
+  "hovers": [],
+  "captcha_attempts": 1,
+  "captcha_time_ms": 150,
+  "bot_score": 0.8439658374838703
+}

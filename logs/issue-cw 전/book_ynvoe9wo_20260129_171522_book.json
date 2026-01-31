@@ -1,0 +1,240 @@
+{
+  "session_id": "book_ynvoe9wo",
+  "stage": "book",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-29T17:15:22.935274",
+  "performance_id": "perf003",
+  "selected_date": "2026-04-20",
+  "selected_time": "18:00",
+  "booking_start_time": "2026-01-29T08:14:50.645Z",
+  "captcha": {
+    "start_time": "2026-01-29T08:14:50.645Z",
+    "end_time": "2026-01-29T08:15:08.116Z",
+    "attempts": [
+      {
+        "action": "attempt",
+        "input": "NDKSUX",
+        "correct": true,
+        "time_ms": 17471,
+        "attempt_number": 1,
+        "timestamp": "2026-01-29T08:15:08.116Z"
+      }
+    ],
+    "success": true,
+    "mouse_trajectory": [
+      {
+        "x": 734,
+        "y": 574,
+        "t": 4617
+      },
+      {
+        "x": 700,
+        "y": 530,
+        "t": 4723
+      },
+      {
+        "x": 642,
+        "y": 453,
+        "t": 4818
+      },
+      {
+        "x": 621,
+        "y": 425,
+        "t": 4874
+      },
+      {
+        "x": 604,
+        "y": 403,
+        "t": 4971
+      },
+      {
+        "x": 602,
+        "y": 407,
+        "t": 6194
+      },
+      {
+        "x": 596,
+        "y": 417,
+        "t": 6249
+      },
+      {
+        "x": 586,
+        "y": 435,
+        "t": 6305
+      },
+      {
+        "x": 574,
+        "y": 459,
+        "t": 6360
+      },
+      {
+        "x": 564,
+        "y": 477,
+        "t": 6415
+      },
+      {
+        "x": 558,
+        "y": 487,
+        "t": 6471
+      },
+      {
+        "x": 556,
+        "y": 491,
+        "t": 6527
+      },
+      {
+        "x": 590,
+        "y": 497,
+        "t": 7735
+      },
+      {
+        "x": 693,
+        "y": 514,
+        "t": 7790
+      },
+      {
+        "x": 1089,
+        "y": 581,
+        "t": 7887
+      },
+      {
+        "x": 1364,
+        "y": 627,
+        "t": 7992
+      },
+      {
+        "x": 1385,
+        "y": 632,
+        "t": 14464
+      },
+      {
+        "x": 1346,
+        "y": 631,
+        "t": 14520
+      },
+      {
+        "x": 1282,
+        "y": 628,
+        "t": 14576
+      },
+      {
+        "x": 1192,
+        "y": 624,
+        "t": 14631
+      },
+      {
+        "x": 959,
+        "y": 615,
+        "t": 14735
+      },
+      {
+        "x": 869,
+        "y": 611,
+        "t": 14790
+      },
+      {
+        "x": 805,
+        "y": 608,
+        "t": 14846
+      },
+      {
+        "x": 766,
+        "y": 607,
+        "t": 14902
+      },
+      {
+        "x": 753,
+        "y": 606,
+        "t": 14957
+      }
+    ]
+  },
+  "seats": {
+    "selected": [],
+    "taken_by_others": [],
+    "selection_time": null
+  },
+  "discount": {
+    "type": "normal",
+    "selection_time": "2026-01-29T08:15:18.565Z"
+  },
+  "delivery": {
+    "method": "pickup",
+    "fee": 0,
+    "selection_time": "2026-01-29T08:15:20.804Z"
+  },
+  "payment": {
+    "method": "bank",
+    "selection_time": "2026-01-29T08:15:22.933Z"
+  },
+  "booking_end_time": "2026-01-29T08:15:22.933Z",
+  "section_selection": {
+    "start_time": "2026-01-29T08:15:08.156Z",
+    "clicks": [
+      {
+        "section": "VIP-L",
+        "timestamp": "2026-01-29T08:15:09.789Z"
+      }
+    ],
+    "final_section": "VIP-L",
+    "end_time": "2026-01-29T08:15:10.511Z",
+    "final_grade": "VIP",
+    "mouse_trajectory": []
+  },
+  "seat_selection": {
+    "seats": [
+      "VIP-A5"
+    ],
+    "section": "VIP-L",
+    "grade": "VIP",
+    "start_time": "2026-01-29T08:15:10.549Z",
+    "end_time": "2026-01-29T08:15:16.365Z",
+    "duration_ms": 5816,
+    "clicks": [
+      {
+        "x": 448.5,
+        "y": 394,
+        "target": "VIP-A5",
+        "timestamp": 1630
+      }
+    ],
+    "hovers": []
+  },
+  "mouse_trajectory_seats": [],
+  "mouse_trajectory_discount": [],
+  "booker": {
+    "phone": "1111111111",
+    "email": "magellankr@outlook.kr",
+    "input_time": "2026-01-29T08:15:20.804Z"
+  },
+  "mouse_trajectory_booker": [
+    {
+      "x": 759,
+      "y": 600,
+      "t": 612
+    },
+    {
+      "x": 776,
+      "y": 581,
+      "t": 673
+    },
+    {
+      "x": 846,
+      "y": 507,
+      "t": 771
+    },
+    {
+      "x": 917,
+      "y": 434,
+      "t": 875
+    },
+    {
+      "x": 940,
+      "y": 409,
+      "t": 972
+    }
+  ],
+  "mouse_trajectory_payment": []
+}

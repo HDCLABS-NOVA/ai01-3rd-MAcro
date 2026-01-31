@@ -1,0 +1,211 @@
+{
+  "session_id": "book_0wlkvjyt",
+  "stage": "book",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-29T17:49:03.570626",
+  "performance_id": "perf001",
+  "selected_date": "2026-03-15",
+  "selected_time": "18:00",
+  "booking_start_time": "2026-01-29T08:48:23.792Z",
+  "captcha": {
+    "start_time": "2026-01-29T08:48:23.793Z",
+    "end_time": "2026-01-29T08:48:47.675Z",
+    "attempts": [
+      {
+        "action": "attempt",
+        "input": "PHYHBG",
+        "correct": true,
+        "time_ms": 23882,
+        "attempt_number": 1,
+        "timestamp": "2026-01-29T08:48:47.675Z"
+      }
+    ],
+    "success": true,
+    "mouse_trajectory": [
+      {
+        "x": 720,
+        "y": 598,
+        "t": 4309
+      },
+      {
+        "x": 728,
+        "y": 671,
+        "t": 4406
+      },
+      {
+        "x": 734,
+        "y": 716,
+        "t": 4462
+      },
+      {
+        "x": 737,
+        "y": 743,
+        "t": 4516
+      },
+      {
+        "x": 738,
+        "y": 747,
+        "t": 11892
+      },
+      {
+        "x": 742,
+        "y": 703,
+        "t": 12002
+      },
+      {
+        "x": 746,
+        "y": 665,
+        "t": 12058
+      },
+      {
+        "x": 749,
+        "y": 628,
+        "t": 12113
+      },
+      {
+        "x": 753,
+        "y": 584,
+        "t": 12217
+      },
+      {
+        "x": 753,
+        "y": 579,
+        "t": 12273
+      },
+      {
+        "x": 753,
+        "y": 581,
+        "t": 21246
+      },
+      {
+        "x": 753,
+        "y": 586,
+        "t": 21350
+      },
+      {
+        "x": 753,
+        "y": 591,
+        "t": 21454
+      },
+      {
+        "x": 753,
+        "y": 593,
+        "t": 21510
+      }
+    ]
+  },
+  "seats": {
+    "selected": [],
+    "taken_by_others": [],
+    "selection_time": null
+  },
+  "discount": {
+    "type": "normal",
+    "selection_time": "2026-01-29T08:48:59.129Z"
+  },
+  "delivery": {
+    "method": "pickup",
+    "fee": 0,
+    "selection_time": "2026-01-29T08:49:01.358Z"
+  },
+  "payment": {
+    "method": "bank",
+    "selection_time": "2026-01-29T08:49:03.568Z"
+  },
+  "booking_end_time": "2026-01-29T08:49:03.568Z",
+  "section_selection": {
+    "start_time": "2026-01-29T08:48:47.707Z",
+    "clicks": [
+      {
+        "section": "VIP-L",
+        "timestamp": "2026-01-29T08:48:49.320Z"
+      }
+    ],
+    "final_section": "VIP-L",
+    "end_time": "2026-01-29T08:48:50.088Z",
+    "final_grade": "VIP",
+    "mouse_trajectory": []
+  },
+  "seat_selection": {
+    "seats": [
+      "VIP-B5"
+    ],
+    "section": "VIP-L",
+    "grade": "VIP",
+    "start_time": "2026-01-29T08:48:50.129Z",
+    "end_time": "2026-01-29T08:48:56.893Z",
+    "duration_ms": 6764,
+    "clicks": [
+      {
+        "x": 448.5,
+        "y": 394,
+        "target": "VIP-A5",
+        "timestamp": 1706
+      },
+      {
+        "x": 448.5,
+        "y": 416,
+        "target": "VIP-B5",
+        "timestamp": 2620
+      }
+    ],
+    "hovers": []
+  },
+  "mouse_trajectory_seats": [
+    {
+      "x": 757,
+      "y": 585,
+      "timestamp": 3693
+    },
+    {
+      "x": 770,
+      "y": 563,
+      "timestamp": 3748
+    },
+    {
+      "x": 792,
+      "y": 525,
+      "timestamp": 3804
+    },
+    {
+      "x": 823,
+      "y": 473,
+      "timestamp": 3859
+    },
+    {
+      "x": 860,
+      "y": 408,
+      "timestamp": 3915
+    },
+    {
+      "x": 891,
+      "y": 356,
+      "timestamp": 3970
+    },
+    {
+      "x": 913,
+      "y": 318,
+      "timestamp": 4027
+    },
+    {
+      "x": 926,
+      "y": 296,
+      "timestamp": 4081
+    },
+    {
+      "x": 930,
+      "y": 288,
+      "timestamp": 4137
+    }
+  ],
+  "mouse_trajectory_discount": [],
+  "booker": {
+    "phone": "1111111111",
+    "email": "magellankr@outlook.kr",
+    "input_time": "2026-01-29T08:49:01.358Z"
+  },
+  "mouse_trajectory_booker": [],
+  "mouse_trajectory_payment": []
+}

@@ -1,0 +1,88 @@
+{
+  "session_id": "perf_8tyitfgv",
+  "stage": "perf",
+  "user_ip": "192.168.14.103",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-28T11:25:31.230157",
+  "page_entry_time": "2026-01-28T02:25:14.724Z",
+  "performance_id": "perf004",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf004",
+      "timestamp": "2026-01-28T02:25:19.937Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-05-10",
+      "timestamp": "2026-01-28T02:25:25.340Z"
+    },
+    {
+      "action": "time_select",
+      "target": "19:00",
+      "timestamp": "2026-01-28T02:25:27.925Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf004",
+      "date": "2026-05-10",
+      "time": "19:00",
+      "timestamp": "2026-01-28T02:25:32.001Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 923,
+      "y": 735,
+      "timestamp": 21
+    },
+    {
+      "x": 923,
+      "y": 736,
+      "timestamp": 124
+    },
+    {
+      "x": 237,
+      "y": 373,
+      "timestamp": 5212
+    },
+    {
+      "x": 463,
+      "y": 337,
+      "timestamp": 10616
+    },
+    {
+      "x": 445,
+      "y": 435,
+      "timestamp": 13201
+    },
+    {
+      "x": 632,
+      "y": 508,
+      "timestamp": 17276
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf004",
+      "performance_title": "2026 블랙핑크 앵콜 콘서트",
+      "timestamp": "2026-01-28T02:25:19.937Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-05-10",
+      "timestamp": "2026-01-28T02:25:25.340Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "19:00",
+      "timestamp": "2026-01-28T02:25:27.925Z"
+    }
+  ],
+  "page_exit_time": "2026-01-28T02:25:32.001Z",
+  "selected_date": "2026-05-10",
+  "selected_time": "19:00"
+}

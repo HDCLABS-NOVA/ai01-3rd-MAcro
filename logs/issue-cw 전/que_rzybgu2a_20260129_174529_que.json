@@ -1,0 +1,94 @@
+{
+  "session_id": "que_rzybgu2a",
+  "stage": "que",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-29T17:45:29.619816",
+  "performance_id": "perf002",
+  "selected_date": "2026-02-01",
+  "selected_time": "14:00",
+  "queue_start_time": "2026-01-29T08:45:21.095Z",
+  "initial_position": 1127,
+  "total_queue": 2000,
+  "position_updates": [
+    {
+      "position": 998,
+      "progress": 50,
+      "estimated_minutes": 9,
+      "timestamp": "2026-01-29T08:45:21.116Z"
+    },
+    {
+      "position": 839,
+      "progress": 58,
+      "estimated_minutes": 8,
+      "timestamp": "2026-01-29T08:45:22.113Z"
+    },
+    {
+      "position": 674,
+      "progress": 66,
+      "estimated_minutes": 6,
+      "timestamp": "2026-01-29T08:45:23.117Z"
+    },
+    {
+      "position": 493,
+      "progress": 75,
+      "estimated_minutes": 4,
+      "timestamp": "2026-01-29T08:45:24.116Z"
+    },
+    {
+      "position": 371,
+      "progress": 81,
+      "estimated_minutes": 3,
+      "timestamp": "2026-01-29T08:45:25.114Z"
+    },
+    {
+      "position": 207,
+      "progress": 90,
+      "estimated_minutes": 2,
+      "timestamp": "2026-01-29T08:45:26.116Z"
+    },
+    {
+      "position": 58,
+      "progress": 97,
+      "estimated_minutes": 1,
+      "timestamp": "2026-01-29T08:45:27.116Z"
+    },
+    {
+      "position": 0,
+      "status": "ready",
+      "timestamp": "2026-01-29T08:45:28.113Z"
+    },
+    {
+      "position": 0,
+      "status": "ready",
+      "timestamp": "2026-01-29T08:45:29.115Z"
+    }
+  ],
+  "queue_end_time": "2026-01-29T08:45:29.115Z",
+  "final_position": 0,
+  "wait_duration_ms": 8020,
+  "mouse_trajectory": [
+    {
+      "x": 723,
+      "y": 585,
+      "t": 5766
+    },
+    {
+      "x": 759,
+      "y": 557,
+      "t": 5871
+    },
+    {
+      "x": 830,
+      "y": 499,
+      "t": 5974
+    },
+    {
+      "x": 922,
+      "y": 423,
+      "t": 6127
+    }
+  ],
+  "entry_time": "2026-01-29T08:45:29.618Z"
+}

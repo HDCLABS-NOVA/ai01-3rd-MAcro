@@ -1,0 +1,37 @@
+{
+  "session_id": "que_7hter78j",
+  "stage": "que",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-23T14:16:12.411592",
+  "performance_id": "perf008",
+  "selected_date": "2026-07-06",
+  "selected_time": "18:00",
+  "queue_start_time": "2026-01-23T05:16:03.070Z",
+  "initial_position": 0,
+  "total_queue": 6000,
+  "position_updates": [
+    {
+      "position": 0,
+      "status": "ready",
+      "timestamp": "2026-01-23T05:16:03.095Z"
+    },
+    {
+      "position": 0,
+      "status": "ready",
+      "timestamp": "2026-01-23T05:16:04.089Z"
+    }
+  ],
+  "queue_end_time": "2026-01-23T05:16:04.089Z",
+  "final_position": 0,
+  "wait_duration_ms": 1019,
+  "mouse_trajectory": [
+    {
+      "x": 416,
+      "y": 656,
+      "t": 21
+    }
+  ],
+  "entry_time": "2026-01-23T05:16:12.407Z"
+}

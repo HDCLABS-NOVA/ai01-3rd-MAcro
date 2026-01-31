@@ -1,0 +1,188 @@
+{
+  "session_id": "perf_wpguxewo",
+  "stage": "perf",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-24T08:36:03.938628",
+  "page_entry_time": "2026-01-23T23:35:58.054Z",
+  "performance_id": "perf008",
+  "actions": [
+    {
+      "action": "card_click",
+      "target": "perf008",
+      "timestamp": "2026-01-23T23:36:01.341Z"
+    },
+    {
+      "action": "date_select",
+      "target": "2026-07-06",
+      "timestamp": "2026-01-23T23:36:02.792Z"
+    },
+    {
+      "action": "time_select",
+      "target": "18:00",
+      "timestamp": "2026-01-23T23:36:03.404Z"
+    },
+    {
+      "action": "booking_start",
+      "target": "perf008",
+      "date": "2026-07-06",
+      "time": "18:00",
+      "timestamp": "2026-01-23T23:36:03.935Z"
+    }
+  ],
+  "mouse_trajectory": [
+    {
+      "x": 782,
+      "y": 636,
+      "timestamp": 1425
+    },
+    {
+      "x": 775,
+      "y": 633,
+      "timestamp": 1614
+    },
+    {
+      "x": 773,
+      "y": 654,
+      "timestamp": 1732
+    },
+    {
+      "x": 773,
+      "y": 665,
+      "timestamp": 1891
+    },
+    {
+      "x": 768,
+      "y": 668,
+      "timestamp": 1993
+    },
+    {
+      "x": 757,
+      "y": 684,
+      "timestamp": 2114
+    },
+    {
+      "x": 720,
+      "y": 708,
+      "timestamp": 2225
+    },
+    {
+      "x": 715,
+      "y": 725,
+      "timestamp": 2329
+    },
+    {
+      "x": 715,
+      "y": 724,
+      "timestamp": 2759
+    },
+    {
+      "x": 714,
+      "y": 722,
+      "timestamp": 2861
+    },
+    {
+      "x": 710,
+      "y": 717,
+      "timestamp": 2972
+    },
+    {
+      "x": 710,
+      "y": 708,
+      "timestamp": 3717
+    },
+    {
+      "x": 748,
+      "y": 638,
+      "timestamp": 3826
+    },
+    {
+      "x": 762,
+      "y": 601,
+      "timestamp": 3941
+    },
+    {
+      "x": 693,
+      "y": 525,
+      "timestamp": 4066
+    },
+    {
+      "x": 640,
+      "y": 492,
+      "timestamp": 4192
+    },
+    {
+      "x": 640,
+      "y": 454,
+      "timestamp": 4298
+    },
+    {
+      "x": 644,
+      "y": 438,
+      "timestamp": 4514
+    },
+    {
+      "x": 643,
+      "y": 441,
+      "timestamp": 4826
+    },
+    {
+      "x": 568,
+      "y": 492,
+      "timestamp": 4930
+    },
+    {
+      "x": 547,
+      "y": 513,
+      "timestamp": 5034
+    },
+    {
+      "x": 532,
+      "y": 524,
+      "timestamp": 5146
+    },
+    {
+      "x": 520,
+      "y": 532,
+      "timestamp": 5258
+    },
+    {
+      "x": 521,
+      "y": 535,
+      "timestamp": 5479
+    },
+    {
+      "x": 580,
+      "y": 592,
+      "timestamp": 5597
+    },
+    {
+      "x": 637,
+      "y": 613,
+      "timestamp": 5715
+    }
+  ],
+  "card_clicks": [
+    {
+      "performance_id": "perf008",
+      "performance_title": "2026 NCT 127 월드투어",
+      "timestamp": "2026-01-23T23:36:01.341Z"
+    }
+  ],
+  "date_selections": [
+    {
+      "date": "2026-07-06",
+      "timestamp": "2026-01-23T23:36:02.792Z"
+    }
+  ],
+  "time_selections": [
+    {
+      "time": "18:00",
+      "timestamp": "2026-01-23T23:36:03.404Z"
+    }
+  ],
+  "page_exit_time": "2026-01-23T23:36:03.935Z",
+  "selected_date": "2026-07-06",
+  "selected_time": "18:00"
+}

@@ -1,0 +1,132 @@
+{
+  "session_id": "e9442cf1-b527-4420-a785-e1930cee4b6f",
+  "is_bot": true,
+  "bot_type": "linear_move",
+  "bot_description": "직선 이동 봇",
+  "mode": "C",
+  "page_entry_time": "2026-01-29T17:52:02.483201",
+  "page_exit_time": "2026-01-29T17:52:11.483201",
+  "total_duration_ms": 9609,
+  "user_ip": "192.168.12.76",
+  "user_id": "bot_linear_move_6534",
+  "mouse_trajectory": [
+    {
+      "x": 265,
+      "y": 135,
+      "timestamp": 0
+    },
+    {
+      "x": 324,
+      "y": 198,
+      "timestamp": 50
+    },
+    {
+      "x": 384,
+      "y": 261,
+      "timestamp": 100
+    },
+    {
+      "x": 444,
+      "y": 324,
+      "timestamp": 150
+    },
+    {
+      "x": 504,
+      "y": 387,
+      "timestamp": 200
+    }
+  ],
+  "clicks": [
+    {
+      "x": 393,
+      "y": 364,
+      "target": "seat_549",
+      "timestamp": 0
+    },
+    {
+      "x": 390,
+      "y": 222,
+      "target": "seat_349",
+      "timestamp": 638
+    },
+    {
+      "x": 398,
+      "y": 247,
+      "target": "seat_22",
+      "timestamp": 1277
+    },
+    {
+      "x": 570,
+      "y": 351,
+      "target": "seat_312",
+      "timestamp": 1916
+    },
+    {
+      "x": 449,
+      "y": 279,
+      "target": "seat_177",
+      "timestamp": 2555
+    },
+    {
+      "x": 500,
+      "y": 326,
+      "target": "seat_40",
+      "timestamp": 3194
+    },
+    {
+      "x": 319,
+      "y": 395,
+      "target": "seat_463",
+      "timestamp": 3833
+    },
+    {
+      "x": 355,
+      "y": 350,
+      "target": "seat_599",
+      "timestamp": 4472
+    },
+    {
+      "x": 412,
+      "y": 398,
+      "target": "seat_96",
+      "timestamp": 5111
+    },
+    {
+      "x": 535,
+      "y": 351,
+      "target": "seat_140",
+      "timestamp": 5750
+    },
+    {
+      "x": 412,
+      "y": 268,
+      "target": "seat_358",
+      "timestamp": 6388
+    },
+    {
+      "x": 496,
+      "y": 296,
+      "target": "seat_281",
+      "timestamp": 7027
+    },
+    {
+      "x": 439,
+      "y": 253,
+      "target": "seat_363",
+      "timestamp": 7666
+    }
+  ],
+  "hovers": [
+    {
+      "target": "elem_0",
+      "duration": 28
+    },
+    {
+      "target": "elem_1",
+      "duration": 31
+    }
+  ],
+  "captcha_attempts": 2,
+  "captcha_time_ms": 451,
+  "bot_score": 0.9185205880518713
+}

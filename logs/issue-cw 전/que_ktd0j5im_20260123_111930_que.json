@@ -1,0 +1,227 @@
+{
+  "session_id": "que_ktd0j5im",
+  "stage": "que",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-23T11:19:30.258599",
+  "performance_id": "perf008",
+  "selected_date": "2026-07-05",
+  "selected_time": "18:00",
+  "queue_start_time": "2026-01-23T02:19:07.551Z",
+  "initial_position": 2960,
+  "total_queue": 6000,
+  "position_updates": [
+    {
+      "position": 2852,
+      "progress": 52,
+      "estimated_minutes": 28,
+      "timestamp": "2026-01-23T02:19:07.570Z"
+    },
+    {
+      "position": 2676,
+      "progress": 55,
+      "estimated_minutes": 26,
+      "timestamp": "2026-01-23T02:19:08.573Z"
+    },
+    {
+      "position": 2512,
+      "progress": 58,
+      "estimated_minutes": 25,
+      "timestamp": "2026-01-23T02:19:10.275Z"
+    },
+    {
+      "position": 2338,
+      "progress": 61,
+      "estimated_minutes": 23,
+      "timestamp": "2026-01-23T02:19:11.283Z"
+    },
+    {
+      "position": 2151,
+      "progress": 64,
+      "estimated_minutes": 21,
+      "timestamp": "2026-01-23T02:19:12.282Z"
+    },
+    {
+      "position": 2011,
+      "progress": 66,
+      "estimated_minutes": 20,
+      "timestamp": "2026-01-23T02:19:12.575Z"
+    },
+    {
+      "position": 1869,
+      "progress": 69,
+      "estimated_minutes": 18,
+      "timestamp": "2026-01-23T02:19:13.573Z"
+    },
+    {
+      "position": 1733,
+      "progress": 71,
+      "estimated_minutes": 17,
+      "timestamp": "2026-01-23T02:19:14.572Z"
+    },
+    {
+      "position": 1587,
+      "progress": 74,
+      "estimated_minutes": 15,
+      "timestamp": "2026-01-23T02:19:15.571Z"
+    },
+    {
+      "position": 1419,
+      "progress": 76,
+      "estimated_minutes": 14,
+      "timestamp": "2026-01-23T02:19:16.573Z"
+    },
+    {
+      "position": 1293,
+      "progress": 78,
+      "estimated_minutes": 12,
+      "timestamp": "2026-01-23T02:19:18.272Z"
+    },
+    {
+      "position": 1166,
+      "progress": 81,
+      "estimated_minutes": 11,
+      "timestamp": "2026-01-23T02:19:19.273Z"
+    },
+    {
+      "position": 1046,
+      "progress": 83,
+      "estimated_minutes": 10,
+      "timestamp": "2026-01-23T02:19:20.283Z"
+    },
+    {
+      "position": 846,
+      "progress": 86,
+      "estimated_minutes": 8,
+      "timestamp": "2026-01-23T02:19:21.273Z"
+    },
+    {
+      "position": 689,
+      "progress": 89,
+      "estimated_minutes": 6,
+      "timestamp": "2026-01-23T02:19:22.278Z"
+    },
+    {
+      "position": 576,
+      "progress": 90,
+      "estimated_minutes": 5,
+      "timestamp": "2026-01-23T02:19:23.283Z"
+    },
+    {
+      "position": 462,
+      "progress": 92,
+      "estimated_minutes": 4,
+      "timestamp": "2026-01-23T02:19:24.271Z"
+    },
+    {
+      "position": 340,
+      "progress": 94,
+      "estimated_minutes": 3,
+      "timestamp": "2026-01-23T02:19:25.272Z"
+    },
+    {
+      "position": 157,
+      "progress": 97,
+      "estimated_minutes": 1,
+      "timestamp": "2026-01-23T02:19:26.274Z"
+    },
+    {
+      "position": 7,
+      "progress": 100,
+      "estimated_minutes": 1,
+      "timestamp": "2026-01-23T02:19:27.276Z"
+    },
+    {
+      "position": 0,
+      "status": "ready",
+      "timestamp": "2026-01-23T02:19:28.280Z"
+    },
+    {
+      "position": 0,
+      "status": "ready",
+      "timestamp": "2026-01-23T02:19:29.282Z"
+    }
+  ],
+  "queue_end_time": "2026-01-23T02:19:29.282Z",
+  "final_position": 0,
+  "wait_duration_ms": 21731,
+  "mouse_trajectory": [
+    {
+      "x": 664,
+      "y": 494,
+      "t": 39
+    },
+    {
+      "x": 672,
+      "y": 483,
+      "t": 143
+    },
+    {
+      "x": 696,
+      "y": 451,
+      "t": 247
+    },
+    {
+      "x": 764,
+      "y": 303,
+      "t": 351
+    },
+    {
+      "x": 857,
+      "y": 132,
+      "t": 455
+    },
+    {
+      "x": 880,
+      "y": 107,
+      "t": 559
+    },
+    {
+      "x": 893,
+      "y": 108,
+      "t": 719
+    },
+    {
+      "x": 901,
+      "y": 113,
+      "t": 823
+    },
+    {
+      "x": 1000,
+      "y": 75,
+      "t": 928
+    },
+    {
+      "x": 1012,
+      "y": 28,
+      "t": 1032
+    },
+    {
+      "x": 999,
+      "y": 92,
+      "t": 1150
+    },
+    {
+      "x": 1041,
+      "y": 35,
+      "t": 1254
+    },
+    {
+      "x": 1012,
+      "y": 2,
+      "t": 1358
+    },
+    {
+      "x": 1220,
+      "y": 7,
+      "t": 7796
+    },
+    {
+      "x": 1235,
+      "y": 52,
+      "t": 7914
+    }
+  ],
+  "entry_time": "2026-01-23T02:19:30.256Z"
+}

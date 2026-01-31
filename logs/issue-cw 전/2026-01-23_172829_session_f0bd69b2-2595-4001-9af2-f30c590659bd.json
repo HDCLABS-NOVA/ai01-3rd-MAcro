@@ -1,0 +1,24 @@
+{
+  "session_id": "f0bd69b2-2595-4001-9af2-f30c590659bd",
+  "page": "seat_selection",
+  "mode": "A",
+  "selected_seats": [
+    "VIP-A7"
+  ],
+  "page_entry_time": "2026-01-23T08:28:24.362Z",
+  "page_exit_time": "2026-01-23T08:28:29.693Z",
+  "total_duration_ms": 5331,
+  "mouse_trajectory": [],
+  "clicks": [
+    {
+      "x": 449.58335065841675,
+      "y": 397.8125071525574,
+      "target": "VIP-A7",
+      "timestamp": 1496
+    }
+  ],
+  "hovers": [],
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "saved_at": "2026-01-23T17:28:29.694581"
+}

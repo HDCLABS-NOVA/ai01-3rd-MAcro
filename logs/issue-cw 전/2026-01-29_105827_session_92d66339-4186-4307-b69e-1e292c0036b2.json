@@ -1,0 +1,122 @@
+{
+  "session_id": "92d66339-4186-4307-b69e-1e292c0036b2",
+  "page": "seat_selection",
+  "mode": "B",
+  "selected_seats": [
+    "VIP-A22"
+  ],
+  "page_entry_time": "2026-01-29T01:57:09.108Z",
+  "page_exit_time": "2026-01-29T01:58:27.226Z",
+  "total_duration_ms": 78118,
+  "mouse_trajectory": [
+    {
+      "x": 10,
+      "y": 411,
+      "timestamp": 1397
+    },
+    {
+      "x": 20,
+      "y": 420,
+      "timestamp": 1454
+    },
+    {
+      "x": 8,
+      "y": 423,
+      "timestamp": 1607
+    },
+    {
+      "x": 20,
+      "y": 390,
+      "timestamp": 1659
+    },
+    {
+      "x": 66,
+      "y": 296,
+      "timestamp": 1714
+    },
+    {
+      "x": 147,
+      "y": 251,
+      "timestamp": 1770
+    },
+    {
+      "x": 175,
+      "y": 238,
+      "timestamp": 1826
+    },
+    {
+      "x": 208,
+      "y": 230,
+      "timestamp": 1881
+    },
+    {
+      "x": 242,
+      "y": 220,
+      "timestamp": 1937
+    },
+    {
+      "x": 282,
+      "y": 216,
+      "timestamp": 1992
+    },
+    {
+      "x": 293,
+      "y": 216,
+      "timestamp": 2180
+    },
+    {
+      "x": 268,
+      "y": 217,
+      "timestamp": 2235
+    },
+    {
+      "x": 107,
+      "y": 208,
+      "timestamp": 2291
+    }
+  ],
+  "clicks": [
+    {
+      "x": 354.47265625,
+      "y": 395.17578125,
+      "target": "VIP-A21",
+      "timestamp": 18838
+    },
+    {
+      "x": 370.44921875,
+      "y": 395.17578125,
+      "target": "VIP-A22",
+      "timestamp": 58072
+    }
+  ],
+  "hovers": [
+    {
+      "target": "VIP-A21",
+      "duration": 6,
+      "timestamp": 18843
+    },
+    {
+      "target": "VIP-A21",
+      "duration": 1552,
+      "timestamp": 39564
+    },
+    {
+      "target": "VIP-A22",
+      "duration": 19,
+      "timestamp": 58089
+    },
+    {
+      "target": "VIP-A22",
+      "duration": 26,
+      "timestamp": 58339
+    },
+    {
+      "target": "VIP-A22",
+      "duration": 1575,
+      "timestamp": 78115
+    }
+  ],
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "saved_at": "2026-01-29T10:58:27.535445"
+}

@@ -1,0 +1,240 @@
+{
+  "session_id": "book_lp8teiy6",
+  "stage": "book",
+  "user_ip": "192.168.14.103",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-28T11:25:08.952374",
+  "performance_id": "perf003",
+  "selected_date": "2026-04-20",
+  "selected_time": "18:00",
+  "booking_start_time": "2026-01-28T02:24:19.664Z",
+  "captcha": {
+    "start_time": "2026-01-28T02:24:19.665Z",
+    "end_time": "2026-01-28T02:24:27.089Z",
+    "attempts": [
+      {
+        "action": "attempt",
+        "input": "QRCXNZ",
+        "correct": true,
+        "time_ms": 7424,
+        "attempt_number": 1,
+        "timestamp": "2026-01-28T02:24:27.089Z"
+      }
+    ],
+    "success": true,
+    "mouse_trajectory": [
+      {
+        "x": 632,
+        "y": 664,
+        "t": 7425
+      }
+    ]
+  },
+  "seats": {
+    "selected": [],
+    "taken_by_others": [],
+    "selection_time": null
+  },
+  "discount": {
+    "type": "normal",
+    "selection_time": "2026-01-28T02:24:54.040Z"
+  },
+  "delivery": {
+    "method": "pickup",
+    "fee": 0,
+    "selection_time": "2026-01-28T02:25:03.663Z"
+  },
+  "payment": {
+    "method": "card",
+    "selection_time": "2026-01-28T02:25:09.217Z"
+  },
+  "booking_end_time": "2026-01-28T02:25:09.217Z",
+  "section_selection": {
+    "start_time": "2026-01-28T02:24:27.114Z",
+    "clicks": [
+      {
+        "section": "VIP-C",
+        "timestamp": "2026-01-28T02:24:31.659Z"
+      }
+    ],
+    "final_section": "VIP-C",
+    "end_time": "2026-01-28T02:24:36.395Z",
+    "final_grade": "VIP",
+    "mouse_trajectory": [
+      {
+        "x": 631,
+        "y": 520,
+        "t": 4546
+      },
+      {
+        "x": 1270,
+        "y": 564,
+        "t": 4673
+      },
+      {
+        "x": 1160,
+        "y": 541,
+        "t": 4773
+      },
+      {
+        "x": 1167,
+        "y": 493,
+        "t": 4873
+      },
+      {
+        "x": 1169,
+        "y": 475,
+        "t": 4977
+      },
+      {
+        "x": 1040,
+        "y": 612,
+        "t": 5089
+      },
+      {
+        "x": 923,
+        "y": 736,
+        "t": 5954
+      },
+      {
+        "x": 632,
+        "y": 647,
+        "t": 9282
+      }
+    ]
+  },
+  "seat_selection": {
+    "seats": [
+      "VIP-A21"
+    ],
+    "section": "VIP-C",
+    "grade": "VIP",
+    "start_time": "2026-01-28T02:24:36.418Z",
+    "end_time": "2026-01-28T02:24:46.133Z",
+    "duration_ms": 9715,
+    "clicks": [
+      {
+        "x": 302,
+        "y": 389,
+        "target": "VIP-A21",
+        "timestamp": 4847
+      }
+    ],
+    "hovers": [
+      {
+        "target": "VIP-A21",
+        "duration": 4867,
+        "timestamp": 9714
+      }
+    ]
+  },
+  "mouse_trajectory_seats": [
+    {
+      "x": 923,
+      "y": 735,
+      "timestamp": 24
+    },
+    {
+      "x": 923,
+      "y": 736,
+      "timestamp": 88
+    },
+    {
+      "x": 923,
+      "y": 736,
+      "timestamp": 138
+    },
+    {
+      "x": 302,
+      "y": 389,
+      "timestamp": 4847
+    },
+    {
+      "x": 1076,
+      "y": 717,
+      "timestamp": 9714
+    }
+  ],
+  "mouse_trajectory_discount": [
+    {
+      "x": 923,
+      "y": 735,
+      "t": 11
+    },
+    {
+      "x": 923,
+      "y": 735,
+      "t": 65
+    },
+    {
+      "x": 923,
+      "y": 735,
+      "t": 115
+    },
+    {
+      "x": 407,
+      "y": 614,
+      "t": 5224
+    },
+    {
+      "x": 752,
+      "y": 688,
+      "t": 7860
+    }
+  ],
+  "booker": {
+    "phone": "1111111111",
+    "email": "magellankr@outlook.kr",
+    "input_time": "2026-01-28T02:25:03.663Z"
+  },
+  "mouse_trajectory_booker": [
+    {
+      "x": 923,
+      "y": 735,
+      "t": 14
+    },
+    {
+      "x": 923,
+      "y": 736,
+      "t": 68
+    },
+    {
+      "x": 923,
+      "y": 735,
+      "t": 118
+    },
+    {
+      "x": 475,
+      "y": 626,
+      "t": 6999
+    },
+    {
+      "x": 752,
+      "y": 688,
+      "t": 9599
+    }
+  ],
+  "mouse_trajectory_payment": [
+    {
+      "x": 923,
+      "y": 735,
+      "t": 10
+    },
+    {
+      "x": 923,
+      "y": 736,
+      "t": 70
+    },
+    {
+      "x": 923,
+      "y": 736,
+      "t": 135
+    },
+    {
+      "x": 752,
+      "y": 687,
+      "t": 5529
+    }
+  ]
+}

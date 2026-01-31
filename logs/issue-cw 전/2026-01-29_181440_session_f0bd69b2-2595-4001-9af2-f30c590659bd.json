@@ -1,0 +1,50 @@
+{
+  "session_id": "f0bd69b2-2595-4001-9af2-f30c590659bd",
+  "page": "seat_selection",
+  "mode": "A",
+  "selected_seats": [
+    "VIP-A5"
+  ],
+  "page_entry_time": "2026-01-29T09:14:34.829Z",
+  "page_exit_time": "2026-01-29T09:14:40.714Z",
+  "total_duration_ms": 5885,
+  "mouse_trajectory": [
+    {
+      "x": 759,
+      "y": 583,
+      "timestamp": 3612
+    },
+    {
+      "x": 803,
+      "y": 537,
+      "timestamp": 3716
+    },
+    {
+      "x": 880,
+      "y": 455,
+      "timestamp": 3814
+    },
+    {
+      "x": 908,
+      "y": 426,
+      "timestamp": 3870
+    },
+    {
+      "x": 930,
+      "y": 403,
+      "timestamp": 3966
+    }
+  ],
+  "clicks": [
+    {
+      "x": 448.5,
+      "y": 394,
+      "target": "VIP-A5",
+      "timestamp": 1679
+    }
+  ],
+  "hovers": [],
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "saved_at": "2026-01-29T18:14:40.716108"
+}

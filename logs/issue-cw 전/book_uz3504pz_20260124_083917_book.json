@@ -1,0 +1,100 @@
+{
+  "session_id": "book_uz3504pz",
+  "stage": "book",
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "user_email": "magellankr@outlook.kr",
+  "created_at": "2026-01-24T08:39:17.983690",
+  "performance_id": "perf007",
+  "selected_date": "2026-12-25",
+  "selected_time": "15:00",
+  "booking_start_time": "2026-01-23T23:38:57.703Z",
+  "captcha": {
+    "start_time": "2026-01-23T23:38:57.703Z",
+    "end_time": "2026-01-23T23:39:05.768Z",
+    "attempts": [
+      {
+        "action": "attempt",
+        "input": "ASTMKG",
+        "correct": true,
+        "time_ms": 8065,
+        "attempt_number": 1,
+        "timestamp": "2026-01-23T23:39:05.768Z"
+      }
+    ],
+    "success": true,
+    "mouse_trajectory": [
+      {
+        "x": 703,
+        "y": 636,
+        "t": 7738
+      }
+    ]
+  },
+  "seats": {
+    "selected": [],
+    "taken_by_others": [],
+    "selection_time": null
+  },
+  "discount": {
+    "type": "normal",
+    "selection_time": "2026-01-23T23:39:14.663Z"
+  },
+  "delivery": {
+    "method": "pickup",
+    "fee": 0,
+    "selection_time": "2026-01-23T23:39:16.328Z"
+  },
+  "payment": {
+    "method": "bank",
+    "selection_time": "2026-01-23T23:39:17.981Z"
+  },
+  "booking_end_time": "2026-01-23T23:39:17.981Z",
+  "section_selection": {
+    "start_time": "2026-01-23T23:39:05.804Z",
+    "clicks": [
+      {
+        "section": "VIP-L",
+        "timestamp": "2026-01-23T23:39:07.222Z"
+      }
+    ],
+    "final_section": "VIP-L",
+    "end_time": "2026-01-23T23:39:07.636Z",
+    "final_grade": "VIP",
+    "mouse_trajectory": []
+  },
+  "seat_selection": {
+    "seats": [
+      "VIP-A7"
+    ],
+    "section": "VIP-L",
+    "grade": "VIP",
+    "start_time": "2026-01-23T23:39:07.676Z",
+    "end_time": "2026-01-23T23:39:12.994Z",
+    "duration_ms": 5318,
+    "clicks": [
+      {
+        "x": 449.58335065841675,
+        "y": 397.8125071525574,
+        "target": "VIP-A7",
+        "timestamp": 1488
+      }
+    ],
+    "hovers": []
+  },
+  "mouse_trajectory_seats": [],
+  "mouse_trajectory_discount": [],
+  "booker": {
+    "phone": "1111111111",
+    "email": "magellankr@outlook.kr",
+    "input_time": "2026-01-23T23:39:16.328Z"
+  },
+  "mouse_trajectory_booker": [
+    {
+      "x": 1060,
+      "y": 280,
+      "t": 1526
+    }
+  ],
+  "mouse_trajectory_payment": []
+}

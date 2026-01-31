@@ -1,0 +1,253 @@
+{
+  "session_id": "463faf4f-d0ba-4ec5-be4d-b9a61ceaf696",
+  "page": "seat_selection",
+  "mode": "B",
+  "selected_seats": [
+    "VIP-B31",
+    "VIP-B32"
+  ],
+  "page_entry_time": "2026-01-22T02:56:41.146Z",
+  "page_exit_time": "2026-01-22T02:56:44.639Z",
+  "total_duration_ms": 3493,
+  "mouse_trajectory": [
+    {
+      "x": 743,
+      "y": 675,
+      "timestamp": 285
+    },
+    {
+      "x": 743,
+      "y": 672,
+      "timestamp": 343
+    },
+    {
+      "x": 744,
+      "y": 647,
+      "timestamp": 396
+    },
+    {
+      "x": 729,
+      "y": 613,
+      "timestamp": 448
+    },
+    {
+      "x": 671,
+      "y": 577,
+      "timestamp": 500
+    },
+    {
+      "x": 593,
+      "y": 517,
+      "timestamp": 552
+    },
+    {
+      "x": 559,
+      "y": 462,
+      "timestamp": 604
+    },
+    {
+      "x": 552,
+      "y": 445,
+      "timestamp": 656
+    },
+    {
+      "x": 551,
+      "y": 441,
+      "timestamp": 718
+    },
+    {
+      "x": 549,
+      "y": 439,
+      "timestamp": 809
+    },
+    {
+      "x": 544,
+      "y": 434,
+      "timestamp": 860
+    },
+    {
+      "x": 538,
+      "y": 427,
+      "timestamp": 913
+    },
+    {
+      "x": 538,
+      "y": 425,
+      "timestamp": 982
+    },
+    {
+      "x": 538,
+      "y": 421,
+      "timestamp": 1045
+    },
+    {
+      "x": 538,
+      "y": 418,
+      "timestamp": 1114
+    },
+    {
+      "x": 539,
+      "y": 415,
+      "timestamp": 1614
+    },
+    {
+      "x": 542,
+      "y": 415,
+      "timestamp": 1691
+    },
+    {
+      "x": 546,
+      "y": 415,
+      "timestamp": 1746
+    },
+    {
+      "x": 550,
+      "y": 415,
+      "timestamp": 1802
+    },
+    {
+      "x": 554,
+      "y": 415,
+      "timestamp": 2142
+    },
+    {
+      "x": 587,
+      "y": 420,
+      "timestamp": 2198
+    },
+    {
+      "x": 658,
+      "y": 433,
+      "timestamp": 2253
+    },
+    {
+      "x": 715,
+      "y": 444,
+      "timestamp": 2309
+    },
+    {
+      "x": 760,
+      "y": 453,
+      "timestamp": 2371
+    },
+    {
+      "x": 877,
+      "y": 496,
+      "timestamp": 2428
+    },
+    {
+      "x": 986,
+      "y": 553,
+      "timestamp": 2482
+    },
+    {
+      "x": 1059,
+      "y": 653,
+      "timestamp": 2533
+    },
+    {
+      "x": 1114,
+      "y": 724,
+      "timestamp": 2587
+    },
+    {
+      "x": 1122,
+      "y": 734,
+      "timestamp": 2642
+    },
+    {
+      "x": 1130,
+      "y": 741,
+      "timestamp": 2698
+    },
+    {
+      "x": 1154,
+      "y": 746,
+      "timestamp": 2753
+    },
+    {
+      "x": 1184,
+      "y": 749,
+      "timestamp": 2809
+    },
+    {
+      "x": 1237,
+      "y": 750,
+      "timestamp": 2864
+    },
+    {
+      "x": 1245,
+      "y": 750,
+      "timestamp": 2916
+    }
+  ],
+  "clicks": [
+    {
+      "x": 539,
+      "y": 416,
+      "target": "VIP-B31",
+      "timestamp": 1573
+    },
+    {
+      "x": 555,
+      "y": 416,
+      "target": "VIP-B32",
+      "timestamp": 2085
+    }
+  ],
+  "hovers": [
+    {
+      "target": "VIP-D32",
+      "duration": 31,
+      "timestamp": 635
+    },
+    {
+      "target": "VIP-C32",
+      "duration": 196,
+      "timestamp": 860
+    },
+    {
+      "target": "VIP-C31",
+      "duration": 25,
+      "timestamp": 885
+    },
+    {
+      "target": "VIP-B31",
+      "duration": 750,
+      "timestamp": 1774
+    },
+    {
+      "target": "VIP-B32",
+      "duration": 403,
+      "timestamp": 2177
+    },
+    {
+      "target": "VIP-B33",
+      "duration": 14,
+      "timestamp": 2191
+    },
+    {
+      "target": "VIP-B34",
+      "duration": 7,
+      "timestamp": 2205
+    },
+    {
+      "target": "VIP-B35",
+      "duration": 20,
+      "timestamp": 2225
+    },
+    {
+      "target": "VIP-C39",
+      "duration": 7,
+      "timestamp": 2274
+    },
+    {
+      "target": "VIP-C40",
+      "duration": 7,
+      "timestamp": 2288
+    }
+  ],
+  "user_ip": "127.0.0.1",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "saved_at": "2026-01-22T11:56:44.640752"
+}

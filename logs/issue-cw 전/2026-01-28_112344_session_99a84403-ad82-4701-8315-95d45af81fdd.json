@@ -1,0 +1,21 @@
+{
+  "session_id": "99a84403-ad82-4701-8315-95d45af81fdd",
+  "page": "step2_discount",
+  "discount_type": "normal",
+  "total_duration_ms": 6941,
+  "mouse_trajectory": [
+    {
+      "x": 407,
+      "y": 614,
+      "t": 4238
+    },
+    {
+      "x": 752,
+      "y": 688,
+      "t": 6940
+    }
+  ],
+  "user_ip": "192.168.14.103",
+  "user_id": "511ce0b4-cf18-43cf-923f-c7381e8240a2",
+  "saved_at": "2026-01-28T11:23:44.789672"
+}
