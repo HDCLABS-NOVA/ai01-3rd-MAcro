@@ -207,31 +207,40 @@ Type "NONE":
                      self.update_status("📅 Auto Date/Time Selection detected")
                      self.update_status(f"   Normalized: date=({d_x:.3f},{d_y:.3f}) time=({t_x:.3f},{t_y:.3f}) reserve=({r_x:.3f},{r_y:.3f})")
                      
-                     if d_x > 1.0: d_x /= width
-                     if d_y > 1.0: d_y /= height
-                     abs_d_x = self.mon_x + int(d_x * width)
-                     abs_d_y = self.mon_y + int(d_y * height)
-
-                     if t_x > 1.0: t_x /= width
-                     if t_y > 1.0: t_y /= height
-                     abs_t_x = self.mon_x + int(t_x * width)
-                     abs_t_y = self.mon_y + int(t_y * height)
-
-                     if r_x > 1.0: r_x /= width
-                     if r_y > 1.0: r_y /= height
-                     abs_r_x = self.mon_x + int(r_x * width)
-                     abs_r_y = self.mon_y + int(r_y * height)
+                     # Hardcoded positions (DISABLED VLM coordinates - too unreliable)
+                     # if d_x > 1.0: d_x /= width
+                     # if d_y > 1.0: d_y /= height
+                     # abs_d_x = self.mon_x + int(d_x * width)
+                     # abs_d_y = self.mon_y + int(d_y * height)
+                     #
+                     # if t_x > 1.0: t_x /= width
+                     # if t_y > 1.0: t_y /= height
+                     # abs_t_x = self.mon_x + int(t_x * width)
+                     # abs_t_y = self.mon_y + int(t_y * height)
+                     #
+                     # if r_x > 1.0: r_x /= width
+                     # if r_y > 1.0: r_y /= height
+                     # abs_r_x = self.mon_x + int(r_x * width)
+                     # abs_r_y = self.mon_y + int(r_y * height)
+                     
+                     # Hardcoded coordinates
+                     abs_d_x = 591
+                     abs_d_y = 557
+                     abs_t_x = 573
+                     abs_t_y = 660
+                     abs_r_x = 755
+                     abs_r_y = 735
 
                      # Sequence
-                     self.update_status(f"  -> Selecting Date ({abs_d_x},{abs_d_y})")
+                     self.update_status(f"  -> Selecting Date (Hardcoded: {abs_d_x},{abs_d_y})")
                      click_and_restore(abs_d_x, abs_d_y)
                      time.sleep(0.5)
 
-                     self.update_status(f"  -> Selecting Time ({abs_t_x},{abs_t_y})")
+                     self.update_status(f"  -> Selecting Time (Hardcoded: {abs_t_x},{abs_t_y})")
                      click_and_restore(abs_t_x, abs_t_y)
                      time.sleep(0.5)
 
-                     self.update_status(f"  -> Clicking Reserve ({abs_r_x},{abs_r_y})")
+                     self.update_status(f"  -> Clicking Reserve (Hardcoded: {abs_r_x},{abs_r_y})")
                      click_and_restore(abs_r_x, abs_r_y)
                      return True
             except:
