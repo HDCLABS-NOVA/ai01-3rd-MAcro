@@ -91,7 +91,9 @@ function logStageEntry(stageName) {
             exit_time: '',
             duration_ms: 0,
             mouse_trajectory: [],
-            clicks: []
+            clicks: [],
+            viewport_width: window.innerWidth,
+            viewport_height: window.innerHeight
         };
     } else {
         logData.stages[stageName].entry_time = getISOTimestamp();
@@ -135,7 +137,10 @@ function trackMouseMove(event) {
     lastMouseMoveTime = now;
 
     const relativeTime = stageStartTime ? now - stageStartTime : 0;
-    mouseTrajectory.push([event.clientX, event.clientY, relativeTime]);
+    // 정규화된 좌표 (0~1 범위)와 실제 픽셀 좌표 모두 저장
+    const nx = event.clientX / window.innerWidth;
+    const ny = event.clientY / window.innerHeight;
+    mouseTrajectory.push([event.clientX, event.clientY, relativeTime, nx, ny]);
 }
 
 /**

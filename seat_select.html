@@ -7,6 +7,114 @@
     <title>좌석 선택 - 티켓 예매</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
+
+    <style>
+        body>#captcha-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: rgba(0, 0, 0, 0.7) !important;
+            z-index: 999999 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        #captcha-overlay.captcha-hidden {
+            display: none !important;
+        }
+
+        #captcha-modal {
+            background: white;
+            border-radius: 20px;
+            padding: 60px;
+            max-width: 700px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        #captcha-modal h2 {
+            color: #333;
+            font-size: 32px;
+            margin-bottom: 12px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        #captcha-modal p {
+            color: #999;
+            font-size: 16px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .captcha-canvas-container {
+            background: #f0f0f0;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .captcha-btn {
+            position: absolute;
+            top: 20px;
+            background: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .captcha-btn-left {
+            left: 20px;
+        }
+
+        .captcha-btn-right {
+            right: 20px;
+        }
+
+        #captcha-canvas {
+            margin: 20px auto;
+            display: block;
+        }
+
+        #captcha-input {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 18px;
+            margin-bottom: 25px;
+            box-sizing: border-box;
+        }
+
+        #captcha-submit-btn {
+            width: 100%;
+            padding: 22px;
+            background: #d0d0d0;
+            color: #666;
+            border: none;
+            border-radius: 12px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: not-allowed;
+            transition: all 0.3s;
+        }
+    </style>
 </head>
 
 <body>
@@ -22,7 +130,7 @@
             <h1 class="page-title">좌석 선택</h1>
             <p class="page-subtitle" id="perf-info">공연 정보</p>
 
-            <div style="display: grid; grid-template-columns: 3fr 1.2fr; gap: var(--spacing-xl);">
+            <div style="display: grid; grid-template-columns: 3fr 1fr; gap: var(--spacing-xl);">
                 <div>
                     <div class="card" style="background: #1a1a1a; padding: var(--spacing-xl);">
                         <!-- 무대 -->
@@ -43,17 +151,17 @@
                             style="display: flex; gap: var(--spacing-xl); justify-content: center; padding: var(--spacing-md); background: rgba(255,255,255,0.05); border-radius: var(--border-radius);">
                             <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
                                 <span class="seat available"
-                                    style="pointer-events: none; width: 28px; height: 28px; line-height: 28px;">A1</span>
+                                    style="pointer-events: none; width: 14px; height: 14px; line-height: 14px; font-size: 8px;">A1</span>
                                 <span style="color: #fff; font-size: 14px;">선택가능</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
                                 <span class="seat selected"
-                                    style="pointer-events: none; width: 28px; height: 28px; line-height: 28px;">A1</span>
+                                    style="pointer-events: none; width: 14px; height: 14px; line-height: 14px; font-size: 8px;">A1</span>
                                 <span style="color: #fff; font-size: 14px;">선택됨</span>
                             </div>
                             <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
                                 <span class="seat taken"
-                                    style="pointer-events: none; width: 28px; height: 28px; line-height: 28px;">A1</span>
+                                    style="pointer-events: none; width: 14px; height: 14px; line-height: 14px; font-size: 8px;">A1</span>
                                 <span style="color: #fff; font-size: 14px;">매진</span>
                             </div>
                         </div>
@@ -98,6 +206,8 @@
         </div>
     </main>
 
+
+
     <script src="js/utils.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/logger.js"></script>
@@ -109,6 +219,119 @@
         logStageEntry('seat');
         enableMouseTracking();
         // preventBackNavigation() 제거 - 뒤로가기 허용
+
+        // 보안문자 관련 변수
+        let currentCaptcha = '';
+        let isCaptchaVerified = false;
+
+        // 보안문자 생성 함수
+        function generateCaptcha() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // 영어만! 숫자 제외!
+            currentCaptcha = '';
+            for (let i = 0; i < 6; i++) {
+                currentCaptcha += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+
+            const canvas = document.getElementById('captcha-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // 배경 그리기
+            ctx.fillStyle = '#4a7c59';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 노이즈 추가
+            for (let i = 0; i < 100; i++) {
+                ctx.fillStyle = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.3)`;
+                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+            }
+
+            // 문자 그리기
+            ctx.font = 'bold 40px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            for (let i = 0; i < currentCaptcha.length; i++) {
+                ctx.save();
+                const x = 50 + i * 40;
+                const y = 50;
+                ctx.translate(x, y);
+                ctx.rotate((Math.random() - 0.5) * 0.4);
+                ctx.fillStyle = `hsl(${Math.random() * 60 + 150}, 70%, ${Math.random() * 20 + 70}%)`;
+                ctx.fillText(currentCaptcha[i], 0, 0);
+                ctx.restore();
+            }
+
+            // 방해선 추가
+            for (let i = 0; i < 3; i++) {
+                ctx.strokeStyle = `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.4)`;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.stroke();
+            }
+
+            // 입력 필드 초기화
+            document.getElementById('captcha-input').value = '';
+            updateCaptchaButton();
+        }
+
+        // 입력값에 따라 버튼 활성화/비활성화
+        function updateCaptchaButton() {
+            const input = document.getElementById('captcha-input');
+            const btn = document.getElementById('captcha-submit-btn');
+
+            if (input.value.trim().length > 0) {
+                btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                btn.style.color = 'white';
+                btn.style.cursor = 'pointer';
+            } else {
+                btn.style.background = '#d0d0d0';
+                btn.style.color = '#666';
+                btn.style.cursor = 'not-allowed';
+            }
+        }
+
+        // 보안문자 검증
+        function verifyCaptcha() {
+            const input = document.getElementById('captcha-input').value.trim().toUpperCase();
+
+            if (!input) {
+                showAlert('문자를 입력해주세요.', 'warning');
+                return;
+            }
+
+            if (input === currentCaptcha) {
+                isCaptchaVerified = true;
+                document.getElementById('captcha-overlay').classList.add('captcha-hidden');
+                showAlert('인증되었습니다! 좌석을 선택해주세요.', 'success');
+
+                // 로그 기록
+                trackClick(event, { target: 'captcha_verify', action: 'success', captcha: currentCaptcha });
+            } else {
+                showAlert('문자가 일치하지 않습니다. 다시 시도해주세요.', 'error');
+                generateCaptcha();
+
+                // 로그 기록
+                trackClick(event, { target: 'captcha_verify', action: 'failed', input: input, captcha: currentCaptcha });
+            }
+        }
+
+        // 입력 필드 변화 감지
+        document.addEventListener('DOMContentLoaded', () => {
+            const captchaInput = document.getElementById('captcha-input');
+            if (captchaInput) {
+                captchaInput.addEventListener('input', updateCaptchaButton);
+            }
+        });
+
+        // 페이지 로드 시 보안문자 팝업 표시
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('captcha-overlay').classList.remove('captcha-hidden');
+                generateCaptcha();
+            }, 500);
+        });
 
         // 페이지 진입 시마다 좌석 선택 초기화 (보류 없음)
 
@@ -175,12 +398,12 @@
                 seatContainer.style.borderRadius = 'var(--border-radius)';
 
                 const rows = gradeIdx === 0 ? ['A', 'B', 'C'] : gradeIdx === 1 ? ['D', 'E', 'F'] : gradeIdx === 2 ? ['G', 'H'] : ['I', 'J'];
-                const seatsPerRow = 16;
-                const aislePosition = 8;
+                const seatsPerRow = 32;
+                const aislePosition = 16;
 
                 rows.forEach((row) => {
                     const rowContainer = document.createElement('div');
-                    rowContainer.style.cssText = 'display: flex; gap: 4px; margin-bottom: 4px; justify-content: center; align-items: center;';
+                    rowContainer.style.cssText = 'display: flex; gap: 2px; margin-bottom: 2px; justify-content: center; align-items: center;';
 
                     // 행 레이블 (왼쪽)
                     const leftLabel = document.createElement('div');
@@ -207,7 +430,7 @@
                         seat.dataset.price = grade.price;
                         seat.dataset.row = row;
                         seat.dataset.col = col;
-                        seat.style.cssText = `width: 28px; height: 28px; line-height: 28px; font-size: 10px;`;
+                        seat.style.cssText = `width: 14px; height: 14px; line-height: 14px; font-size: 7px;`;
 
                         if (!isTaken) {
                             // 등급별 색상 적용
@@ -262,7 +485,27 @@
                 element.style.color = gradeColor.color;
                 element.style.boxShadow = 'none';
             } else {
-                // 선택
+                // 선택 시도 - 35% 확률로 이미 선택된 좌석으로 변경
+                if (Math.random() < 0.35) {
+                    // 다른 사람이 먼저 선택한 것처럼 처리
+                    showAlert('이미 선택된 좌석입니다.', 'error');
+
+                    // 좌석을 매진 상태로 변경
+                    element.classList.remove('available');
+                    element.classList.add('taken');
+                    element.onclick = null;
+                    element.onmouseenter = null;
+                    element.onmouseleave = null;
+                    element.style.background = '';
+                    element.style.color = '';
+                    element.style.boxShadow = '';
+
+                    // 로그 기록
+                    trackClick(event, { target: seatId, grade, price, action: 'already_taken', result: 'failed' });
+                    return;
+                }
+
+                // 선택 성공
                 if (selectedSeats.length >= maxSeats) {
                     showAlert(`최대 ${maxSeats}개까지 선택할 수 있습니다.`, 'warning');
                     return;
@@ -274,9 +517,10 @@
                 element.style.background = 'linear-gradient(135deg, #FF3D7F 0%, #9C27B0 100%)';
                 element.style.color = 'white';
                 element.style.boxShadow = '0 4px 12px rgba(255, 61, 127, 0.4)';
+
+                trackClick(event, { target: seatId, grade, price, action: 'select', result: 'success' });
             }
 
-            trackClick(event, { target: seatId, grade, price, action: idx > -1 ? 'deselect' : 'select' });
             updateSummary();
         }
 
@@ -364,6 +608,24 @@
 
         createSeatGrid();
     </script>
+    <!-- 보안문자 팝업 (페이지 최상위) -->
+    <div id="captcha-overlay" class="captcha-hidden">
+        <div id="captcha-modal">
+            <h2>화면의 문자를 입력해주세요</h2>
+            <p>문자 입력 인증 후 좌석을 선택할 수 있습니다</p>
+
+            <div class="captcha-canvas-container">
+                <button onclick="generateCaptcha()" class="captcha-btn captcha-btn-left">🔊</button>
+                <button onclick="generateCaptcha()" class="captcha-btn captcha-btn-right">🔄</button>
+                <canvas id="captcha-canvas" width="450" height="150"></canvas>
+            </div>
+
+            <input type="text" id="captcha-input" placeholder="화면의 문자를 입력해주세요 (대소문자 구분없음)"
+                onkeypress="if(event.key === 'Enter') verifyCaptcha()" />
+
+            <button onclick="verifyCaptcha()" id="captcha-submit-btn">입력완료</button>
+        </div>
+    </div>
 </body>
 
 </html>

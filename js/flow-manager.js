@@ -59,8 +59,7 @@ const BOOKING_STEPS = [
     'performance',      // 공연 선택
     'performance_detail', // 날짜/시간 선택
     'queue',            // 대기열
-    'captcha',          // 보안문자
-    'seat_select',      // 좌석 선택
+    'seat_select',      // 좌석 선택 (보안문자 팝업 포함)
     'discount',         // 할인
     'order_info',       // 배송 정보
     'payment',          // 결제
@@ -85,7 +84,6 @@ function goToNextStep(currentPage) {
             'performance': 'index.html',
             'performance_detail': 'performance_detail.html',
             'queue': 'queue.html',
-            'captcha': 'captcha.html',
             'seat_select': 'seat_select.html',
             'discount': 'discount.html',
             'order_info': 'order_info.html',

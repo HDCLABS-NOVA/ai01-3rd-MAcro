@@ -516,19 +516,68 @@
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const trajectory = stageData.mouse_trajectory || [];
+            const rawTrajectory = stageData.mouse_trajectory || [];
             const clicks = stageData.clicks || [];
 
             const hovers = type === 'perf' ? perfHovers : bookHovers;
             hovers.length = 0;
 
-            if (trajectory.length === 0) {
+            if (rawTrajectory.length === 0) {
                 ctx.fillStyle = '#666';
                 ctx.font = '20px Arial';
                 ctx.textAlign = 'center';
                 ctx.fillText('마우스 트래킹 데이터가 없습니다', canvas.width / 2, canvas.height / 2);
                 return;
             }
+
+            // 원본 viewport 크기 (로그된 화면 크기)
+            const srcWidth = stageData.viewport_width || 1920;
+            const srcHeight = stageData.viewport_height || 1080;
+
+            // 좌표 정규화 및 스케일링 함수
+            function normalizePoint(point) {
+                // point 형식: [x, y, time] 또는 [x, y, time, nx, ny]
+                let nx, ny;
+
+                if (point.length >= 5) {
+                    // 이미 정규화된 좌표가 있는 경우
+                    nx = point[3];
+                    ny = point[4];
+                } else {
+                    // 픽셀 좌표를 정규화
+                    nx = point[0] / srcWidth;
+                    ny = point[1] / srcHeight;
+                }
+
+                // 캔버스 크기로 스케일링
+                return [
+                    nx * canvas.width,
+                    ny * canvas.height,
+                    point[2]
+                ];
+            }
+
+            // 정규화된 궤적 생성
+            const trajectory = rawTrajectory.map(normalizePoint);
+
+            // 정규화된 클릭 좌표 생성
+            const normalizedClicks = clicks.map(click => {
+                let nx, ny;
+                if (click.nx !== undefined && click.ny !== undefined) {
+                    // 정규화된 좌표 사용
+                    nx = parseFloat(click.nx);
+                    ny = parseFloat(click.ny);
+                } else {
+                    // 픽셀 좌표를 정규화
+                    nx = click.x / srcWidth;
+                    ny = click.y / srcHeight;
+                }
+                return {
+                    ...click,
+                    displayX: nx * canvas.width,
+                    displayY: ny * canvas.height
+                };
+            });
 
             // 호버 구간 찾기 (속도가 느린 구간)
             var currentHover = [];
@@ -555,7 +604,7 @@
                 hovers.push([].concat(currentHover));
             }
 
-            console.log(`${type} - 감지된 호버 구간: ${hovers.length}개, 전체 포인트: ${trajectory.length}개`);
+            console.log(`${type} - 감지된 호버 구간: ${hovers.length}개, 전체 포인트: ${trajectory.length}개, 원본 해상도: ${srcWidth}x${srcHeight}`);
 
             // 마우스 경로
             ctx.strokeStyle = '#2196F3';
@@ -601,18 +650,19 @@
                 ctx.fill();
             }
 
-            // 클릭
-            clicks.forEach((click, clickIndex) => {
+            // 클릭 (정규화된 좌표 사용)
+            normalizedClicks.forEach((click, clickIndex) => {
                 ctx.fillStyle = 'rgba(255, 61, 127, 0.3)';
                 ctx.beginPath();
-                ctx.arc(click.x, click.y, 15, 0, Math.PI * 2);
+                ctx.arc(click.displayX, click.displayY, 15, 0, Math.PI * 2);
                 ctx.fill();
 
                 ctx.fillStyle = '#FF3D7F';
                 ctx.beginPath();
-                ctx.arc(click.x, click.y, 5, 0, Math.PI * 2);
+                ctx.arc(click.displayX, click.displayY, 5, 0, Math.PI * 2);
                 ctx.fill();
             });
+
 
             // 마우스 이벤트 핸들러
             canvas.onmousemove = function (e) {
@@ -622,11 +672,11 @@
                 const mouseX = (e.clientX - rect.left) * scaleX;
                 const mouseY = (e.clientY - rect.top) * scaleY;
 
-                // 클릭 포인트 확인
+                // 클릭 포인트 확인 (정규화된 좌표 사용)
                 var foundClick = null;
-                for (var i = 0; i < clicks.length; i++) {
-                    const click = clicks[i];
-                    const distance = Math.sqrt(Math.pow(mouseX - click.x, 2) + Math.pow(mouseY - click.y, 2));
+                for (var i = 0; i < normalizedClicks.length; i++) {
+                    const click = normalizedClicks[i];
+                    const distance = Math.sqrt(Math.pow(mouseX - click.displayX, 2) + Math.pow(mouseY - click.displayY, 2));
                     if (distance < 15) {
                         foundClick = { data: click, index: i, type: 'click' };
                         break;
