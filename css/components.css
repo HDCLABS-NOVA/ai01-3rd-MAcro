@@ -1,0 +1,371 @@
+/* ======================
+   재사용 가능한 컴포넌트 스타일
+   ====================== */
+
+/* 공연 카드 */
+.performance-card {
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+}
+
+.performance-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+}
+
+.performance-card-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.performance-card-content {
+    padding: var(--spacing-lg);
+}
+
+.performance-card-category {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--primary-light);
+    color: var(--text-white);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+}
+
+.performance-card-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-primary);
+}
+
+.performance-card-venue {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-bottom: var(--spacing-sm);
+}
+
+.performance-card-date {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* 대기열 카드 */
+.queue-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: var(--text-white);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius);
+    text-align: center;
+}
+
+.queue-position {
+    font-size: 64px;
+    font-weight: 700;
+    margin: var(--spacing-lg) 0;
+}
+
+.queue-total {
+    font-size: 18px;
+    opacity: 0.9;
+}
+
+/* 좌석 선택 */
+.seat-map {
+    background: var(--bg-primary);
+    padding: var(--spacing-xl);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.seat {
+    width: 30px;
+    height: 30px;
+    margin: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-block;
+    text-align: center;
+    line-height: 30px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.seat.available {
+    background: #F3E5F5;
+    border: 2px solid #9C27B0;
+    color: #9C27B0;
+}
+
+.seat.available:hover {
+    background: linear-gradient(135deg, #FF3D7F 0%, #9C27B0 100%);
+    color: white;
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(255, 61, 127, 0.4);
+}
+
+.seat.selected {
+    background: linear-gradient(135deg, #FF3D7F 0%, #9C27B0 100%);
+    border: 2px solid #C2185B;
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 61, 127, 0.4);
+}
+
+.seat.taken {
+    background: #424242;
+    border: 2px solid #616161;
+    color: #9E9E9E;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* 선택 요약 */
+.selection-summary {
+    background: var(--bg-primary);
+    border: 2px solid transparent;
+    background-image: linear-gradient(white, white), linear-gradient(135deg, #FF3D7F, #9C27B0);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    margin-top: var(--spacing-lg);
+    position: sticky;
+    top: 100px;
+    box-shadow: var(--shadow-md);
+}
+
+.summary-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: var(--spacing-md);
+    background: linear-gradient(135deg, #FF3D7F 0%, #9C27B0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--primary-color);
+    padding-top: var(--spacing-md);
+}
+
+/* 할인 옵션 */
+.discount-option {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: var(--spacing-md);
+}
+
+.discount-option:hover {
+    border-color: var(--primary-color);
+    box-shadow: var(--shadow-sm);
+}
+
+.discount-option.selected {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(255, 61, 127, 0.05) 0%, rgba(156, 39, 176, 0.05) 100%);
+    box-shadow: var(--shadow-md);
+}
+
+.discount-option-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: var(--spacing-sm);
+}
+
+.discount-option-desc {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.discount-option-price {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-top: var(--spacing-sm);
+}
+
+/* 결제 방법 */
+.payment-method {
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.payment-method:hover {
+    border-color: var(--primary-color);
+}
+
+.payment-method.selected {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, rgba(255, 61, 127, 0.05) 0%, rgba(156, 39, 176, 0.05) 100%);
+    box-shadow: var(--shadow-md);
+}
+
+.payment-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.payment-info {
+    flex: 1;
+}
+
+.payment-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.payment-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* 진행 단계 표시 */
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-lg) 0;
+    position: relative;
+}
+
+.progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--border-color);
+    z-index: 0;
+}
+
+.progress-step {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    flex: 1;
+}
+
+.progress-step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-primary);
+    border: 2px solid var(--border-color);
+    margin: 0 auto var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.progress-step.active .progress-step-circle {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.progress-step.completed .progress-step-circle {
+    background: #4CAF50;
+    border-color: #4CAF50;
+    color: white;
+}
+
+.progress-step-label {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.progress-step.active .progress-step-label {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* 알림 메시지 */
+.alert {
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-md);
+}
+
+.alert-info {
+    background: #E3F2FD;
+    border-left: 4px solid #2196F3;
+    color: #1565C0;
+}
+
+.alert-warning {
+    background: #FFF3E0;
+    border-left: 4px solid #FF9800;
+    color: #E65100;
+}
+
+.alert-error {
+    background: #FFEBEE;
+    border-left: 4px solid #F44336;
+    color: #C62828;
+}
+
+.alert-success {
+    background: #E8F5E9;
+    border-left: 4px solid #4CAF50;
+    color: #2E7D32;
+}
+
+/* 체크박스 */
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    margin-bottom: var(--spacing-md);
+}
+
+.checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.checkbox-label {
+    cursor: pointer;
+    user-select: none;
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - 티켓 예매</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">🎫 Ticket</a>
+            <div class="user-menu"></div>
+        </div>
+    </header>
+
+    <main class="page-wrapper">
+        <div class="container-narrow">
+            <div class="card">
+                <h1 class="page-title text-center">회원가입</h1>
+                <p class="text-center text-secondary mb-xl">티켓 예매를 위해 회원가입이 필요합니다</p>
+
+                <form id="signup-form">
+                    <div class="form-group">
+                        <label class="form-label">이름 *</label>
+                        <input type="text" class="form-input" id="name" placeholder="이름을 입력하세요" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">생년월일 *</label>
+                        <input type="date" class="form-input" id="birthdate" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">휴대폰 번호 *</label>
+                        <input type="tel" class="form-input" id="phone" placeholder="01012345678" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">이메일 *</label>
+                        <input type="email" class="form-input" id="email" placeholder="example@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">비밀번호 *</label>
+                        <input type="password" class="form-input" id="password" placeholder="비밀번호를 입력하세요" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">비밀번호 확인 *</label>
+                        <input type="password" class="form-input" id="password-confirm" placeholder="비밀번호를 다시 입력하세요"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="agree-privacy" class="checkbox" required>
+                            <label for="agree-privacy" class="checkbox-label">개인정보 수집 및 이용에 동의합니다 (필수)</label>
+                        </div>
+                        <div class="alert alert-info mt-sm">
+                            <small>예매 및 서비스 제공을 위해 이름, 생년월일, 휴대폰 번호, 이메일 정보를 수집합니다.</small>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">회원가입</button>
+                </form>
+
+                <div class="text-center mt-lg">
+                    <p>이미 계정이 있으신가요? <a href="login.html" style="color: var(--primary-color); font-weight: 600;">로그인</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/browser-info.js"></script>
+
+    <script>
+        const form = document.getElementById('signup-form');
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('password-confirm').value;
+
+            if (password !== passwordConfirm) {
+                showAlert('비밀번호가 일치하지 않습니다.', 'error');
+                return;
+            }
+
+            const userData = {
+                name: document.getElementById('name').value,
+                birthdate: document.getElementById('birthdate').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                password: password
+            };
+
+            try {
+                const result = await signup(userData);
+                showAlert(result.message, 'success');
+
+                setTimeout(() => {
+                    navigateTo('login.html');
+                }, 1500);
+            } catch (error) {
+                showAlert(error.message, 'error');
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대기열 - 티켓 예매</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+
+<body>
+    <main class="page-wrapper">
+        <div class="container-narrow">
+            <div class="queue-card">
+                <h1 style="font-size: 28px; margin-bottom: var(--spacing-md);">대기 중입니다</h1>
+                <p style="opacity: 0.9;">잠시만 기다려주세요</p>
+
+                <div class="queue-position" id="queue-position">-</div>
+                <div class="queue-total" id="queue-total">전체 대기: - 명</div>
+
+                <div style="margin-top: var(--spacing-xl);">
+                    <div class="spinner" style="border-color: rgba(255,255,255,0.3); border-top-color: white;"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/utils.js"></script>
+    <script src="js/logger.js"></script>
+    <script src="js/browser-info.js"></script>
+
+    <script>
+        loadLogFromSession();
+        logStageEntry('queue');
+        // preventBackNavigation() 제거 - 뒤로가기 허용
+
+        let currentPosition = Math.floor(Math.random() * 80) + 20; // 20-100
+        const totalQueue = 8000;
+        const waitTime = 3000 + Math.random() * 2000; // 3-5초
+        const initialPosition = currentPosition;
+
+        document.getElementById('queue-position').textContent = currentPosition;
+        document.getElementById('queue-total').textContent = `전체 대기: ${totalQueue.toLocaleString()} 명`;
+
+        // 대기번호 줄어드는 애니메이션
+        const updateInterval = 200;
+        const decreaseAmount = Math.ceil(currentPosition / (waitTime / updateInterval));
+
+        const countdownInterval = setInterval(() => {
+            currentPosition = Math.max(0, currentPosition - decreaseAmount);
+            document.getElementById('queue-position').textContent = currentPosition;
+
+            if (currentPosition === 0) {
+                clearInterval(countdownInterval);
+            }
+        }, updateInterval);
+
+        setTimeout(() => {
+            clearInterval(countdownInterval);
+            currentPosition = 0;
+            document.getElementById('queue-position').textContent = '통과!';
+
+            logStageExit('queue', {
+                initial_position: initialPosition,
+                final_position: 0,
+                total_queue: totalQueue,
+                wait_duration_ms: Math.floor(waitTime),
+                position_updates: [
+                    { position: 0, status: 'ready', timestamp: getISOTimestamp() }
+                ]
+            });
+
+            setTimeout(() => {
+                navigateTo('seat_select.html');
+            }, 1000);
+        }, waitTime);
+    </script>
+</body>
+
+</html>

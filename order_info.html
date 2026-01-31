@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예매 정보 - 티켓 예매</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">🎫 Ticket</a>
+            <div class="user-menu"></div>
+        </div>
+    </header>
+
+    <main class="page-wrapper">
+        <div class="container-narrow">
+            <h1 class="page-title">예매 정보 입력</h1>
+
+            <div class="card mb-lg">
+                <h3 class="mb-md">예매자 정보</h3>
+                <div class="form-group">
+                    <label class="form-label">이름</label>
+                    <input type="text" class="form-input" id="booker-name" readonly style="background: #f8f9fa;">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">휴대폰 번호 <span style="color: var(--primary-color);">*</span></label>
+                    <input type="tel" class="form-input" id="booker-phone" placeholder="010-1234-5678 또는 01012345678">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">이메일 <span style="color: var(--primary-color);">*</span></label>
+                    <input type="email" class="form-input" id="booker-email" placeholder="example@email.com">
+                </div>
+                <p style="color: var(--text-secondary); font-size: 14px;">* 예매자 이름은 회원 정보를 기준으로 자동 입력됩니다.</p>
+                <p style="color: var(--text-secondary); font-size: 14px;">* 핸드폰 번호와 이메일은 티켓 발권 및 공연 안내를 위해 사용됩니다.</p>
+            </div>
+
+            <div class="card mb-lg">
+                <h3 class="mb-md">티켓 수령 방법</h3>
+
+                <div class="payment-method selected" data-type="pickup" onclick="selectDelivery('pickup', this)">
+                    <div class="payment-icon">📍</div>
+                    <div class="payment-info">
+                        <div class="payment-name">현장 수령</div>
+                        <div class="payment-desc">공연 당일 현장에서 수령 (무료)</div>
+                    </div>
+                </div>
+
+                <div class="payment-method" data-type="delivery" onclick="selectDelivery('delivery', this)">
+                    <div class="payment-icon">📦</div>
+                    <div class="payment-info">
+                        <div class="payment-name">배송</div>
+                        <div class="payment-desc">주소지로 배송 (+3,000원)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="delivery-address" class="card mb-lg" style="display: none;">
+                <h3 class="mb-md">배송 주소</h3>
+                <div class="form-group">
+                    <label class="form-label">우편번호</label>
+                    <input type="text" class="form-input" id="zipcode" placeholder="우편번호">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">주소</label>
+                    <input type="text" class="form-input" id="address" placeholder="주소">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">상세주소</label>
+                    <input type="text" class="form-input" id="address-detail" placeholder="상세주소">
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-lg btn-block" onclick="confirmOrderInfo()">결제하기</button>
+        </div>
+    </main>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/logger.js"></script>
+    <script src="js/browser-info.js"></script>
+    <script src="js/flow-manager.js"></script>
+
+    <script>
+        loadLogFromSession();
+        logStageEntry('order_info');
+        // preventBackNavigation() 제거 - 뒤로가기 허용
+
+        const flowData = getFlowData();
+        const currentUser = getCurrentUser();
+
+        if (!flowData) {
+            navigateTo('index.html');
+        }
+
+        // 예매자 정보 자동 입력 (회원 정보에서 가져오기)
+        document.getElementById('booker-name').value = currentUser.name;
+        document.getElementById('booker-phone').value = currentUser.phone || '';
+        document.getElementById('booker-email').value = currentUser.email || '';
+
+        // 핸드폰 번호 자동 포맷팅 (하이픈 자동 삽입)
+        const phoneInput = document.getElementById('booker-phone');
+        phoneInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 추출
+
+            if (value.length <= 3) {
+                e.target.value = value;
+            } else if (value.length <= 7) {
+                e.target.value = value.slice(0, 3) + '-' + value.slice(3);
+            } else if (value.length <= 11) {
+                e.target.value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7);
+            } else {
+                // 11자리 초과 시 자르기
+                e.target.value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
+            }
+        });
+
+        let selectedDelivery = 'pickup';
+
+        function selectDelivery(type, element) {
+            document.querySelectorAll('.payment-method').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+
+            selectedDelivery = type;
+
+            if (type === 'delivery') {
+                document.getElementById('delivery-address').style.display = 'block';
+            } else {
+                document.getElementById('delivery-address').style.display = 'none';
+            }
+
+            updateFlowData({ deliveryType: type });
+        }
+
+        function confirmOrderInfo() {
+            // 핸드폰 번호 자동 보정 및 검증
+            const phoneRaw = document.getElementById('booker-phone').value.trim();
+            if (!phoneRaw) {
+                showAlert('휴대폰 번호를 입력해주세요.', 'warning');
+                return;
+            }
+
+            // 허용된 형식만 체크 (하이픈 포함 또는 숫자만)
+            const phoneWithHyphen = /^010-\d{4}-\d{4}$/;  // 010-1234-5678
+            const phoneDigitsOnly = /^010\d{8}$/;         // 01012345678
+
+            let phone;
+            if (phoneWithHyphen.test(phoneRaw)) {
+                // 하이픈 포함 형식 → 하이픈 제거
+                phone = phoneRaw.replace(/-/g, '');
+            } else if (phoneDigitsOnly.test(phoneRaw)) {
+                // 숫자만 → 그대로 사용
+                phone = phoneRaw;
+            } else {
+                // 허용되지 않는 형식
+                showAlert('올바른 형식으로 입력해주세요.\n예) 010-1234-5678 또는 01012345678', 'warning');
+                return;
+            }
+
+            // 이메일 검증
+            const email = document.getElementById('booker-email').value.trim();
+            if (!email) {
+                showAlert('이메일을 입력해주세요.', 'warning');
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showAlert('올바른 이메일 형식이 아닙니다.', 'warning');
+                return;
+            }
+
+            // 배송 주소 검증
+            if (selectedDelivery === 'delivery') {
+                const zipcode = document.getElementById('zipcode').value;
+                const address = document.getElementById('address').value;
+                const addressDetail = document.getElementById('address-detail').value;
+
+                if (!zipcode || !address || !addressDetail) {
+                    showAlert('배송 주소를 입력해주세요.', 'warning');
+                    return;
+                }
+
+                updateFlowData({
+                    deliveryAddress: {
+                        zipcode,
+                        address,
+                        addressDetail
+                    }
+                });
+            }
+
+            // 예매자 연락처 정보 저장
+            updateFlowData({
+                bookerPhone: phone,
+                bookerEmail: email
+            });
+
+            // 메타데이터에도 추가
+            updateMetadata({
+                booker_phone: phone,
+                booker_email: email
+            });
+
+            logStageExit('order_info', {
+                delivery_type: selectedDelivery,
+                has_phone: true,
+                has_email: true
+            });
+
+            navigateTo('payment.html');
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예매 로그 뷰어</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .log-item {
+            background: var(--card-bg);
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            margin-bottom: var(--spacing-md);
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .log-item:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .canvas-container {
+            position: relative;
+            background: #1a1a1a;
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            margin-top: var(--spacing-lg);
+        }
+
+        canvas {
+            border: 1px solid #333;
+            border-radius: var(--border-radius);
+            background: white;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .tremor-view {
+            background: #f5f5f5;
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            margin-top: var(--spacing-md);
+            border: 2px solid #2196F3;
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-lg);
+        }
+
+        .analysis-card {
+            background: var(--card-bg);
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .bot-score {
+            font-size: 40px;
+            font-weight: 700;
+            text-align: center;
+            margin: var(--spacing-lg) 0;
+        }
+
+        .bot-score.human {
+            color: #4CAF50;
+        }
+
+        .bot-score.suspicious {
+            color: #FF9800;
+        }
+
+        .bot-score.bot {
+            color: #F44336;
+        }
+
+        .stage-btn {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: var(--spacing-sm);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .stage-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">🎫 Ticket</a>
+            <nav style="display: flex; gap: var(--spacing-md);">
+                <a href="viewer_performance.html" style="color: var(--text-secondary);">공연창</a>
+                <a href="viewer_booking.html" style="color: var(--primary-color); font-weight: 600;">예매창</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-wrapper">
+        <div class="container">
+            <h1 class="page-title">🎫 예매 로그 분석</h1>
+            <p class="page-subtitle">좌석 선택 → 결제 완료까지</p>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-logs">0</div>
+                    <div class="stat-label">총 로그 수</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%);">
+                    <div class="stat-number" id="avg-duration">-</div>
+                    <div class="stat-label">평균 소요시간</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);">
+                    <div class="stat-number" id="completion-rate">-</div>
+                    <div class="stat-label">완료율</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="margin-bottom: var(--spacing-md);">로그 목록</h3>
+                <div id="logs-list">
+                    <p style="text-align: center; color: var(--text-secondary);">로그를 불러오는 중...</p>
+                </div>
+            </div>
+
+            <div id="analysis-container" style="display: none;">
+                <h3 style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-md);">🔍 마우스 트래킹 분석</h3>
+
+                <div class="card">
+                    <h4 style="margin-bottom: var(--spacing-md);">단계별 분석</h4>
+                    <div id="stage-selector" style="margin-bottom: var(--spacing-md);"></div>
+
+                    <div class="canvas-container">
+                        <canvas id="main-canvas" width="1400" height="900"></canvas>
+                    </div>
+
+                    <div id="tremor-container" style="display: none;">
+                        <h4 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">🔬 호버 영역 미세 떨림 분석
+                        </h4>
+                        <div class="tremor-view">
+                            <canvas id="tremor-canvas" width="600" height="600"></canvas>
+                            <div id="tremor-stats" style="margin-top: var(--spacing-md);"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: var(--spacing-lg);">
+                    <h4 style="margin-bottom: var(--spacing-md);">🤖 봇 탐지 분석</h4>
+                    <div id="bot-analysis"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/utils.js"></script>
+
+    <script>
+        let allLogs = [];
+        let currentLog = null;
+        let currentStage = null;
+        let hoverSegments = [];
+
+        const BOOKING_STAGES = ['seat', 'discount', 'order_info', 'payment'];
+        const STAGE_NAMES = {
+            'seat': '좌석 선택',
+            'discount': '할인',
+            'order_info': '배송 정보',
+            'payment': '결제'
+        };
+
+        async function loadLogs() {
+            try {
+                const response = await fetch('/api/logs');
+                const data = await response.json();
+
+                if (!data.success || data.files.length === 0) {
+                    document.getElementById('logs-list').innerHTML = '<p style="text-align: center; color: var(--text-secondary);">저장된 로그가 없습니다.</p>';
+                    return;
+                }
+
+                const logPromises = data.files.map(filename =>
+                    fetch(`/api/logs/${filename}`).then(res => res.json())
+                );
+
+                const logDetails = await Promise.all(logPromises);
+                allLogs = logDetails.map(log => log.data).filter(log => log.stages.seat);
+
+                document.getElementById('total-logs').textContent = allLogs.length;
+
+                const completedLogs = allLogs.filter(log => log.stages.payment && log.stages.payment.completed);
+                const completionRate = allLogs.length > 0 ? (completedLogs.length / allLogs.length * 100).toFixed(1) : 0;
+                document.getElementById('completion-rate').textContent = completionRate + '%';
+
+                if (completedLogs.length > 0) {
+                    const durations = completedLogs.map(log => {
+                        let total = 0;
+                        BOOKING_STAGES.forEach(stage => {
+                            if (log.stages[stage]) total += log.stages[stage].duration_ms;
+                        });
+                        return total;
+                    });
+                    const avgDur = durations.reduce((a, b) => a + b, 0) / durations.length;
+                    document.getElementById('avg-duration').textContent = (avgDur / 1000).toFixed(1) + '초';
+                }
+
+                displayLogsList(allLogs);
+
+            } catch (error) {
+                console.error('로그 로딩 에러:', error);
+            }
+        }
+
+        function displayLogsList(logs) {
+            const listContainer = document.getElementById('logs-list');
+
+            listContainer.innerHTML = logs.map((log, index) => {
+                const completed = log.stages.payment && log.stages.payment.completed;
+                const status = completed ? '✅ 완료' : '❌ 미완료';
+
+                let totalDuration = 0;
+                BOOKING_STAGES.forEach(stage => {
+                    if (log.stages[stage]) totalDuration += log.stages[stage].duration_ms;
+                });
+
+                const date = new Date(log.metadata.created_at).toLocaleString('ko-KR');
+                const seats = log.metadata.final_seats?.join(', ') || '-';
+
+                return `
+                    <div class="log-item" onclick="showAnalysis(${index})">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
+                            <div style="display: flex; gap: var(--spacing-md); align-items: center;">
+                                <span style="font-size: 20px;">${status}</span>
+                                <span style="font-weight: 700; color: var(--primary-color);">${log.metadata.flow_id}</span>
+                            </div>
+                            <span style="color: var(--text-secondary); font-size: 14px;">${date}</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--spacing-sm); font-size: 14px;">
+                            <div><strong>공연:</strong> ${log.metadata.performance_title || '-'}</div>
+                            <div><strong>좌석:</strong> ${seats}</div>
+                            <div><strong>소요시간:</strong> ${(totalDuration / 1000).toFixed(1)}초</div>
+                            ${log.metadata.booking_id ? `<div><strong>예매번호:</strong> ${log.metadata.booking_id}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showAnalysis(index) {
+            currentLog = allLogs[index];
+            const container = document.getElementById('analysis-container');
+            container.style.display = 'block';
+
+            createStageSelector();
+            selectStage('seat');
+
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function createStageSelector() {
+            const selector = document.getElementById('stage-selector');
+            const buttons = BOOKING_STAGES
+                .filter(stage => currentLog.stages[stage])
+                .map(stage => `
+                    <button class="stage-btn" onclick="selectStage('${stage}')" data-stage="${stage}">
+                        ${STAGE_NAMES[stage]}
+                    </button>
+                `).join('');
+
+            selector.innerHTML = buttons;
+        }
+
+        function selectStage(stage) {
+            currentStage = stage;
+
+            document.querySelectorAll('.stage-btn').forEach(btn => {
+                if (btn.dataset.stage === stage) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            drawMainCanvas(currentLog.stages[stage]);
+            analyzeBotBehavior(currentLog.stages[stage]);
+        }
+
+        function drawMainCanvas(stageData) {
+            const canvas = document.getElementById('main-canvas');
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const trajectory = stageData.mouse_trajectory || [];
+            const clicks = stageData.clicks || [];
+            hoverSegments = [];
+
+            if (trajectory.length === 0) {
+                ctx.fillStyle = '#666';
+                ctx.font = '20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('마우스 트래킹 데이터가 없습니다', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            // 호버 구간 찾기
+            let currentHover = [];
+            for (let i = 1; i < trajectory.length; i++) {
+                const prev = trajectory[i - 1];
+                const curr = trajectory[i];
+                const distance = Math.sqrt(Math.pow(curr[0] - prev[0], 2) + Math.pow(curr[1] - prev[1], 2));
+                const timeDiff = (curr[2] - prev[2]) / 1000;
+                const speed = timeDiff > 0 ? distance / timeDiff : 0;
+
+                if (speed < 100 && distance > 0) {
+                    currentHover.push(curr);
+                } else {
+                    if (currentHover.length > 5) {
+                        hoverSegments.push([...currentHover]);
+                    }
+                    currentHover = [];
+                }
+            }
+
+            // 마우스 경로
+            ctx.strokeStyle = '#2196F3';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            trajectory.forEach((point, index) => {
+                if (index === 0) ctx.moveTo(point[0], point[1]);
+                else ctx.lineTo(point[0], point[1]);
+            });
+            ctx.stroke();
+
+            // 호버 구간
+            hoverSegments.forEach((segment, idx) => {
+                ctx.strokeStyle = '#FF9800';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+
+                segment.forEach((point, i) => {
+                    if (i === 0) ctx.moveTo(point[0], point[1]);
+                    else ctx.lineTo(point[0], point[1]);
+                });
+                ctx.stroke();
+
+                const mid = segment[Math.floor(segment.length / 2)];
+                ctx.fillStyle = '#FF9800';
+                ctx.font = 'bold 12px Arial';
+                ctx.fillText(`호버${idx + 1}`, mid[0] + 10, mid[1] - 10);
+            });
+
+            // 시작/끝
+            if (trajectory.length > 0) {
+                ctx.fillStyle = '#4CAF50';
+                ctx.beginPath();
+                ctx.arc(trajectory[0][0], trajectory[0][1], 8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            if (trajectory.length > 1) {
+                ctx.fillStyle = '#F44336';
+                ctx.beginPath();
+                const end = trajectory[trajectory.length - 1];
+                ctx.arc(end[0], end[1], 8, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 클릭
+            clicks.forEach((click) => {
+                ctx.fillStyle = 'rgba(255, 61, 127, 0.3)';
+                ctx.beginPath();
+                ctx.arc(click.x, click.y, 15, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#FF3D7F';
+                ctx.beginPath();
+                ctx.arc(click.x, click.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // 호버 구간 분석
+            if (hoverSegments.length > 0) {
+                document.getElementById('tremor-container').style.display = 'block';
+                analyzeHoverTremor(0);
+            } else {
+                document.getElementById('tremor-container').style.display = 'none';
+            }
+        }
+
+        function analyzeHoverTremor(hoverIndex) {
+            const segment = hoverSegments[hoverIndex];
+            if (!segment || segment.length < 3) return;
+
+            const canvas = document.getElementById('tremor-canvas');
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = segment.reduce((sum, p) => sum + p[0], 0) / segment.length;
+            const centerY = segment.reduce((sum, p) => sum + p[1], 0) / segment.length;
+
+            const scale = 10;
+            const offsetX = canvas.width / 2;
+            const offsetY = canvas.height / 2;
+
+            // 격자
+            ctx.strokeStyle = '#eee';
+            ctx.lineWidth = 1;
+            for (let i = -10; i <= 10; i++) {
+                ctx.beginPath();
+                ctx.moveTo(offsetX + i * 20, 0);
+                ctx.lineTo(offsetX + i * 20, canvas.height);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, offsetY + i * 20);
+                ctx.lineTo(canvas.width, offsetY + i * 20);
+                ctx.stroke();
+            }
+
+            // 중심선
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(offsetX, 0);
+            ctx.lineTo(offsetX, canvas.height);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, offsetY);
+            ctx.lineTo(canvas.width, offsetY);
+            ctx.stroke();
+
+            // 호버 경로
+            ctx.strokeStyle = '#FF9800';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+
+            segment.forEach((point, index) => {
+                const x = offsetX + (point[0] - centerX) * scale;
+                const y = offsetY + (point[1] - centerY) * scale;
+
+                if (index === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            // 포인트
+            segment.forEach(point => {
+                const x = offsetX + (point[0] - centerX) * scale;
+                const y = offsetY + (point[1] - centerY) * scale;
+
+                ctx.fillStyle = '#FF9800';
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // 통계
+            const distances = [];
+            for (let i = 1; i < segment.length; i++) {
+                const dx = segment[i][0] - segment[i - 1][0];
+                const dy = segment[i][1] - segment[i - 1][1];
+                distances.push(Math.sqrt(dx * dx + dy * dy));
+            }
+
+            const avgDist = distances.reduce((a, b) => a + b, 0) / distances.length;
+            const maxDist = Math.max(...distances);
+            const variance = distances.reduce((sum, d) => sum + Math.pow(d - avgDist, 2), 0) / distances.length;
+            const stdDev = Math.sqrt(variance);
+
+            const statsHtml = `
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h5 style="color: var(--primary-color);">평균 떨림</h5>
+                        <p style="font-size: 20px; font-weight: 700;">${avgDist.toFixed(2)} px</p>
+                    </div>
+                    <div class="analysis-card">
+                        <h5 style="color: var(--primary-color);">최대 떨림</h5>
+                        <p style="font-size: 20px; font-weight: 700;">${maxDist.toFixed(2)} px</p>
+                    </div>
+                    <div class="analysis-card">
+                        <h5 style="color: var(--primary-color);">표준편차</h5>
+                        <p style="font-size: 20px; font-weight: 700;">${stdDev.toFixed(2)} px</p>
+                    </div>
+                    <div class="analysis-card">
+                        <h5 style="color: var(--primary-color);">포인트 수</h5>
+                        <p style="font-size: 20px; font-weight: 700;">${segment.length}개</p>
+                    </div>
+                </div>
+                <div style="margin-top: var(--spacing-md); padding: var(--spacing-md); background: ${stdDev > 2 ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)'}; border-radius: var(--border-radius);">
+                    <strong>${stdDev > 2 ? '✅ 자연스러운 떨림 감지 (사람)' : '⚠️ 떨림이 부족함 (봇 의심)'}</strong><br>
+                    <small>사람의 호버는 일반적으로 2px 이상의 표준편차를 가집니다</small>
+                </div>
+            `;
+
+            document.getElementById('tremor-stats').innerHTML = statsHtml;
+        }
+
+        function analyzeBotBehavior(stageData) {
+            const trajectory = stageData.mouse_trajectory || [];
+            const clicks = stageData.clicks || [];
+
+            if (trajectory.length < 3) {
+                document.getElementById('bot-analysis').innerHTML = '<p style="text-align: center; color: var(--text-secondary);">분석할 데이터가 부족합니다</p>';
+                return;
+            }
+
+            const speeds = [];
+            const angles = [];
+
+            for (let i = 1; i < trajectory.length; i++) {
+                const prev = trajectory[i - 1];
+                const curr = trajectory[i];
+                const timeDiff = (curr[2] - prev[2]) / 1000;
+
+                if (timeDiff > 0) {
+                    const distance = Math.sqrt(Math.pow(curr[0] - prev[0], 2) + Math.pow(curr[1] - prev[1], 2));
+                    speeds.push(distance / timeDiff);
+                }
+
+                if (i < trajectory.length - 1) {
+                    const next = trajectory[i + 1];
+                    const angle1 = Math.atan2(curr[1] - prev[1], curr[0] - prev[0]);
+                    const angle2 = Math.atan2(next[1] - curr[1], next[0] - curr[0]);
+                    angles.push(Math.abs(angle2 - angle1));
+                }
+            }
+
+            const avgSpeed = speeds.reduce((a, b) => a + b, 0) / speeds.length;
+            const speedVariance = speeds.reduce((sum, s) => sum + Math.pow(s - avgSpeed, 2), 0) / speeds.length;
+            const speedStdDev = Math.sqrt(speedVariance);
+            const avgAngle = angles.reduce((a, b) => a + b, 0) / angles.length;
+
+            let botScore = 0;
+            const reasons = [];
+
+            const speedCV = speedStdDev / avgSpeed;
+            if (speedCV < 0.3) {
+                botScore += 30;
+                reasons.push('속도가 매우 일정함');
+            }
+
+            if (avgAngle < 0.2) {
+                botScore += 25;
+                reasons.push('경로가 거의 직선');
+            }
+
+            if (avgSpeed > 5000) {
+                botScore += 20;
+                reasons.push('비정상적으로 빠른 속도');
+            }
+
+            const integerClicks = clicks.filter(c => c.is_integer).length;
+            if (integerClicks > clicks.length * 0.8) {
+                botScore += 15;
+                reasons.push('클릭 좌표가 정수값');
+            }
+
+            if (hoverSegments.length === 0) {
+                botScore += 10;
+                reasons.push('호버 구간 없음');
+            }
+
+            let scoreClass = 'human';
+            let verdict = '✅ 정상 사용자';
+            if (botScore > 60) {
+                scoreClass = 'bot';
+                verdict = '🤖 봇 의심';
+            } else if (botScore > 30) {
+                scoreClass = 'suspicious';
+                verdict = '⚠️ 의심스러움';
+            }
+
+            const html = `
+                <div class="bot-score ${scoreClass}">${verdict}</div>
+                <div class="analysis-grid">
+                    <div class="analysis-card">
+                        <h5 style="color: var(--primary-color);">봇 점수</h5>
+                        <p style="font-size: 24px; font-weight: 700;">${botScore.toFixed(1)} / 100</p>
+                    </div>
+                    <div class="analysis-card">
+                        <h5 style="color: var(--primary-color);">속도 변동성</h5>
+                        <p style="font-size: 20px; font-weight: 700;">${(speedCV * 100).toFixed(1)}%</p>
+                        <small>${speedCV < 0.3 ? '⚠️ 낮음' : '✅ 정상'}</small>
+                    </div>
+                    <div class="analysis-card">
+                        <h5 style="color: var(--primary-color);">경로 곡선성</h5>
+                        <p style="font-size: 20px; font-weight: 700;">${avgAngle.toFixed(2)} rad</p>
+                        <small>${avgAngle < 0.2 ? '⚠️ 직선적' : '✅ 자연스러움'}</small>
+                    </div>
+                    <div class="analysis-card">
+                        <h5 style="color: var(--primary-color);">호버 구간</h5>
+                        <p style="font-size: 20px; font-weight: 700;">${hoverSegments.length}개</p>
+                        <small>${hoverSegments.length === 0 ? '⚠️ 없음' : '✅ 발견'}</small>
+                    </div>
+                </div>
+                ${reasons.length > 0 ? `
+                    <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: rgba(255, 152, 0, 0.1); border-left: 4px solid #FF9800; border-radius: var(--border-radius);">
+                        <h5>⚠️ 의심 요인:</h5>
+                        <ul style="margin: 0; padding-left: 20px;">
+                            ${reasons.map(r => `<li>${r}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            `;
+
+            document.getElementById('bot-analysis').innerHTML = html;
+        }
+
+        loadLogs();
+    </script>
+</body>
+
+</html>

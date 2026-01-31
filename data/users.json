@@ -1,0 +1,18 @@
+{
+  "users": [
+    {
+      "email": "test@example.com",
+      "password": "test1111",
+      "name": "테스트",
+      "phone": "010-0000-0000",
+      "created_at": "2026-01-30T15:36:00+09:00"
+    },
+    {
+      "email": "test_kim@email.com",
+      "password": "1",
+      "name": "test_kim",
+      "phone": "010-1234-5678",
+      "created_at": "2026-01-31T09:37:15.004370"
+    }
+  ]
+}
