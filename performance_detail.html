@@ -2,216 +2,34 @@
 <html lang="ko">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>공연 상세 - 티켓 예매</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/components.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공연 상세 - 티켓 예매</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/components.css">
 </head>
 
 <body>
-    <header>
-        <div class="header-content">
-            <a href="index.html" class="logo">🎫 Ticket</a>
-            <div class="user-menu"></div>
-        </div>
-    </header>
+  <header>
+    <div class="header-content">
+      <a href="index.html" class="logo">🎫 Ticket</a>
+      <div class="user-menu"></div>
+    </div>
+  </header>
 
-    <main class="page-wrapper">
-        <div class="container">
-            <div id="perf-detail"></div>
-        </div>
-    </main>
+  <main class="page-wrapper">
+    <div class="container">
+      <div id="perf-detail"></div>
+    </div>
+  </main>
 
-    <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/logger.js"></script>
-    <script src="js/browser-info.js"></script>
-    <script src="js/flow-manager.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/logger.js"></script>
+  <script src="js/browser-info.js"></script>
+  <script src="js/flow-manager.js"></script>
 
-    <script>
-        let currentPerformance = null;
-
-        async function loadPerformance() {
-            const perfId = getQueryParam('id');
-            if (!perfId) {
-                navigateTo('index.html');
-                return;
-            }
-
-            try {
-                const response = await fetch('data/performances.json');
-                const data = await response.json();
-                currentPerformance = data.performances.find(p => p.id === perfId);
-
-                if (!currentPerformance) {
-                    throw new Error('공연을 찾을 수 없습니다.');
-                }
-
-                displayPerformance();
-
-                // 로그 초기화
-                await initLogger(currentPerformance.id, currentPerformance.title);
-                logStageEntry('perf');
-                enableMouseTracking();
-            } catch (error) {
-                console.error(error);
-                showAlert('공연 정보를 불러오는데 실패했습니다.', 'error');
-                setTimeout(() => navigateTo('index.html'), 2000);
-            }
-        }
-
-        function displayPerformance() {
-            const detailDiv = document.getElementById('perf-detail');
-
-            detailDiv.innerHTML = `
-        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
-          <div class="card">
-            <div style="width: 100%; height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 80px;">
-              ${getCategoryIcon(currentPerformance.category)}
-            </div>
-          </div>
-          
-          <div>
-            <h1 class="page-title">${currentPerformance.title}</h1>
-            <p class="page-subtitle">${currentPerformance.description}</p>
-            
-            <div class="card mt-lg">
-              <div style="margin-bottom: var(--spacing-md);">
-                <strong>📍 장소:</strong> ${currentPerformance.venue}
-              </div>
-              <div style="margin-bottom: var(--spacing-md);">
-                <strong>🎭 카테고리:</strong> ${getCategoryName(currentPerformance.category)}
-              </div>
-              <div>
-                <strong>💰 가격:</strong> ${formatPrice(currentPerformance.grades[currentPerformance.grades.length - 1].price)} ~ ${formatPrice(currentPerformance.grades[0].price)}
-              </div>
-            </div>
-
-            <div class="card mt-lg">
-              <h3 style="margin-bottom: var(--spacing-md);">날짜 선택</h3>
-              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--spacing-sm);" id="date-selection">
-                ${currentPerformance.dates.map(date => `
-                  <button class="btn btn-outline date-btn" data-date="${date}" onclick="selectDate('${date}')">
-                    ${formatDateKorean(date)}<br>
-                    <small>(${getDayOfWeek(date)})</small>
-                  </button>
-                `).join('')}
-              </div>
-            </div>
-
-            <div class="card mt-lg" id="time-selection-section" style="display: none;">
-              <h3 style="margin-bottom: var(--spacing-md);">시간 선택</h3>
-              <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;" id="time-selection">
-                ${currentPerformance.times.map(time => `
-                  <button class="btn btn-outline time-btn" data-time="${time}" onclick="selectTime('${time}')">
-                    ${time}
-                  </button>
-                `).join('')}
-              </div>
-            </div>
-
-            <button id="start-booking-btn" class="btn btn-primary btn-lg btn-block mt-xl" style="display: none;" onclick="startBooking()">
-              예매 시작
-            </button>
-          </div>
-        </div>
-      `;
-        }
-
-        let selectedDate = '';
-        let selectedTime = '';
-
-        function selectDate(date) {
-            selectedDate = date;
-
-            // 날짜 버튼 스타일 업데이트
-            document.querySelectorAll('.date-btn').forEach(btn => {
-                btn.classList.remove('btn-primary');
-                btn.classList.add('btn-outline');
-            });
-            event.target.classList.remove('btn-outline');
-            event.target.classList.add('btn-primary');
-
-            // 시간 선택 섹션 표시
-            document.getElementById('time-selection-section').style.display = 'block';
-
-            // 로그 기록
-            trackClick(event, { action: 'date_select', target: date });
-        }
-
-        function selectTime(time) {
-            selectedTime = time;
-
-            // 시간 버튼 스타일 업데이트
-            document.querySelectorAll('.time-btn').forEach(btn => {
-                btn.classList.remove('btn-primary');
-                btn.classList.add('btn-outline');
-            });
-            event.target.classList.remove('btn-outline');
-            event.target.classList.add('btn-primary');
-
-            // 예매 시작 버튼 표시
-            document.getElementById('start-booking-btn').style.display = 'block';
-
-            // 로그 기록
-            trackClick(event, { action: 'time_select', target: time });
-        }
-
-        function startBooking() {
-            if (!requireLogin()) return;
-
-            if (!selectedDate || !selectedTime) {
-                showAlert('날짜와 시간을 선택해주세요.', 'warning');
-                return;
-            }
-
-            // 플로우  데이터 초기화
-            initFlow(currentPerformance);
-            updateFlowData({
-                selectedDate: selectedDate,
-                selectedTime: selectedTime
-            });
-
-            // 메타데이터 업데이트
-            updateMetadata({
-                selected_date: selectedDate,
-                selected_time: selectedTime
-            });
-
-            // 로그 단계 종료
-            logStageExit('perf', {
-                card_clicks: [{
-                    performance_id: currentPerformance.id,
-                    performance_title: currentPerformance.title,
-                    timestamp: getISOTimestamp()
-                }],
-                date_selections: [{ date: selectedDate, timestamp: getISOTimestamp() }],
-                time_selections: [{ time: selectedTime, timestamp: getISOTimestamp() }],
-                actions: [
-                    { action: 'card_click', target: currentPerformance.id, timestamp: getISOTimestamp() },
-                    { action: 'date_select', target: selectedDate, timestamp: getISOTimestamp() },
-                    { action: 'time_select', target: selectedTime, timestamp: getISOTimestamp() },
-                    { action: 'booking_start', target: currentPerformance.id, date: selectedDate, time: selectedTime, timestamp: getISOTimestamp() }
-                ]
-            });
-
-            disableMouseTracking();
-            navigateTo('queue.html');
-        }
-
-        function getCategoryIcon(category) {
-            const icons = { concert: '🎤', musical: '🎭', sports: '⚽', exhibition: '🖼️' };
-            return icons[category] || '🎫';
-        }
-
-        function getCategoryName(category) {
-            const names = { concert: '콘서트', musical: '뮤지컬', sports: '스포츠', exhibition: '전시' };
-            return names[category] || '공연';
-        }
-
-        loadPerformance();
-    </script>
+  <script src="js/performance_detail.js"></script>
 </body>
 
 </html>

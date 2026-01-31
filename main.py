@@ -126,8 +126,19 @@ async def login(login_data: LoginData):
 async def save_log(log_data: LogData):
     """예매 로그 데이터를 저장합니다."""
     try:
+        # 메타데이터에서 필요한 정보 추출
         flow_id = log_data.metadata.get("flow_id", f"flow_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
-        filename = f"booking_{flow_id}.json"
+        performance_id = log_data.metadata.get("performance_id", "unknown")
+        payment_success = log_data.metadata.get("payment_success", False)
+        
+        # 날짜 형식: YYYYMMDD
+        date_str = datetime.now().strftime('%Y%m%d')
+        
+        # 결제 성공 여부: success 또는 fail
+        payment_status = "success" if payment_success else "fail"
+        
+        # 파일명 형식: [날짜]_[공연ID]_[flow_id]_[결제성공여부].json
+        filename = f"{date_str}_{performance_id}_{flow_id}_{payment_status}.json"
         filepath = os.path.join(LOGS_DIR, filename)
         
         # JSON 파일로 저장

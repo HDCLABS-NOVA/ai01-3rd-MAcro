@@ -1,0 +1,13 @@
+/* index.css - 메인 페이지 스타일 */
+
+.filter-section {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.filter-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}

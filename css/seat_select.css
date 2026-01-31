@@ -1,0 +1,106 @@
+/* 보안문자 팝업 스타일 */
+body>#captcha-overlay {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0, 0, 0, 0.7) !important;
+    z-index: 999999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+#captcha-overlay.captcha-hidden {
+    display: none !important;
+}
+
+#captcha-modal {
+    background: white;
+    border-radius: 20px;
+    padding: 60px;
+    max-width: 700px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+#captcha-modal h2 {
+    color: #333;
+    font-size: 32px;
+    margin-bottom: 12px;
+    font-weight: 700;
+    text-align: center;
+}
+
+#captcha-modal p {
+    color: #999;
+    font-size: 16px;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.captcha-canvas-container {
+    background: #f0f0f0;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.captcha-btn {
+    position: absolute;
+    top: 20px;
+    background: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.captcha-btn-left {
+    left: 20px;
+}
+
+.captcha-btn-right {
+    right: 20px;
+}
+
+#captcha-canvas {
+    margin: 20px auto;
+    display: block;
+}
+
+#captcha-input {
+    width: 100%;
+    padding: 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 18px;
+    margin-bottom: 25px;
+    box-sizing: border-box;
+}
+
+#captcha-submit-btn {
+    width: 100%;
+    padding: 22px;
+    background: #d0d0d0;
+    color: #666;
+    border: none;
+    border-radius: 12px;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: not-allowed;
+    transition: all 0.3s;
+}
