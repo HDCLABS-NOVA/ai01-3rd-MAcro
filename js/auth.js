@@ -134,6 +134,41 @@ function requireLogin() {
 }
 
 /**
+ * 관리자 여부 확인
+ */
+function isAdmin() {
+    const currentUser = getCurrentUser();
+    if (!currentUser) return false;
+
+    // 관리자 이메일 목록 (실제 환경에서는 서버에서 관리해야 함)
+    const adminEmails = ['admin@ticket.com', 'manager@ticket.com'];
+    return adminEmails.includes(currentUser.email);
+}
+
+/**
+ * 관리자 권한 필수 체크 (비관리자는 접근 불가)
+ */
+function requireAdmin() {
+    if (!isLoggedIn()) {
+        showAlert('로그인이 필요한 서비스입니다.', 'warning');
+        setTimeout(() => {
+            navigateTo('login.html?return=' + encodeURIComponent(window.location.pathname));
+        }, 1000);
+        return false;
+    }
+
+    if (!isAdmin()) {
+        showAlert('관리자만 접근할 수 있는 페이지입니다.', 'error');
+        setTimeout(() => {
+            navigateTo('index.html');
+        }, 1500);
+        return false;
+    }
+
+    return true;
+}
+
+/**
  * 헤더에 사용자 정보 표시
  */
 function updateUserMenu() {

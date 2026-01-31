@@ -180,8 +180,14 @@
     </main>
 
     <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
 
     <script>
+        // 관리자 권한 체크
+        if (!requireAdmin()) {
+            throw new Error('Unauthorized access');
+        }
+
         let allLogs = [];
         let currentLog = null;
         let hoverSegments = [];

@@ -304,6 +304,12 @@
     <script src="js/auth.js"></script>
 
     <script>
+        // 관리자 권한 체크
+        if (!requireAdmin()) {
+            // requireAdmin()이 false를 반환하면 이미 리디렉션 처리됨
+            throw new Error('Unauthorized access');
+        }
+
         var allLogs = [];
         var perfLogs = [];
         var bookLogs = [];

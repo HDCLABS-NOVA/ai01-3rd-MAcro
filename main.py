@@ -33,6 +33,44 @@ if not os.path.exists(USERS_FILE):
     with open(USERS_FILE, 'w', encoding='utf-8') as f:
         json.dump({"users": []}, f, ensure_ascii=False, indent=2)
 
+# 기본 관리자 계정 생성
+def init_admin_accounts():
+    """서버 시작 시 기본 관리자 계정을 생성합니다."""
+    with open(USERS_FILE, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    # 관리자 계정 정보
+    admin_accounts = [
+        {
+            "email": "admin@ticket.com",
+            "password": "admin1234",  # 실제 환경에서는 해시화 필요
+            "name": "Administrator",
+            "phone": "01000000000"
+        },
+        {
+            "email": "manager@ticket.com",
+            "password": "manager1234",
+            "name": "Manager",
+            "phone": "01000000001"
+        }
+    ]
+    
+    users_updated = False
+    for admin in admin_accounts:
+        # 이미 존재하는지 확인
+        existing = any(user['email'] == admin['email'] for user in data['users'])
+        if not existing:
+            data['users'].append(admin)
+            users_updated = True
+            print(f"✅ 관리자 계정 생성: {admin['email']} (비밀번호: {admin['password']})")
+    
+    if users_updated:
+        with open(USERS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+# 관리자 계정 초기화 실행
+init_admin_accounts()
+
 # Pydantic 모델 정의
 class SignupData(BaseModel):
     email: str

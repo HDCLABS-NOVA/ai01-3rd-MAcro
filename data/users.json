@@ -13,6 +13,18 @@
       "name": "test_kim",
       "phone": "010-1234-5678",
       "created_at": "2026-01-31T09:37:15.004370"
+    },
+    {
+      "email": "admin@ticket.com",
+      "password": "admin1234",
+      "name": "Administrator",
+      "phone": "01000000000"
+    },
+    {
+      "email": "manager@ticket.com",
+      "password": "manager1234",
+      "name": "Manager",
+      "phone": "01000000001"
     }
   ]
 }
