@@ -13,6 +13,27 @@
       "name": "test_kim",
       "phone": "010-1234-5678",
       "created_at": "2026-01-31T09:37:15.004370"
+    },
+    {
+      "email": "test_bae@email.com",
+      "password": "11111111",
+      "name": "test_bae",
+      "phone": "01012345678",
+      "created_at": "2026-01-31T12:37:32.236926"
+    },
+    {
+      "email": "tester@example.com",
+      "password": "password123",
+      "name": "Tester",
+      "phone": "01012345678",
+      "created_at": "2026-01-31T14:21:27.142896"
+    },
+    {
+      "email": "newtest542@example.com",
+      "password": "password123",
+      "name": "Test User",
+      "phone": "01012345678",
+      "created_at": "2026-01-31T17:31:31.743166"
     }
   ]
 }

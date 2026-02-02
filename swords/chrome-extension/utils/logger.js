@@ -108,6 +108,45 @@ class Logger {
   clear() {
     this.logs = [];
   }
+
+  /**
+   * Send complete booking flow logs to server
+   * @param {Object} metadata - Metadata about the booking attempt
+   * @param {Object} stages - Detailed stage-by-stage data
+   * @param {String} customFilename - Optional custom filename (without .json extension)
+   */
+  async sendToServer(metadata = {}, stages = {}, customFilename = null) {
+    try {
+      const response = await fetch('http://localhost:8000/api/logs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          metadata: {
+            ...metadata,
+            timestamp: new Date().toISOString(),
+            url: window.location.href,
+            userAgent: navigator.userAgent,
+            customFilename  // Pass custom filename to backend
+          },
+          stages
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Failed to send logs to server:', response.status);
+        return false;
+      }
+
+      const result = await response.json();
+      console.log('✅ Logs sent to server:', result.filename);
+      return true;
+    } catch (error) {
+      console.error('Error sending logs to server:', error);
+      return false;
+    }
+  }
 }
 
 // Global logger instance

@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>좌석 선택 - 티켓 예매</title>
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="../css/components.css">
 
     <style>
         body>#captcha-overlay {
@@ -208,11 +208,11 @@
 
 
 
-    <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/logger.js"></script>
-    <script src="js/browser-info.js"></script>
-    <script src="js/flow-manager.js"></script>
+    <script src="../js/utils.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/logger.js"></script>
+    <script src="../js/browser-info.js"></script>
+    <script src="../js/flow-manager.js"></script>
 
     <script>
         loadLogFromSession();
@@ -368,7 +368,7 @@
         // 좌석 그리드 생성 (여러 등급 통합)
         async function createSeatGrid() {
             const grid = document.getElementById('seat-grid');
-            const response = await fetch('data/performances.json');
+            const response = await fetch('../data/performances.json');
             const data = await response.json();
             const perf = data.performances.find(p => p.id === flowData.performanceId);
 

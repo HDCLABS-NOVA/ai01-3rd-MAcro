@@ -34,6 +34,16 @@ class IdleState extends BaseState {
     console.log('[IdleState] handleStart called with:', config);
     logger.info('START_REQUESTED', config);
     
+    // Extract performance information from page
+    const performanceInfo = this.extractPerformanceInfo();
+    
+    // Update FSM booking flow with performance info
+    if (this.fsm && this.fsm.bookingFlow) {
+      this.fsm.bookingFlow.performanceId = performanceInfo.id;
+      this.fsm.bookingFlow.performanceName = performanceInfo.name;
+      logger.info('PERFORMANCE_INFO_EXTRACTED', performanceInfo);
+    }
+    
     // Store config in context
     this.updateContext({
       config,
@@ -50,6 +60,44 @@ class IdleState extends BaseState {
       console.log('[IdleState] Transitioning to CLICK_START');
       await this.transitionTo('CLICK_START', {}, 'User started immediately');
     }
+  }
+
+  /**
+   * Extract performance information from current page
+   * @returns {Object} {id, name}
+   */
+  extractPerformanceInfo() {
+    // Try to extract from page title or H1
+    let performanceName = document.title;
+    
+    // Try H1 first
+    const h1 = document.querySelector('h1');
+    if (h1 && h1.textContent.trim()) {
+      performanceName = h1.textContent.trim();
+    }
+    
+    // Clean up name (remove extra whitespace, special characters)
+    performanceName = performanceName.replace(/\s+/g, ' ').trim();
+    
+    // Generate performance ID from name or URL
+    let performanceId = 'UNKNOWN';
+    
+    // Try to extract from URL (e.g., concert/IU001)
+    const urlMatch = window.location.href.match(/concert[s]?\/([A-Za-z0-9]+)/);
+    if (urlMatch) {
+      performanceId = urlMatch[1];
+    } else {
+      // Generate from name (first letters + number)
+      const words = performanceName.split(' ');
+      const initials = words.slice(0, 2).map(w => w.charAt(0).toUpperCase()).join('');
+      const timestamp = Date.now().toString().slice(-3);
+      performanceId = `${initials}${timestamp}`;
+    }
+    
+    return {
+      id: performanceId,
+      name: performanceName
+    };
   }
 
   async onExit() {

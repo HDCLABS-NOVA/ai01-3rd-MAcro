@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     minute: document.getElementById('minute'),
     second: document.getElementById('second'),
     seatCount: document.getElementById('seatCount'),
+    randomSeats: document.getElementById('randomSeats'),
+    seatRangeLabel: document.getElementById('seatRangeLabel'),
+    autoLoopCount: document.getElementById('autoLoopCount'),
     autoRefresh: document.getElementById('autoRefresh'),
     debugMode: document.getElementById('debugMode'),
     btnStartNow: document.getElementById('btnStartNow'),
@@ -23,17 +26,41 @@ document.addEventListener('DOMContentLoaded', () => {
   let isRunning = false;
 
   // Load saved settings
-  chrome.storage.local.get(['seatCount', 'autoRefresh', 'debugMode'], (result) => {
+  chrome.storage.local.get(['seatCount', 'randomSeats', 'autoLoopCount', 'autoRefresh', 'debugMode'], (result) => {
     ui.seatCount.value = result.seatCount || 1;
+    ui.randomSeats.checked = result.randomSeats || false;
+    ui.autoLoopCount.value = result.autoLoopCount || 1;
     ui.autoRefresh.checked = result.autoRefresh !== false;
     ui.debugMode.checked = result.debugMode || false;
+    
+    // Show/hide random label
+    if (ui.randomSeats.checked) {
+      ui.seatCount.disabled = true;
+      ui.seatRangeLabel.style.display = 'block';
+    }
+  });
+
+  // Random seats toggle
+  ui.randomSeats.addEventListener('change', () => {
+    if (ui.randomSeats.checked) {
+      ui.seatCount.disabled = true;
+      ui.seatCount.value = 'Random';
+      ui.seatRangeLabel.style.display = 'block';
+    } else {
+      ui.seatCount.disabled = false;
+      ui.seatCount.value = 1;
+      ui.seatRangeLabel.style.display = 'none';
+    }
+    chrome.storage.local.set({randomSeats: ui.randomSeats.checked});
   });
 
   // **NEW: Immediate Start Button**
   ui.btnStartNow.addEventListener('click', async () => {
     const config = {
       targetTime: Date.now() - 1000, // 1초 전 = 즉시 실행
-      seatCount: parseInt(ui.seatCount.value),
+      seatCount: ui.randomSeats.checked ? Math.floor(Math.random() * 4) + 1 : parseInt(ui.seatCount.value),
+      randomSeats: ui.randomSeats.checked,
+      autoLoopCount: parseInt(ui.autoLoopCount.value) || 1,
       autoRefresh: false // 즉시 실행은 refresh 안함
     };
 
@@ -44,7 +71,9 @@ document.addEventListener('DOMContentLoaded', () => {
   ui.btnStart.addEventListener('click', async () => {
     const config = {
       targetTime: getTargetTime(),
-      seatCount: parseInt(ui.seatCount.value),
+      seatCount: ui.randomSeats.checked ? Math.floor(Math.random() * 4) + 1 : parseInt(ui.seatCount.value),
+      randomSeats: ui.randomSeats.checked,
+      autoLoopCount: parseInt(ui.autoLoopCount.value) || 1,
       autoRefresh: ui.autoRefresh.checked
     };
 
@@ -53,11 +82,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // **Shared start function**
   async function startAutomation(config) {
-    // Save settings
+    // Save settings (don't save randomSeats here, it's saved on toggle)
     chrome.storage.local.set({
-      seatCount: config.seatCount,
+      seatCount: config.randomSeats ? 1 : config.seatCount,
+      autoLoopCount: config.autoLoopCount,
       autoRefresh: config.autoRefresh
     });
+    
+    // Log random seat selection
+    if (config.randomSeats) {
+      addLog(`🎲 Random seats: ${config.seatCount}`, 'info');
+    }
 
     // Get active tab
     const [tab] = await chrome.tabs.query({active: true, currentWindow: true});

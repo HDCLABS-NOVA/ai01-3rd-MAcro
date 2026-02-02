@@ -50,6 +50,14 @@ class LogData(BaseModel):
 
 # API 엔드포인트
 
+# 루트 경로 리다이렉트
+from fastapi.responses import RedirectResponse
+
+@app.get("/")
+async def root():
+    """루트 경로를 메인 페이지로 리다이렉트합니다."""
+    return RedirectResponse(url="/html/index.html")
+
 # 회원가입
 @app.post("/api/auth/signup")
 async def signup(signup_data: SignupData):
@@ -126,8 +134,17 @@ async def login(login_data: LoginData):
 async def save_log(log_data: LogData):
     """예매 로그 데이터를 저장합니다."""
     try:
-        flow_id = log_data.metadata.get("flow_id", f"flow_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
-        filename = f"booking_{flow_id}.json"
+        # Check for custom filename in metadata
+        custom_filename = log_data.metadata.get("customFilename")
+        
+        if custom_filename:
+            # Use custom filename format: [날짜]_[공연ID]_[flow_id]_[결제성공여부].json
+            filename = f"{custom_filename}.json"
+        else:
+            # Fallback to flow_id based naming
+            flow_id = log_data.metadata.get("flow_id", f"flow_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
+            filename = f"booking_{flow_id}.json"
+        
         filepath = os.path.join(LOGS_DIR, filename)
         
         # JSON 파일로 저장

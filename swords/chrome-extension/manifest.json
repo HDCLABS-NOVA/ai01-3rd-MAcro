@@ -47,6 +47,7 @@
         "states/payment.js",
         "states/handle_captcha.js",
         "states/error.js",
+        "states/failed.js",
         "content.js"
       ],
       "run_at": "document_end",

@@ -177,15 +177,95 @@ const SiteConfig = {
       solveCaptcha: false,
       multiSeatSelect: true,
     }
+  },
+
+  // New localhost ticketing site (issue-GB)
+  localhost: {
+    selectors: {
+      // Queue page
+      queuePosition: ['#queue-position'],
+      queueTotal: ['#queue-total'],
+      
+      // Section selection page
+      sectionMap: ['#section-map'],
+      gradeCards: ['.card'],
+      nextButton: ['#next-btn', '.btn-primary'],
+      
+      // Seat selection page
+      seats: ['.seat.available'],
+      selectedSeats: ['.seat.selected'],
+      takenSeats: ['.seat.taken'],
+      seatGrid: ['#seat-grid'],
+      confirmButton: ['#next-btn'],
+      
+      // CAPTCHA (appears on seat_select.html)
+      captchaOverlay: ['#captcha-overlay'],
+      captchaCanvas: ['canvas#captcha-canvas', '#captcha-canvas'],
+      captchaInput: ['input#captcha-input', '#captcha-input'],
+      captchaSubmit: ['button#captcha-submit-btn', '#captcha-submit-btn'],
+      
+      // Common elements
+      popup: ['.modal', '.overlay'],
+      popupClose: ['.close', '.btn-close'],
+      loading: ['.spinner', '.loading'],
+    },
+    
+    timing: {
+      clickDelay: 80,
+      pageLoadTimeout: 8000,
+      elementTimeout: 4000,
+      popupTimeout: 2500,
+      seatSelectDelay: 120,
+      retryDelay: 600,
+      queueCheckInterval: 1000, // Check queue status every 1s
+    },
+    
+    retry: {
+      maxAttempts: {
+        clickStart: 4,
+        selectZone: 3,
+        selectSeat: 8,
+        confirm: 3,
+        solveCaptcha: 5,
+      },
+      backoffMultiplier: 1.5,
+    },
+    
+    seatPreferences: {
+      preferCenter: true,
+      minSeatsDistance: 0,
+      maxSeatsDistance: 2,
+      grades: ['VIP', 'R', 'S', 'A'], // Preferred grades in order
+    },
+    
+    captcha: {
+      selectors: ['#captcha-overlay'],
+      input: ['#captcha-input'],
+      button: ['#captcha-submit-btn'],
+      canvas: ['#captcha-canvas'],
+      solverEndpoint: 'http://localhost:5000/api/solve_captcha',
+    },
+    
+    features: {
+      autoRefresh: false,
+      handlePopups: true,
+      solveCaptcha: true,  // Enable CAPTCHA solving
+      multiSeatSelect: true,
+      handleQueue: true,   // Handle queue/waiting room
+    }
   }
 };
 
 /**
  * Get site config by hostname
- * Simplified to always use mocktest configuration
  */
 function getSiteConfig(hostname = window.location.hostname) {
-  // Always use mocktest config for all sites
+  // Use localhost config for localhost/127.0.0.1
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return SiteConfig.localhost;
+  }
+  
+  // Default to mocktest for all other sites
   return SiteConfig.mocktest;
 }
 

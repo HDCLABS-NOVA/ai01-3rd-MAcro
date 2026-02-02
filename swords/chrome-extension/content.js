@@ -139,6 +139,14 @@
       // Update context with config
       this.fsm.context.config = config;
       
+      // Start booking flow logging (check if auto-loop is enabled)
+      const autoLoopCount = config.autoLoopCount || 1;
+      if (autoLoopCount > 1) {
+        this.fsm.enableAutoLoop(autoLoopCount);
+      } else {
+        this.fsm.startBookingFlow(1);
+      }
+      
       // Save for auto-resume (Persistence)
       try {
         sessionStorage.setItem('SWORD_CONFIG', JSON.stringify(config));
@@ -194,6 +202,19 @@
 
     // ... existing debugging methods ...
     onStateTransition(data) {
+      // Log stage for booking flow tracking
+      this.fsm.logStage(data.to, {
+        from: data.from,
+        transitionData: data.data,
+        url: location.href
+      });
+
+      // Complete booking flow on terminal states
+      if (['PAYMENT', 'FAILED', 'ERROR'].includes(data.to)) {
+        const status = data.to === 'PAYMENT' ? 'completed' : 'failed';
+        this.fsm.completeBookingFlow(status);
+      }
+
       // Clear persistence on terminal states (except IDLE to prevent clearing on reset)
       if (['PAYMENT', 'FAILED'].includes(data.to)) {
          try {
