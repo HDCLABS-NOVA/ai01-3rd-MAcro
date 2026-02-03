@@ -177,7 +177,12 @@
 
                     <div id="tremor-container" style="display: none;">
                         <h4 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">🔬 호버 영역 미세 떨림 분석
+                            (10배 확대)
                         </h4>
+
+                        <!-- 호버 구간 선택 버튼 -->
+                        <div id="hover-selector" style="margin-bottom: var(--spacing-md);"></div>
+
                         <div class="tremor-view">
                             <canvas id="tremor-canvas" width="600" height="600"></canvas>
                             <div id="tremor-stats" style="margin-top: var(--spacing-md);"></div>
@@ -193,9 +198,15 @@
         </div>
     </main>
 
-    <script src="../js/utils.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
 
     <script>
+        // 관리자 권한 체크
+        if (!requireAdmin()) {
+            throw new Error('Unauthorized access');
+        }
+
         let allLogs = [];
         let currentLog = null;
         let currentStage = null;
@@ -211,7 +222,9 @@
 
         async function loadLogs() {
             try {
-                const response = await fetch('/api/logs');
+                // 캐시 방지를 위한 타임스탬프 추가
+                const timestamp = new Date().getTime();
+                const response = await fetch(`/api/logs?_t=${timestamp}`);
                 const data = await response.json();
 
                 if (!data.success || data.files.length === 0) {
@@ -220,7 +233,7 @@
                 }
 
                 const logPromises = data.files.map(filename =>
-                    fetch(`/api/logs/${filename}`).then(res => res.json())
+                    fetch(`/api/logs/${filename}?_t=${timestamp}`).then(res => res.json())
                 );
 
                 const logDetails = await Promise.all(logPromises);
@@ -353,7 +366,8 @@
                 const timeDiff = (curr[2] - prev[2]) / 1000;
                 const speed = timeDiff > 0 ? distance / timeDiff : 0;
 
-                if (speed < 100 && distance > 0) {
+                // 호버 판정: 속도 200 px/s 미만 && 미세 움직임 있음
+                if (speed < 200 && distance > 0) {
                     currentHover.push(curr);
                 } else {
                     if (currentHover.length > 5) {
@@ -423,15 +437,40 @@
             // 호버 구간 분석
             if (hoverSegments.length > 0) {
                 document.getElementById('tremor-container').style.display = 'block';
+                createHoverSelector();
                 analyzeHoverTremor(0);
             } else {
                 document.getElementById('tremor-container').style.display = 'none';
             }
         }
 
+        function createHoverSelector() {
+            const selector = document.getElementById('hover-selector');
+            const buttons = hoverSegments.map((segment, index) => `
+                <button class="stage-btn hover-btn" onclick="analyzeHoverTremor(${index})" data-hover="${index}">
+                    호버 구간 ${index + 1} (${segment.length}개 포인트)
+                </button>
+            `).join('');
+
+            selector.innerHTML = buttons;
+
+            // 첫 번째 버튼 활성화
+            const firstBtn = selector.querySelector('.hover-btn[data-hover="0"]');
+            if (firstBtn) firstBtn.classList.add('active');
+        }
+
         function analyzeHoverTremor(hoverIndex) {
             const segment = hoverSegments[hoverIndex];
             if (!segment || segment.length < 3) return;
+
+            // 버튼 활성화 상태 업데이트
+            document.querySelectorAll('.hover-btn').forEach(btn => {
+                if (btn.dataset.hover === String(hoverIndex)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
 
             const canvas = document.getElementById('tremor-canvas');
             const ctx = canvas.getContext('2d');

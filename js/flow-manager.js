@@ -50,6 +50,7 @@ function updateFlowData(updates) {
  */
 function clearFlowData() {
     sessionStorage.removeItem('bookingFlow');
+    sessionStorage.removeItem('captchaVerified'); // 보안문자 통과 플래그도 제거
 }
 
 /**
