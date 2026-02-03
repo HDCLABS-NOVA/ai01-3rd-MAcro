@@ -49,16 +49,29 @@ Analyze the screen for the following elements. Priority: CAPTCHA > Performance I
 **IMPORTANT: ALL coordinates must be NORMALIZED (0.0-1.0 range), NOT pixel values!**
 Example: If an element is at pixel (960, 540) on a 1920x1080 screen, return x=0.5, y=0.5
 
-1. **CAPTCHA**: 
-   - At the top: distorted/striped CAPTCHA image with 6 letters (like "MJTAFS")
-   - To the RIGHT of CAPTCHA image: Blue circular refresh icon (회오리 아이콘) - can be clicked to get new CAPTCHA
-   - In the middle: EMPTY WHITE INPUT BOX with gray placeholder "문자 입력" - THIS IS YOUR INPUT TARGET!
-   - At the bottom: Purple "확인" button
-   - The INPUT BOX is located DIRECTLY ABOVE the purple "확인" button (just a small gap between them)
-   - DO NOT target the striped CAPTCHA image at the top!
-   - READ the 6 letters from the CAPTCHA image, but return coordinates for BOTH the INPUT BOX and REFRESH BUTTON
-   - Return input_x, input_y = CENTER of the WHITE INPUT BOX, NORMALIZED 0-1
-   - Return refresh_x, refresh_y = CENTER of the BLUE REFRESH ICON (to the right of CAPTCHA image), NORMALIZED 0-1
+1. **CAPTCHA SCREEN LAYOUT** (Look for title "화면의 문자를 입력해주세요"): 
+   - **Page Title**: "화면의 문자를 입력해주세요" at the very top (large dark text)
+   - **Subtitle**: "문자 입력 인증 후 좌석을 선택할 수 있습니다" (smaller gray text below title)
+   
+   - **CAPTCHA Image Section** (in a light gray rounded box):
+     * LEFT side: Speaker icon (🔊) for audio CAPTCHA
+     * CENTER: Green rectangular CAPTCHA image with 6 WHITE CAPITAL LETTERS
+     * RIGHT side: Blue circular refresh icon (🔄) - clickable to get new CAPTCHA
+   
+   - **Input Field**:
+     * White rectangular text input with light gray placeholder: "화면의 문자를 입력해주세요 (대소문자 구분없음)"
+     * This is approximately in the MIDDLE of the screen vertically
+     * **THIS IS YOUR PRIMARY TARGET** - Return its CENTER coordinates
+   
+   - **Submit Button**:
+     * Gray rounded rectangle button with text "입력완료" at the bottom
+     * Located below the input field with some spacing
+   
+   **What to return**:
+   - READ the 6 uppercase letters from the green CAPTCHA image (ignore distortion lines)
+   - Return input_x, input_y = CENTER of the WHITE INPUT FIELD (NOT the CAPTCHA image!)
+   - Return refresh_x, refresh_y = CENTER of the BLUE REFRESH ICON on the right
+   - All coordinates must be NORMALIZED (0.0-1.0)
 
 2. **Performance Icons**: Colorful rectangular icons/cards for shows/concerts (like theater masks, music notes, emoji-style icons)
    - Return NORMALIZED coordinates (0-1) for ALL detected icons (up to 5)
@@ -132,6 +145,12 @@ Type "NONE":
                      return True
                  return False
              
+             # Case 0: Check for sample/example text from prompt
+             SAMPLE_TEXTS = {"ENENLR", "MJTAFS", "EXAMPLE", "SAMPLE", "ABCDEF", "123456"}
+             if captcha_str in SAMPLE_TEXTS:
+                 self.update_status(f"⚠️ Sample text detected: '{captcha_str}' - Ignoring (no real CAPTCHA on screen)")
+                 return False  # Skip input, continue loop
+             
              # Case 1: Invalid length (< 6 or > 6) - refresh immediately
              if len(captcha_str) != 6:
                  self.update_status(f"⚠️ Invalid CAPTCHA length ({len(captcha_str)}): '{p_text}' -> '{captcha_str}'")
@@ -151,13 +170,15 @@ Type "NONE":
              # Case 3: Check retry counter for same CAPTCHA
              if captcha_str == self.last_captcha_text:
                  self.captcha_attempt_count += 1
-                 self.update_status(f"⚠️ Same CAPTCHA '{captcha_str}' - Attempt {self.captcha_attempt_count}/3")
                  
                  if self.captcha_attempt_count >= 3:
                      self.update_status(f"❌ Failed 3 times on '{captcha_str}', refreshing...")
                      if click_refresh():
                          return True
                      return False
+                 
+                 self.update_status(f"⏭️ Skipping duplicate CAPTCHA '{captcha_str}' - Attempt {self.captcha_attempt_count}/3 (Waiting for screen change)")
+                 return False # Skip actual typing for duplicate text
              else:
                  # New CAPTCHA text
                  self.captcha_attempt_count = 1
@@ -176,16 +197,20 @@ Type "NONE":
              # abs_y = self.mon_y + int(input_y * height)
              
              # Hardcoded position for CAPTCHA input field
-             abs_x = 755
-             abs_y = 755
+             abs_x = 625
+             abs_y = 625
              
              self.update_status(f"🔐 CAPTCHA DETECTED: '{captcha_str}' (Hardcoded Click: {abs_x}, {abs_y})")
              
              click_and_restore(abs_x, abs_y)
-             time.sleep(0.2)
+             time.sleep(0.3)
              human_type(captcha_str)
              time.sleep(0.2)
              pyautogui.press('enter')
+             
+             self.update_status(f"✅ CAPTCHA Submitted: '{captcha_str}'. Waiting for screen change...")
+             # Give more time for the screen to transition to seat selection
+             time.sleep(1.5) 
              return True
         elif p_type == "CAPTCHA":
              # Invalid CAPTCHA format, already handled above

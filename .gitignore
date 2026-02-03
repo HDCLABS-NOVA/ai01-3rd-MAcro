@@ -10,7 +10,8 @@ ENV/
 
 # Logs
 logs/
-
+temp/
+tmp/
 # IDE
 .vscode/
 .idea/
