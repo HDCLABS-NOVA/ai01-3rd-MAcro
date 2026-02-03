@@ -1,8 +1,12 @@
 // performance_detail.js - 공연 상세 페이지
 
 let currentPerformance = null;
+let buttonEnabledTime = null;  // 버튼 활성화 시간 (오픈 시뮬레이션용)
+let pageLoadTime = null;        // 페이지 로드 시간
 
 async function loadPerformance() {
+  pageLoadTime = Date.now();  // 페이지 로드 시간 기록
+
   const perfId = getQueryParam('id');
   if (!perfId) {
     navigateTo('index.html');
@@ -10,7 +14,7 @@ async function loadPerformance() {
   }
 
   try {
-    const response = await fetch('data/performances.json');
+    const response = await fetch('/api/performances');
     const data = await response.json();
     currentPerformance = data.performances.find(p => p.id === perfId);
 
@@ -268,7 +272,16 @@ function startBooking() {
       { action: 'date_select', target: selectedDate, timestamp: getISOTimestamp() },
       { action: 'time_select', target: selectedTime, timestamp: getISOTimestamp() },
       { action: 'booking_start', target: currentPerformance.id, date: selectedDate, time: selectedTime, timestamp: getISOTimestamp() }
-    ]
+    ],
+    // ⭐⭐⭐ 매크로 탐지 핵심 데이터!
+    button_click_timing: {
+      page_load_time: pageLoadTime,
+      button_enabled_time: buttonEnabledTime,
+      click_time: Date.now(),
+      reaction_time_from_enable_ms: buttonEnabledTime ? (Date.now() - buttonEnabledTime) : null,  // ← 가장 중요!
+      reaction_time_from_load_ms: pageLoadTime ? (Date.now() - pageLoadTime) : null,
+      has_open_time_simulation: buttonEnabledTime !== null
+    }
   });
 
   disableMouseTracking();

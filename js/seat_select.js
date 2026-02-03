@@ -163,12 +163,12 @@ document.getElementById('perf-info').textContent = flowData.performanceTitle;
 // 등급별 색상 정의
 const gradeColors = {
     'VIP': { bg: '#FFE5F1', border: '#FF3D7F', color: '#FF3D7F', hoverBg: 'linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%)' },
-    'VIP석': { bg: '#FFE5F1', border: '#FF3D7F', color: '#FF3D7F', hoverBg: 'linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%)' },
     'R': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
-    'R석': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
     'S': { bg: '#E8F5E9', border: '#4CAF50', color: '#4CAF50', hoverBg: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' },
-    'S석': { bg: '#E8F5E9', border: '#4CAF50', color: '#4CAF50', hoverBg: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' },
     'A': { bg: '#E3F2FD', border: '#2196F3', color: '#2196F3', hoverBg: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' },
+    'VIP석': { bg: '#FFE5F1', border: '#FF3D7F', color: '#FF3D7F', hoverBg: 'linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%)' },
+    'R석': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
+    'S석': { bg: '#E8F5E9', border: '#4CAF50', color: '#4CAF50', hoverBg: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' },
     'A석': { bg: '#E3F2FD', border: '#2196F3', color: '#2196F3', hoverBg: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' },
     '프리미엄석': { bg: '#F3E5F5', border: '#9C27B0', color: '#9C27B0', hoverBg: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)' },
     '지정석': { bg: '#E0F2F1', border: '#009688', color: '#009688', hoverBg: 'linear-gradient(135deg, #009688 0%, #00796B 100%)' },
@@ -181,7 +181,7 @@ const gradeColors = {
 // 좌석 그리드 생성 (여러 등급 통합)
 async function createSeatGrid() {
     const grid = document.getElementById('seat-grid');
-    const response = await fetch('data/performances.json');
+    const response = await fetch('/api/performances');
     const data = await response.json();
     const perf = data.performances.find(p => p.id === flowData.performanceId);
 
@@ -197,7 +197,7 @@ async function createSeatGrid() {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md); padding: var(--spacing-sm) var(--spacing-md); background: ${gradeColor.bg}; border-left: 4px solid ${gradeColor.border}; border-radius: 8px;">
                 <div style="display: flex; align-items: center; gap: var(--spacing-md);">
                     <div style="width: 24px; height: 24px; background: ${gradeColor.border}; border-radius: 4px;"></div>
-                    <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 18px;">${grade.name}석</span>
+                    <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 18px;">${grade.name}${grade.name.endsWith('석') ? '' : '석'}</span>
                 </div>
                 <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 20px;">${formatPrice(grade.price)}</span>
             </div>

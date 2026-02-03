@@ -21,7 +21,7 @@ document.getElementById('summary-datetime').textContent = `${formatDateKorean(fl
 
 // 구역 버튼 생성
 async function loadGrades() {
-    const response = await fetch('data/performances.json');
+    const response = await fetch('/api/performances');
     const data = await response.json();
     const perf = data.performances.find(p => p.id === flowData.performanceId);
 

@@ -12,7 +12,8 @@
   ],
   "host_permissions": [
     "http://localhost:*/*",
-    "http://192.168.14.118:*/*"
+    "http://192.168.14.118:*/*",
+    "https://974e36126faa.ngrok-free.app/*"
   ],
   "optional_host_permissions": [
     "*://*.interpark.com/*",
@@ -28,7 +29,8 @@
         "file:///*/*",
         "http://localhost:*/*",
         "http://127.0.0.1:*/*",
-        "http://192.168.14.118:*/*"
+        "http://192.168.14.118:*/*",
+        "https://974e36126faa.ngrok-free.app/*"
       ],
       "js": [
         "config/sites.js",

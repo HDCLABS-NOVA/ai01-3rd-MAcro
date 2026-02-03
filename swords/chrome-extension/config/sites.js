@@ -21,7 +21,7 @@ const SiteConfig = {
         '#layerPopup',
         '[class*="popup"]'
       ],
-      
+
       popupClose: [
         '.closeButton',
         '.btn_Close',
@@ -185,31 +185,31 @@ const SiteConfig = {
       // Queue page
       queuePosition: ['#queue-position'],
       queueTotal: ['#queue-total'],
-      
+
       // Section selection page
       sectionMap: ['#section-map'],
       gradeCards: ['.card'],
       nextButton: ['#next-btn', '.btn-primary'],
-      
+
       // Seat selection page
       seats: ['.seat.available'],
       selectedSeats: ['.seat.selected'],
       takenSeats: ['.seat.taken'],
       seatGrid: ['#seat-grid'],
       confirmButton: ['#next-btn'],
-      
+
       // CAPTCHA (appears on seat_select.html)
       captchaOverlay: ['#captcha-overlay'],
       captchaCanvas: ['canvas#captcha-canvas', '#captcha-canvas'],
       captchaInput: ['input#captcha-input', '#captcha-input'],
       captchaSubmit: ['button#captcha-submit-btn', '#captcha-submit-btn'],
-      
+
       // Common elements
       popup: ['.modal', '.overlay'],
       popupClose: ['.close', '.btn-close'],
       loading: ['.spinner', '.loading'],
     },
-    
+
     timing: {
       clickDelay: 80,
       pageLoadTimeout: 8000,
@@ -219,7 +219,7 @@ const SiteConfig = {
       retryDelay: 600,
       queueCheckInterval: 1000, // Check queue status every 1s
     },
-    
+
     retry: {
       maxAttempts: {
         clickStart: 4,
@@ -230,14 +230,14 @@ const SiteConfig = {
       },
       backoffMultiplier: 1.5,
     },
-    
+
     seatPreferences: {
       preferCenter: true,
       minSeatsDistance: 0,
       maxSeatsDistance: 2,
       grades: ['VIP', 'R', 'S', 'A'], // Preferred grades in order
     },
-    
+
     captcha: {
       selectors: ['#captcha-overlay'],
       input: ['#captcha-input'],
@@ -245,7 +245,7 @@ const SiteConfig = {
       canvas: ['#captcha-canvas'],
       solverEndpoint: 'http://localhost:5000/api/solve_captcha',
     },
-    
+
     features: {
       autoRefresh: false,
       handlePopups: true,
@@ -264,7 +264,12 @@ function getSiteConfig(hostname = window.location.hostname) {
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return SiteConfig.localhost;
   }
-  
+
+  // Use localhost config for ngrok remote server
+  if (hostname.includes('ngrok') || hostname.includes('974e36126faa')) {
+    return SiteConfig.localhost;
+  }
+
   // Default to mocktest for all other sites
   return SiteConfig.mocktest;
 }

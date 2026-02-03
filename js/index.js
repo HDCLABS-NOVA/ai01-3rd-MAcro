@@ -5,7 +5,7 @@ let currentFilter = 'all';
 
 async function loadPerformances() {
     try {
-        const response = await fetch('data/performances.json');
+        const response = await fetch('/api/performances');
         const data = await response.json();
         performances = data.performances;
         displayPerformances();

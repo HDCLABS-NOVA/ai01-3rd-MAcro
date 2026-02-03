@@ -27,6 +27,7 @@ DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
 USERS_FILE = os.path.join(DATA_DIR, "users.json")
+PERFORMANCES_FILE = os.path.join(DATA_DIR, "performances.json")
 
 # 사용자 파일이 없으면 초기화
 if not os.path.exists(USERS_FILE):
