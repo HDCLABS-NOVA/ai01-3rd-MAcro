@@ -228,6 +228,168 @@ async def get_log_file(filename: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"로그 파일 조회 실패: {str(e)}")
 
+# ============================================
+# 공연 오픈 시간 관리 API (새로 추가)
+# ============================================
+
+PERFORMANCES_FILE = os.path.join(DATA_DIR, "performances.json")
+
+class PerformanceUpdate(BaseModel):
+    open_time: Optional[str] = None
+    status: Optional[str] = None
+
+class PerformanceCreate(BaseModel):
+    id: str
+    title: str
+    category: str
+    venue: str
+    dates: List[str]
+    times: List[str]
+    grades: List[Dict[str, Any]]
+    image: str
+    description: str
+    open_time: str
+    status: str = "upcoming"
+
+@app.get("/api/performances")
+async def get_performances():
+    """모든 공연 목록을 반환합니다."""
+    try:
+        if not os.path.exists(PERFORMANCES_FILE):
+            return {"success": True, "performances": []}
+        
+        with open(PERFORMANCES_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        return {
+            "success": True,
+            "count": len(data.get("performances", [])),
+            "performances": data.get("performances", [])
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"공연 목록 조회 실패: {str(e)}")
+
+@app.get("/api/performances/{performance_id}")
+async def get_performance(performance_id: str):
+    """특정 공연의 정보를 반환합니다."""
+    try:
+        if not os.path.exists(PERFORMANCES_FILE):
+            raise HTTPException(status_code=404, detail="공연 데이터를 찾을 수 없습니다.")
+        
+        with open(PERFORMANCES_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        performance = next((p for p in data.get("performances", []) if p["id"] == performance_id), None)
+        
+        if not performance:
+            raise HTTPException(status_code=404, detail="해당 공연을 찾을 수 없습니다.")
+        
+        return {
+            "success": True,
+            "performance": performance
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"공연 조회 실패: {str(e)}")
+
+@app.put("/api/admin/performances/{performance_id}")
+async def update_performance(performance_id: str, update_data: PerformanceUpdate):
+    """공연의 오픈 시간 및 상태를 업데이트합니다."""
+    try:
+        if not os.path.exists(PERFORMANCES_FILE):
+            raise HTTPException(status_code=404, detail="공연 데이터를 찾을 수 없습니다.")
+        
+        with open(PERFORMANCES_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        performance = next((p for p in data.get("performances", []) if p["id"] == performance_id), None)
+        
+        if not performance:
+            raise HTTPException(status_code=404, detail="해당 공연을 찾을 수 없습니다.")
+        
+        # 업데이트
+        if update_data.open_time is not None:
+            performance["open_time"] = update_data.open_time
+        if update_data.status is not None:
+            performance["status"] = update_data.status
+        
+        # 파일 저장
+        with open(PERFORMANCES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        
+        return {
+            "success": True,
+            "message": "공연 정보가 업데이트되었습니다.",
+            "performance": performance
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"공연 업데이트 실패: {str(e)}")
+
+@app.post("/api/admin/performances")
+async def create_performance(performance_data: PerformanceCreate):
+    """새 공연을 추가합니다."""
+    try:
+        if not os.path.exists(PERFORMANCES_FILE):
+            data = {"performances": []}
+        else:
+            with open(PERFORMANCES_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        
+        # ID 중복 체크
+        if any(p["id"] == performance_data.id for p in data.get("performances", [])):
+            raise HTTPException(status_code=400, detail="이미 존재하는 공연 ID입니다.")
+        
+        # 새 공연 추가
+        new_performance = performance_data.dict()
+        data.setdefault("performances", []).append(new_performance)
+        
+        # 파일 저장
+        with open(PERFORMANCES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        
+        return {
+            "success": True,
+            "message": "새 공연이 추가되었습니다.",
+            "performance": new_performance
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"공연 추가 실패: {str(e)}")
+
+@app.delete("/api/admin/performances/{performance_id}")
+async def delete_performance(performance_id: str):
+    """공연을 삭제합니다."""
+    try:
+        if not os.path.exists(PERFORMANCES_FILE):
+            raise HTTPException(status_code=404, detail="공연 데이터를 찾을 수 없습니다.")
+        
+        with open(PERFORMANCES_FILE, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        original_count = len(data.get("performances", []))
+        data["performances"] = [p for p in data.get("performances", []) if p["id"] != performance_id]
+        
+        if len(data["performances"]) == original_count:
+            raise HTTPException(status_code=404, detail="해당 공연을 찾을 수 없습니다.")
+        
+        # 파일 저장
+        with open(PERFORMANCES_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        
+        return {
+            "success": True,
+            "message": "공연이 삭제되었습니다."
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"공연 삭제 실패: {str(e)}")
+
+
 # 정적 파일 서빙 (HTML, CSS, JS)
 app.mount("/", StaticFiles(directory=".", html=True), name="static")
 

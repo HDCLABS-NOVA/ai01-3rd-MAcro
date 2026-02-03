@@ -21,21 +21,126 @@ function displayPerformances() {
         ? performances
         : performances.filter(p => p.category === currentFilter);
 
-    listDiv.innerHTML = filtered.map(perf => `
-        <div class="performance-card" onclick="selectPerformance('${perf.id}')">
-          <div class="performance-card-image" style="background: linear-gradient(135deg, ${getRandomGradient()})">
-            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
-              ${getCategoryIcon(perf.category)}
+    const now = new Date();
+
+    listDiv.innerHTML = filtered.map(perf => {
+        const openTime = perf.open_time ? new Date(perf.open_time) : null;
+        const isOpen = !openTime || openTime <= now;
+        const statusBadge = getStatusBadge(perf, openTime, now);
+
+        // ✅ 변경: 오픈 전이어도 클릭 가능 (모두 selectPerformance로 이동)
+        const clickAction = `selectPerformance('${perf.id}')`;
+        const cardClass = 'performance-card'; // 잠금 스타일 제거
+
+        return `
+            <div class="${cardClass}" onclick="${clickAction}">
+              <div class="performance-card-image" style="background: linear-gradient(135deg, ${getRandomGradient()})">
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
+                  ${getCategoryIcon(perf.category)}
+                </div>
+                ${statusBadge}
+              </div>
+              <div class="performance-card-content">
+                <span class="performance-card-category">${getCategoryName(perf.category)}</span>
+                <h3 class="performance-card-title">${perf.title}</h3>
+                <p class="performance-card-venue">📍 ${perf.venue}</p>
+                <p class="performance-card-date">📅 ${formatDateKorean(perf.dates[0])} ${perf.dates.length > 1 ? '외 ' + (perf.dates.length - 1) + '일' : ''}</p>
+                ${getOpenTimeInfo(perf, openTime, now)}
+              </div>
             </div>
-          </div>
-          <div class="performance-card-content">
-            <span class="performance-card-category">${getCategoryName(perf.category)}</span>
-            <h3 class="performance-card-title">${perf.title}</h3>
-            <p class="performance-card-venue">📍 ${perf.venue}</p>
-            <p class="performance-card-date">📅 ${formatDateKorean(perf.dates[0])} ${perf.dates.length > 1 ? '외 ' + (perf.dates.length - 1) + '일' : ''}</p>
-          </div>
-        </div>
-      `).join('');
+        `;
+    }).join('');
+
+    // 카운트다운 타이머 시작
+    startCountdowns();
+}
+
+function getStatusBadge(perf, openTime, now) {
+    if (!openTime) return '';
+
+    if (openTime > now) {
+        return '<div class="performance-status-badge badge-upcoming">🔒 오픈 예정</div>';
+    } else {
+        return '<div class="performance-status-badge badge-open">✅ 판매중</div>';
+    }
+}
+
+function getOpenTimeInfo(perf, openTime, now) {
+    if (!openTime) return '';
+
+    if (openTime > now) {
+        return `
+            <div class="open-time-info">
+                <p class="open-time-label">⏰ 티켓 오픈</p>
+                <p class="open-time-date">${formatOpenTime(openTime)}</p>
+                <div class="countdown-timer" id="countdown_${perf.id}" data-open-time="${openTime.toISOString()}"></div>
+            </div>
+        `;
+    }
+    return '';
+}
+
+function formatOpenTime(date) {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? '오후' : '오전';
+    const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
+
+    return `${year}.${month}.${day} ${ampm} ${displayHours}:${minutes}`;
+}
+
+function startCountdowns() {
+    const countdownElements = document.querySelectorAll('.countdown-timer');
+
+    if (countdownElements.length === 0) return;
+
+    // 기존 인터벌 클리어
+    if (window.countdownInterval) {
+        clearInterval(window.countdownInterval);
+    }
+
+    // 1초마다 업데이트
+    window.countdownInterval = setInterval(() => {
+        const now = new Date();
+        let shouldReload = false;
+
+        countdownElements.forEach(elem => {
+            const openTime = new Date(elem.dataset.openTime);
+            const diff = openTime - now;
+
+            if (diff <= 0) {
+                elem.textContent = '🎉 판매 시작!';
+                elem.classList.add('countdown-finished');
+                shouldReload = true;
+            } else {
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                let text = '';
+                if (days > 0) text += `${days}일 `;
+                text += `${hours}시간 ${minutes}분 ${seconds}초`;
+
+                elem.textContent = text;
+
+                // 1시간 미만이면 강조
+                if (diff < 3600000) {
+                    elem.classList.add('countdown-urgent');
+                }
+            }
+        });
+
+        // 오픈 시간이 된 항목이 있으면 페이지 새로고침
+        if (shouldReload) {
+            setTimeout(() => {
+                loadPerformances();
+            }, 2000);
+        }
+    }, 1000);
 }
 
 function getCategoryIcon(category) {

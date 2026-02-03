@@ -152,7 +152,9 @@ function requireAdmin() {
     if (!isLoggedIn()) {
         showAlert('로그인이 필요한 서비스입니다.', 'warning');
         setTimeout(() => {
-            navigateTo('login.html?return=' + encodeURIComponent(window.location.pathname));
+            // 현재 페이지의 파일명만 추출 (예: /viewer.html -> viewer.html)
+            const currentPage = window.location.pathname.split('/').pop() || 'viewer.html';
+            navigateTo('login.html?return=' + encodeURIComponent(currentPage));
         }, 1000);
         return false;
     }

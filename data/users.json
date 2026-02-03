@@ -25,6 +25,13 @@
       "password": "manager1234",
       "name": "Manager",
       "phone": "01000000001"
+    },
+    {
+      "email": "test_bae@email.com",
+      "password": "11111111",
+      "name": "test_bae",
+      "phone": "01011112222",
+      "created_at": "2026-01-31T15:31:42.624358"
     }
   ]
 }
