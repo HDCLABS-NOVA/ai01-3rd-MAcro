@@ -2,6 +2,9 @@ import uvicorn
 from pyngrok import ngrok
 from dotenv import load_dotenv
 import os
+import webbrowser
+import time
+import threading
 
 # .env 파일 로드
 load_dotenv()
@@ -28,6 +31,16 @@ def start_ngrok():
     print(f" * ngrok 서비스 주소: {public_url}")
     print(f" * 위 주소로 접속하세요!")
     print("="*50 + "\n")
+    
+    # 브라우저 자동 실행을 위한 함수
+    def open_browser():
+        time.sleep(2) # 서버 시작 대기
+        print(f" * 브라우저를 엽니다: {public_url}")
+        webbrowser.open(public_url)
+    
+    # 별도 스레드에서 브라우저 실행
+    threading.Thread(target=open_browser, daemon=True).start()
+    
     return public_url
 
 if __name__ == "__main__":
