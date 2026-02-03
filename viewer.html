@@ -236,6 +236,7 @@
                         <div id="perf-tremor" style="display: none;">
                             <h4 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">🔬 호버 영역 미세 떨림
                                 분석 (10배 확대)</h4>
+                            <div id="perf-hover-buttons" style="margin-bottom: var(--spacing-sm);"></div>
                             <div class="tremor-view">
                                 <canvas id="perf-tremor-canvas" width="800" height="800"></canvas>
                                 <div id="perf-tremor-stats"></div>
@@ -285,6 +286,7 @@
                         <div id="book-tremor" style="display: none;">
                             <h4 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">🔬 호버 영역 미세 떨림
                                 분석 (10배 확대)</h4>
+                            <div id="book-hover-buttons" style="margin-bottom: var(--spacing-sm);"></div>
                             <div class="tremor-view">
                                 <canvas id="book-tremor-canvas" width="800" height="800"></canvas>
                                 <div id="book-tremor-stats"></div>
@@ -511,6 +513,22 @@
 
             drawCanvas('book', currentBookLog.stages[stage], 'book-canvas', 'book-tremor', 'book-tremor-canvas', 'book-tremor-stats');
             analyzeBotBehavior('book', currentBookLog.stages[stage], 'book-bot-analysis');
+        }
+
+        function switchHover(type, index, canvasId, statsId) {
+            const hovers = type === 'perf' ? perfHovers : bookHovers;
+            const segment = hovers[index];
+            if (segment) {
+                analyzeHoverTremor(segment, canvasId, statsId);
+
+                // 버튼 활성화 상태 업데이트
+                const buttonsId = type === 'perf' ? 'perf-hover-buttons' : 'book-hover-buttons';
+                const buttons = document.querySelectorAll(`#${buttonsId} .stage-btn`);
+                buttons.forEach((btn, idx) => {
+                    if (idx === index) btn.classList.add('active');
+                    else btn.classList.remove('active');
+                });
+            }
         }
 
         function drawCanvas(type, stageData, canvasId, tremorId, tremorCanvasId, tremorStatsId) {
@@ -790,10 +808,23 @@
             };
 
             // 호버 분석
+            const buttonsId = type === 'perf' ? 'perf-hover-buttons' : 'book-hover-buttons';
+            const buttonsContainer = document.getElementById(buttonsId);
+
             if (hovers.length > 0) {
                 document.getElementById(tremorId).style.display = 'block';
+
+                // 버튼 생성
+                buttonsContainer.innerHTML = hovers.map((_, idx) => `
+                    <button class="stage-btn ${idx === 0 ? 'active' : ''}" 
+                            onclick="switchHover('${type}', ${idx}, '${tremorCanvasId}', '${tremorStatsId}')">
+                        호버 #${idx + 1}
+                    </button>
+                `).join('');
+
                 analyzeHoverTremor(hovers[0], tremorCanvasId, tremorStatsId);
             } else {
+                if (buttonsContainer) buttonsContainer.innerHTML = '';
                 const container = document.getElementById(tremorId);
                 container.style.display = 'block';
                 document.getElementById(tremorStatsId).innerHTML = `
