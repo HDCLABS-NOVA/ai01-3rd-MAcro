@@ -519,7 +519,7 @@
             const hovers = type === 'perf' ? perfHovers : bookHovers;
             const segment = hovers[index];
             if (segment) {
-                analyzeHoverTremor(segment, canvasId, statsId);
+                analyzeHoverTremor(type, segment, canvasId, statsId);
 
                 // 버튼 활성화 상태 업데이트
                 const buttonsId = type === 'perf' ? 'perf-hover-buttons' : 'book-hover-buttons';
@@ -813,6 +813,7 @@
 
             if (hovers.length > 0) {
                 document.getElementById(tremorId).style.display = 'block';
+                document.getElementById(tremorCanvasId).style.display = 'block';
 
                 // 버튼 생성
                 buttonsContainer.innerHTML = hovers.map((_, idx) => `
@@ -822,7 +823,7 @@
                     </button>
                 `).join('');
 
-                analyzeHoverTremor(hovers[0], tremorCanvasId, tremorStatsId);
+                analyzeHoverTremor(type, hovers[0], tremorCanvasId, tremorStatsId);
             } else {
                 if (buttonsContainer) buttonsContainer.innerHTML = '';
                 const container = document.getElementById(tremorId);
@@ -865,11 +866,12 @@
             return count > 0 ? totalSpeed / count : 0;
         }
 
-        function analyzeHoverTremor(segment, canvasId, statsId) {
+        function analyzeHoverTremor(type, segment, canvasId, statsId) {
             if (!segment || segment.length < 3) return;
 
             const canvas = document.getElementById(canvasId);
             const ctx = canvas.getContext('2d');
+            const tooltip = document.getElementById(type === 'perf' ? 'perf-tooltip' : 'book-tooltip');
 
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -881,19 +883,36 @@
             const offsetX = canvas.width / 2;
             const offsetY = canvas.height / 2;
 
-            // 격자
+            // 격자 및 숫자 표시
             ctx.strokeStyle = '#eee';
             ctx.lineWidth = 1;
-            for (var i = -10; i <= 10; i++) {
+            ctx.fillStyle = '#aaa';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+
+            for (var i = -20; i <= 20; i++) { // 범위 확장
+                if (i === 0) continue;
+
+                // 세로선
+                var x = offsetX + i * 20;
                 ctx.beginPath();
-                ctx.moveTo(offsetX + i * 20, 0);
-                ctx.lineTo(offsetX + i * 20, canvas.height);
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
                 ctx.stroke();
 
+                // 가로선
+                var y = offsetY + i * 20;
                 ctx.beginPath();
-                ctx.moveTo(0, offsetY + i * 20);
-                ctx.lineTo(canvas.width, offsetY + i * 20);
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
                 ctx.stroke();
+
+                // 숫자 표시 (실제 픽셀 단위: scale=10 이므로 격자 1칸(20px) = 2px)
+                if (i % 2 === 0) { // 너무 빽빽하지 않게
+                    ctx.fillText(i * 2, x, offsetY + 5);
+                    ctx.fillText(i * 2, offsetX + 5, y);
+                }
             }
 
             // 중심선
@@ -913,9 +932,13 @@
             ctx.lineWidth = 2;
             ctx.beginPath();
 
+            // 포인트 좌표 저장을 위한 배열
+            const displayPoints = [];
+
             segment.forEach((point, index) => {
                 var x = offsetX + (point[0] - centerX) * scale;
                 var y = offsetY + (point[1] - centerY) * scale;
+                displayPoints.push({ x: x, y: y, original: point });
 
                 if (index === 0) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
@@ -923,15 +946,46 @@
             ctx.stroke();
 
             // 포인트
-            segment.forEach(point => {
-                var x = offsetX + (point[0] - centerX) * scale;
-                var y = offsetY + (point[1] - centerY) * scale;
-
+            displayPoints.forEach(p => {
                 ctx.fillStyle = '#FF9800';
                 ctx.beginPath();
-                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); // 크기 약간 키움
                 ctx.fill();
             });
+
+            // 캔버스 이벤트 핸들러 (툴팁)
+            canvas.onmousemove = function (e) {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
+                const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+                var found = null;
+                var minInfo = 1000;
+
+                displayPoints.forEach((p, idx) => {
+                    const dist = Math.sqrt(Math.pow(mouseX - p.x, 2) + Math.pow(mouseY - p.y, 2));
+                    if (dist < 10) {
+                        found = { point: p, index: idx };
+                    }
+                });
+
+                if (found) {
+                    tooltip.innerHTML = `
+                        <strong>📍 호버 포인트 #${found.index + 1}</strong><br>
+                        상대 좌표: (${(found.point.original[0] - centerX).toFixed(2)}, ${(found.point.original[1] - centerY).toFixed(2)})<br>
+                        절대 좌표: (${found.point.original[0].toFixed(1)}, ${found.point.original[1].toFixed(1)})
+                    `;
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = (e.clientX + 15) + 'px';
+                    tooltip.style.top = (e.clientY + 15) + 'px';
+                } else {
+                    tooltip.style.display = 'none';
+                }
+            };
+
+            canvas.onmouseleave = function () {
+                tooltip.style.display = 'none';
+            };
 
             // 통계
             var distances = [];
