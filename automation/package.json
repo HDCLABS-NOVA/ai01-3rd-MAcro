@@ -1,0 +1,9 @@
+{
+  "name": "macro-bot",
+  "version": "1.0.0",
+  "description": "Automated ticketing macro using Puppeteer",
+  "main": "macro_bot.js",
+  "dependencies": {
+    "puppeteer": "^21.0.0"
+  }
+}

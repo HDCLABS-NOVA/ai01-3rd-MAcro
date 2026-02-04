@@ -32,6 +32,34 @@
       "name": "test_bae",
       "phone": "01011112222",
       "created_at": "2026-01-31T15:31:42.624358"
+    },
+    {
+      "email": "macro78979@email.com",
+      "password": "password123",
+      "name": "MacroBot_1",
+      "phone": "01012345678",
+      "created_at": "2026-02-04T19:07:22.224894"
+    },
+    {
+      "email": "macro35188@email.com",
+      "password": "password123",
+      "name": "MacroBot_1",
+      "phone": "01012345678",
+      "created_at": "2026-02-04T19:16:27.590452"
+    },
+    {
+      "email": "macro@email.com",
+      "password": "1",
+      "name": "MacroUser",
+      "phone": "010-0000-0000",
+      "created_at": "2026-02-04T19:22:00.000000"
+    },
+    {
+      "email": "human@email.com",
+      "password": "1",
+      "name": "HumanUser",
+      "phone": "010-9999-9999",
+      "created_at": "2026-02-04T19:48:00.000000"
     }
   ]
 }

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 import os
 import json
+import re
 from datetime import datetime
 
 app = FastAPI(title="Ticket Booking System")
@@ -165,23 +166,57 @@ async def save_log(log_data: LogData):
     """예매 로그 데이터를 저장합니다."""
     try:
         # 메타데이터에서 필요한 정보 추출
-        flow_id = log_data.metadata.get("flow_id", f"flow_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
-        performance_id = log_data.metadata.get("performance_id", "unknown")
-        payment_success = log_data.metadata.get("payment_success", False)
+        metadata = log_data.metadata
+        
+        # flow_id 추출 (필수)
+        flow_id = metadata.get("flow_id", f"flow_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
+        
+        # 공연 ID 추출
+        performance_id = metadata.get("performance_id", "UNKNOWN")
         
         # 날짜 형식: YYYYMMDD
         date_str = datetime.now().strftime('%Y%m%d')
         
-        # 결제 성공 여부: success 또는 fail
-        payment_status = "success" if payment_success else "fail"
+        # 결제 성공 여부 판단
+        # is_completed와 completion_status를 우선 사용
+        is_completed = metadata.get("is_completed", False)
+        completion_status = metadata.get("completion_status", "unknown")
         
+        # 결제 성공 여부 결정 로직
+        if is_completed and completion_status == "success":
+            payment_status = "success"
+        elif completion_status == "abandoned":
+            payment_status = "abandoned"
+        elif completion_status == "failed":
+            payment_status = "failed"
+        else:
+            # 하위 호환성: payment_success 필드도 확인
+            payment_success = metadata.get("payment_success", False)
+            payment_status = "success" if payment_success else "failed"
+        
+        # 📂 분류 저장 로직 추가 (macro/human 등)
+        bot_type = metadata.get("bot_type", "")
+        current_logs_dir = os.path.join(LOGS_DIR, bot_type) if bot_type else LOGS_DIR
+        os.makedirs(current_logs_dir, exist_ok=True)
+
         # 파일명 형식: [날짜]_[공연ID]_[flow_id]_[결제성공여부].json
-        filename = f"{date_str}_{performance_id}_{flow_id}_{payment_status}.json"
-        filepath = os.path.join(LOGS_DIR, filename)
+        # 예: 20260204_perf001_flow_20260204_abc123_success.json
+        
+        # 파일명 안전하게 처리 (특수문자 제거)
+        def sanitize_filename(s):
+            return re.sub(r'[^a-zA-Z0-9_\-]', '', str(s))
+            
+        safe_perf_id = sanitize_filename(performance_id)
+        safe_flow_id = sanitize_filename(flow_id)
+        
+        filename = f"{date_str}_{safe_perf_id}_{safe_flow_id}_{payment_status}.json"
+        filepath = os.path.join(current_logs_dir, filename)
         
         # JSON 파일로 저장
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(log_data.dict(), f, ensure_ascii=False, indent=2)
+        
+        print(f"✅ 로그 저장 성공: {filename}")
         
         return {
             "success": True,
@@ -189,6 +224,11 @@ async def save_log(log_data: LogData):
             "message": "로그가 성공적으로 저장되었습니다."
         }
     except Exception as e:
+        import traceback
+        error_msg = f"로그 저장 실패: {str(e)}\n{traceback.format_exc()}"
+        print(f"❌ {error_msg}")
+        with open("server_error.txt", "a", encoding="utf-8") as err_file:
+            err_file.write(f"[{datetime.now()}] {error_msg}\n")
         raise HTTPException(status_code=500, detail=f"로그 저장 실패: {str(e)}")
 
 @app.get("/api/logs")

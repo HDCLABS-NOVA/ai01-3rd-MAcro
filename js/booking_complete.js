@@ -4,6 +4,10 @@ const bookingId = getQueryParam('id');
 const flowData = getFlowData();
 const currentUser = getCurrentUser();
 
+// 로그 로드 및 단계 시작
+loadLogFromSession();
+logStageEntry('complete');
+
 if (!bookingId || !flowData) {
     showAlert('예매 정보를 찾을 수 없습니다.', 'error');
     setTimeout(() => navigateTo('index.html'), 2000);
@@ -21,8 +25,23 @@ if (!bookingId || !flowData) {
 
     document.getElementById('user-email').textContent = currentUser.email;
 
+    // 로그 단계 종료
+    logStageExit('complete', {
+        booking_id: bookingId,
+        total_price: totalPrice + deliveryFee,
+        completion_time: getISOTimestamp()
+    });
+
+    // 🔥 핵심: 최종 로그 전송 (성공)
+    finalizeLog(true, bookingId).then(result => {
+        console.log('✅ 로그 전송 완료:', result);
+    }).catch(error => {
+        console.error('❌ 로그 전송 실패:', error);
+    });
+
     // 예매 완료 후 플로우 데이터 정리
     setTimeout(() => {
         clearFlowData();
+        sessionStorage.removeItem('bookingLog'); // 로그도 정리
     }, 5000);
 }
