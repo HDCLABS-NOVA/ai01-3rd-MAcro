@@ -275,8 +275,17 @@ async def get_log_file(filename: str):
 PERFORMANCES_FILE = os.path.join(DATA_DIR, "performances.json")
 
 class PerformanceUpdate(BaseModel):
+    id: Optional[str] = None
+    title: Optional[str] = None
+    category: Optional[str] = None
+    venue: Optional[str] = None
+    dates: Optional[List[str]] = None
+    times: Optional[List[str]] = None
+    description: Optional[str] = None
     open_time: Optional[str] = None
     status: Optional[str] = None
+
+
 
 class PerformanceCreate(BaseModel):
     id: str
@@ -335,7 +344,7 @@ async def get_performance(performance_id: str):
 
 @app.put("/api/admin/performances/{performance_id}")
 async def update_performance(performance_id: str, update_data: PerformanceUpdate):
-    """공연의 오픈 시간 및 상태를 업데이트합니다."""
+    """공연 정보를 업데이트합니다. (ID 변경 포함)"""
     try:
         if not os.path.exists(PERFORMANCES_FILE):
             raise HTTPException(status_code=404, detail="공연 데이터를 찾을 수 없습니다.")
@@ -343,12 +352,35 @@ async def update_performance(performance_id: str, update_data: PerformanceUpdate
         with open(PERFORMANCES_FILE, 'r', encoding='utf-8') as f:
             data = json.load(f)
         
-        performance = next((p for p in data.get("performances", []) if p["id"] == performance_id), None)
+        # 대상 공연 찾기
+        target_idx = -1
+        for idx, p in enumerate(data.get("performances", [])):
+            if p["id"] == performance_id:
+                target_idx = idx
+                break
         
-        if not performance:
+        if target_idx == -1:
             raise HTTPException(status_code=404, detail="해당 공연을 찾을 수 없습니다.")
         
-        # 업데이트
+        performance = data["performances"][target_idx]
+        
+        # ID는 수정 불가 (코드 제거)
+
+        # 나머지 필드 업데이트
+
+        # 나머지 필드 업데이트
+        if update_data.title is not None:
+            performance["title"] = update_data.title
+        if update_data.category is not None:
+            performance["category"] = update_data.category
+        if update_data.venue is not None:
+            performance["venue"] = update_data.venue
+        if update_data.dates is not None:
+            performance["dates"] = update_data.dates
+        if update_data.times is not None:
+            performance["times"] = update_data.times
+        if update_data.description is not None:
+            performance["description"] = update_data.description
         if update_data.open_time is not None:
             performance["open_time"] = update_data.open_time
         if update_data.status is not None:

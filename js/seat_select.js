@@ -309,7 +309,7 @@ function toggleSeat(seatId, grade, price, element, event) {
         // 선택 시도 - 35% 확률로 이미 선택된 좌석으로 변경
         if (Math.random() < 0.35) {
             // 다른 사람이 먼저 선택한 것처럼 처리
-            showAlert('이미 선택된 좌석입니다.', 'error');
+            showSeatAlert('선택 불가', '이미 선택된 좌석입니다.<br>다른 좌석을 선택해주세요.');
 
             // 좌석을 매진 상태로 변경
             element.classList.remove('available');
@@ -430,3 +430,43 @@ function confirmSeats() {
 }
 
 createSeatGrid();
+
+// --- Custom Alert Modal Logic ---
+function showSeatAlert(title, message, callback) {
+    const overlay = document.getElementById('alert-overlay');
+    const titleEl = document.getElementById('alert-modal-title');
+    const msgEl = document.getElementById('alert-modal-message');
+    const btn = document.getElementById('alert-confirm-btn');
+
+    if (overlay && titleEl && msgEl && btn) {
+        titleEl.textContent = title;
+        msgEl.innerHTML = message; // Allow HTML for newlines
+
+        // Remove old event listeners by cloning
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+
+        newBtn.addEventListener('click', () => {
+            overlay.classList.remove('active');
+            if (callback) callback();
+        });
+
+        overlay.classList.add('active');
+    } else {
+        // Fallback
+        alert(message);
+        if (callback) callback();
+    }
+}
+
+// Close alert on click outside
+document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('alert-overlay');
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove('active');
+            }
+        });
+    }
+});

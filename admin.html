@@ -44,8 +44,149 @@
         </section>
     </div>
 
-    <!-- Scripts -->
-    <script src="js/admin.js"></script>
+    <!-- Add Performance Modal -->
+    <div id="addPerformanceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ 새 공연 추가</h2>
+            </div>
+            <div class="modal-body">
+                <form id="addPerformanceForm">
+                    <div class="form-group">
+                        <label for="perf_id">공연 ID (영문/숫자, 고유값)</label>
+                        <input type="text" id="perf_id" name="id" placeholder="예: perf005" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="perf_title">공연명</label>
+                        <input type="text" id="perf_title" name="title" placeholder="예: 2026 월드 투어" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="perf_category">카테고리</label>
+                        <select id="perf_category" name="category" required>
+                            <option value="concert">콘서트 (Concert)</option>
+                            <option value="musical">뮤지컬 (Musical)</option>
+                            <option value="sports">스포츠 (Sports)</option>
+                            <option value="exhibition">전시 (Exhibition)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="perf_venue">장소</label>
+                        <input type="text" id="perf_venue" name="venue" placeholder="예: 예술의 전당" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="perf_dates">공연 날짜 (콤마로 구분)</label>
+                        <input type="text" id="perf_dates" name="dates" placeholder="예: 2026-03-01, 2026-03-02"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="perf_times">공연 시간 (콤마로 구분)</label>
+                        <input type="text" id="perf_times" name="times" placeholder="예: 19:30, 14:00" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="perf_open_time">티켓 오픈 시간</label>
+                        <input type="datetime-local" id="perf_open_time" name="open_time" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="perf_desc">설명</label>
+                        <textarea id="perf_desc" name="description" placeholder="공연에 대한 간단한 설명을 입력하세요"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="closeModalBtn">취소</button>
+                <button type="submit" form="addPerformanceForm" class="btn btn-primary">공연 추가</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Performance Modal -->
+    <div id="editPerformanceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>✏️ 공연 정보 수정</h2>
+            </div>
+            <div class="modal-body">
+                <form id="editPerformanceForm">
+                    <div class="form-group">
+                        <label for="edit_perf_id">공연 ID (수정 불가)</label>
+                        <input type="text" id="edit_perf_id" name="id" readonly
+                            style="background-color: #f3f4f6; cursor: not-allowed;">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_perf_title">공연명</label>
+                        <input type="text" id="edit_perf_title" name="title" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_perf_category">카테고리</label>
+                        <select id="edit_perf_category" name="category" required>
+                            <option value="concert">콘서트 (Concert)</option>
+                            <option value="musical">뮤지컬 (Musical)</option>
+                            <option value="sports">스포츠 (Sports)</option>
+                            <option value="exhibition">전시 (Exhibition)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_perf_venue">장소</label>
+                        <input type="text" id="edit_perf_venue" name="venue" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_perf_dates">공연 날짜 (콤마로 구분)</label>
+                        <input type="text" id="edit_perf_dates" name="dates" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_perf_times">공연 시간 (콤마로 구분)</label>
+                        <input type="text" id="edit_perf_times" name="times" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_perf_open_time">티켓 오픈 시간</label>
+                        <input type="datetime-local" id="edit_perf_open_time" name="open_time" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_perf_status">상태</label>
+                        <select id="edit_perf_status" name="status" required>
+                            <option value="upcoming">오픈 예정</option>
+                            <option value="open">판매중</option>
+                            <option value="closed">판매 종료</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_perf_desc">설명</label>
+                        <textarea id="edit_perf_desc" name="description"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="closeEditModalBtn">취소</button>
+                <button type="submit" form="editPerformanceForm" class="btn btn-primary">수정 저장</button>
+            </div>
+        </div>
+    </div>
+    <!-- Cache-busting -->
+    <script src="js/admin.js?v=${new Date().getTime()}"></script>
+    <script>
+        // 강제로 JS 다시 로드 (HTML 레벨에서 처리)
+        const script = document.createElement('script');
+        script.src = 'js/admin.js?v=' + new Date().getTime();
+        document.body.appendChild(script);
+
+        // 기존 script 태그 제거 (중복 실행 방지 위해 위쪽 static script 태그는 지우는 게 좋지만, 
+        // 안전하게 동적으로 추가된 것만 실행되도록 유도)
+    </script>
 </body>
 
 </html>
