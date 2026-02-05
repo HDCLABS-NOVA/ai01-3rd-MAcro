@@ -18,12 +18,16 @@ def start_ngrok():
     # ngrok authtoken 및 지역(region) 설정
     auth_token = os.getenv("NGROK_AUTHTOKEN")
     if auth_token:
-        # 지역을 'jp'로 설정하여 속도 개선
         ngrok.set_auth_token(auth_token)
     
+    # 고정 도메인 설정 확인
+    ngrok_domain = os.getenv("NGROK_DOMAIN")
+    
     # HTTP 터널 열기 (포트 8000)
-    # pyngrok 최신 버전에서는 connect()에 region을 직접 넣으면 에러가 날 수 있으므로 기본 설정 사용하거나 config로 처리
-    public_url = ngrok.connect(8000).public_url
+    if ngrok_domain:
+        public_url = ngrok.connect(8000, domain=ngrok_domain).public_url
+    else:
+        public_url = ngrok.connect(8000).public_url
     print(f"\n" + "="*50)
     print(f" * ngrok 서비스 주소: {public_url}")
     print(f" * 위 주소로 접속하세요!")
