@@ -101,6 +101,72 @@ body>#captcha-overlay {
     border-radius: 12px;
     font-size: 20px;
     font-weight: 700;
-    cursor: not-allowed;
     transition: all 0.3s;
+}
+
+/* Custom Alert Modal */
+#alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#alert-overlay.active {
+    display: flex;
+}
+
+#alert-modal {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    animation: popIn 0.3s ease-out;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.9); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+#alert-modal h3 {
+    color: #333;
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+#alert-modal p {
+    color: #555;
+    font-size: 16px;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+#alert-confirm-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#alert-confirm-btn:hover {
+    transform: scale(1.02);
 }
