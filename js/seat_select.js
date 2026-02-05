@@ -251,10 +251,14 @@ async function createSeatGrid() {
                     seat.style.borderColor = gradeColor.border;
                     seat.style.color = gradeColor.color;
 
-                    seat.onmouseenter = function () {
+                    seat.onmouseenter = function (event) {
                         if (!this.classList.contains('selected')) {
                             this.style.background = gradeColor.hoverBg;
                             this.style.color = 'white';
+                        }
+                        // 🏷️ Hover 기록 추가
+                        if (typeof trackHover === 'function') {
+                            trackHover(event, { target: seatId, grade: grade.name });
                         }
                     };
                     seat.onmouseleave = function () {
@@ -264,7 +268,7 @@ async function createSeatGrid() {
                         }
                     };
 
-                    seat.onclick = function () { toggleSeat(seatId, grade.name, grade.price, this); };
+                    seat.onclick = function (event) { toggleSeat(seatId, grade.name, grade.price, this, event); };
                 }
 
                 rowContainer.appendChild(seat);
@@ -284,7 +288,7 @@ async function createSeatGrid() {
     });
 }
 
-function toggleSeat(seatId, grade, price, element) {
+function toggleSeat(seatId, grade, price, element, event) {
     const idx = selectedSeats.findIndex(s => s.id === seatId);
 
     if (idx > -1) {
@@ -294,9 +298,13 @@ function toggleSeat(seatId, grade, price, element) {
         element.classList.add('available');
 
         const gradeColor = gradeColors[grade];
-        element.style.background = gradeColor.bg;
         element.style.color = gradeColor.color;
         element.style.boxShadow = 'none';
+
+        // 🏷️ 선택 해제 클릭 기록
+        if (typeof trackClick === 'function' && event) {
+            trackClick(event, { target: seatId, grade, price, action: 'deselect' });
+        }
     } else {
         // 선택 시도 - 35% 확률로 이미 선택된 좌석으로 변경
         if (Math.random() < 0.35) {
@@ -313,8 +321,10 @@ function toggleSeat(seatId, grade, price, element) {
             element.style.color = '';
             element.style.boxShadow = '';
 
-            // 로그 기록
-            trackClick(event, { target: seatId, grade, price, action: 'already_taken', result: 'failed' });
+            // 로그 기록 (이미 선택된 좌석 시도)
+            if (typeof trackClick === 'function' && event) {
+                trackClick(event, { target: seatId, grade, price, action: 'already_taken', result: 'failed' });
+            }
             return;
         }
 
@@ -331,7 +341,9 @@ function toggleSeat(seatId, grade, price, element) {
         element.style.color = 'white';
         element.style.boxShadow = '0 4px 12px rgba(255, 61, 127, 0.4)';
 
-        trackClick(event, { target: seatId, grade, price, action: 'select', result: 'success' });
+        if (typeof trackClick === 'function' && event) {
+            trackClick(event, { target: seatId, grade, price, action: 'select', result: 'success' });
+        }
     }
 
     updateSummary();
@@ -409,10 +421,8 @@ function confirmSeats() {
 
     logStageExit('seat', {
         selected_seats: selectedSeats.map(s => s.id),
-        seat_details: selectedSeats,
-        clicks: [],
-        hovers: [],
-        seat_taken_events: []
+        seat_details: selectedSeats
+        // ⚠️ 여기서 빈 배열로 덮어쓰던 clicks, hovers 제거
     });
 
     disableMouseTracking();

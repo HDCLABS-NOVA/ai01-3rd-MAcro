@@ -17,10 +17,13 @@ async function initLogger(performanceId = '', performanceTitle = '') {
     const flowId = `flow_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}_${generateRandomId('', 6)}`;
     const sessionId = `sess_${generateRandomId('', 7)}`;
 
+    const botType = sessionStorage.getItem('bot_type') || '';
+
     logData = {
         metadata: {
             flow_id: flowId,
             session_id: sessionId,
+            bot_type: botType, // 🏷️ Persist bot type
             user_id: currentUser?.userId || '',
             user_email: currentUser?.email || '',
             user_ip: userIP,
@@ -131,23 +134,56 @@ function logStageExit(stageName, additionalData = {}) {
 function trackMouseMove(event) {
     const now = Date.now();
 
-    // 샘플링: 100ms마다 기록
+    // 샘플링: 100ms마다 기록 (사람다움을 측정하기 좋은 간격)
     if (now - lastMouseMoveTime < 100) return;
 
     lastMouseMoveTime = now;
 
     const relativeTime = stageStartTime ? now - stageStartTime : 0;
-    // 정규화된 좌표 (0~1 범위)와 실제 픽셀 좌표 모두 저장
     const nx = event.clientX / window.innerWidth;
     const ny = event.clientY / window.innerHeight;
-    mouseTrajectory.push([event.clientX, event.clientY, relativeTime, nx, ny]);
+    mouseTrajectory.push([event.clientX, event.clientY, relativeTime, nx.toFixed(4), ny.toFixed(4)]);
 }
 
 /**
- * 클릭 이벤트 추적
+ * 호버(머무름) 이벤트 추적
+ */
+function trackHover(event, targetInfo = {}) {
+    if (!logData || !currentStage) return;
+
+    const hoverData = {
+        target: targetInfo.target || event.target.id || event.target.className,
+        x: event.clientX,
+        y: event.clientY,
+        timestamp: stageStartTime ? Date.now() - stageStartTime : 0,
+        ...targetInfo
+    };
+
+    if (!logData.stages[currentStage].hovers) {
+        logData.stages[currentStage].hovers = [];
+    }
+
+    logData.stages[currentStage].hovers.push(hoverData);
+    saveLogToSession();
+}
+
+// 클릭 지속 시간 측정을 위한 변수
+let lastMouseDownTime = 0;
+
+/**
+ * mousedown 시점 기록
+ */
+function handleMouseDown(event) {
+    lastMouseDownTime = Date.now();
+}
+
+/**
+ * 클릭 이벤트 추적 (mouseup 시 호출되거나 click 시 호출)
  */
 function trackClick(event, targetInfo = {}) {
     if (!logData || !currentStage) return;
+
+    const clickDuration = lastMouseDownTime > 0 ? Date.now() - lastMouseDownTime : 0;
 
     const clickData = {
         x: event.clientX,
@@ -156,8 +192,9 @@ function trackClick(event, targetInfo = {}) {
         ny: (event.clientY / window.innerHeight).toFixed(4),
         timestamp: stageStartTime ? Date.now() - stageStartTime : 0,
         is_trusted: event.isTrusted,
-        click_duration: 0,
-        is_integer: true,
+        click_duration: clickDuration,
+        button: event.button, // 0: 좌클릭, 2: 우클릭
+        is_integer: Number.isInteger(event.clientX) && Number.isInteger(event.clientY),
         ...targetInfo
     };
 
@@ -166,8 +203,11 @@ function trackClick(event, targetInfo = {}) {
     }
 
     logData.stages[currentStage].clicks.push(clickData);
+    lastMouseDownTime = 0; // 초기화
     saveLogToSession();
 }
+
+
 
 /**
  * 메타데이터 업데이트
@@ -246,6 +286,7 @@ async function sendLogToServer() {
  */
 function enableMouseTracking() {
     document.addEventListener('mousemove', trackMouseMove);
+    document.addEventListener('mousedown', handleMouseDown);
 }
 
 /**
@@ -253,4 +294,5 @@ function enableMouseTracking() {
  */
 function disableMouseTracking() {
     document.removeEventListener('mousemove', trackMouseMove);
+    document.removeEventListener('mousedown', handleMouseDown);
 }

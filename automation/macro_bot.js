@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 
 // Configuration
 const BASE_URL = 'http://localhost:8000/';
-const LOOP_COUNT = 10; // 🔄 Set this to the number of times you want to run
+const LOOP_COUNT = 300; // 🔄 Set this to the number of times you want to run
 const HEADLESS_MODE = true; // Set true for faster background execution
 
 // Utils
@@ -48,6 +48,12 @@ async function runBotIteration(iteration) {
 
     // 1. Check ngrok
     await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
+
+    // 🏷️ Set bot type globally for the session
+    await page.evaluate(() => {
+      sessionStorage.setItem('bot_type', 'macro');
+    });
+
     const ngrokBtn = await page.$('button');
     if (ngrokBtn) {
       const btnText = await page.evaluate(el => el.textContent, ngrokBtn);
@@ -133,6 +139,12 @@ async function runBotIteration(iteration) {
       }
     }
 
+    // Add safe dialog handler (Moved before loop to catch alerts during selection)
+    page.on('dialog', async dialog => {
+      console.log(`[${iteration}] 💬 Alert detected: ${dialog.message()}`);
+      await dialog.dismiss();
+    });
+
     // Pick Seat
     let seatSelected = false;
     let attempts = 0;
@@ -141,21 +153,19 @@ async function runBotIteration(iteration) {
       if (availableSeats.length === 0) break;
       const targetSeat = availableSeats[Math.floor(Math.random() * Math.min(10, availableSeats.length))];
 
-      // Safety check if seat exists
       if (!targetSeat) break;
 
-      await targetSeat.click();
-      await randomDelay(100, 300);
-      const isSelected = await page.evaluate(el => el.classList.contains('selected'), targetSeat);
-      if (isSelected) seatSelected = true;
-      else attempts++;
-    }
+      // 🤖 Pure Macro: Instant click with 1ms delay (Unbeatable speed)
+      await targetSeat.click({ delay: 1 });
+      await randomDelay(50, 100); // Super fast retry
 
-    // Add safe dialog handler
-    page.on('dialog', async dialog => {
-      console.log(`[${iteration}] 💬 Alert detected: ${dialog.message()}`);
-      await dialog.dismiss();
-    });
+      const isSelected = await page.evaluate(el => el.classList.contains('selected'), targetSeat);
+      if (isSelected) {
+        seatSelected = true;
+      } else {
+        attempts++;
+      }
+    }
 
     if (seatSelected) {
       console.log(`[${iteration}] ✅ Seat selected. Clicking Next...`);

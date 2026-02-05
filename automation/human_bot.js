@@ -2,29 +2,39 @@ const puppeteer = require('puppeteer');
 
 // Configuration
 const BASE_URL = 'http://localhost:8000/';
-const LOOP_COUNT = 1;
-const HEADLESS_MODE = false;
+const LOOP_COUNT = 300; // 🔄 Set this to the number of times you want to run
+const HEADLESS_MODE = true; // Set true for background execution
 
 // Utils
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const randomDelay = (min, max) => delay(Math.floor(Math.random() * (max - min + 1)) + min);
 
-// Simulate Human Mouse Movement (Bezier Curve)
-async function humanMove(page, x, y) {
-  await page.mouse.move(x, y, { steps: 25 + Math.floor(Math.random() * 20) });
+// Simulate Expert Human Mouse Movement (Bezier Curve for Organic Path)
+async function humanMove(page, targetX, targetY) {
+  const start = await page.evaluate(() => ({ x: window.innerWidth / 2, y: window.innerHeight / 2 }));
+  const cp1 = {
+    x: start.x + (targetX - start.x) * Math.random(),
+    y: start.y + (targetY - start.y) * Math.random()
+  };
+
+  const steps = 6;
+  for (let i = 0; i <= 1; i += 1 / steps) {
+    const x = Math.pow(1 - i, 2) * start.x + 2 * (1 - i) * i * cp1.x + Math.pow(i, 2) * targetX;
+    const y = Math.pow(1 - i, 2) * start.y + 2 * (1 - i) * i * cp1.y + Math.pow(i, 2) * targetY;
+    await page.mouse.move(x, y);
+  }
 }
 
 async function runHumanIteration(iteration) {
   const USER_EMAIL = 'human@email.com';
   const USER_PASS = '1';
-  const USER_NAME = 'HumanUser';
 
-  console.log(`\n👨‍💼 Starting Human Iteration ${iteration} / ${LOOP_COUNT}`);
+  console.log(`\n👨‍💼 Starting Expert Human Iteration ${iteration} / ${LOOP_COUNT}`);
 
   const browser = await puppeteer.launch({
     headless: HEADLESS_MODE,
     defaultViewport: { width: 1280, height: 800 },
-    args: ['--start-maximized']
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
   try {
@@ -32,138 +42,123 @@ async function runHumanIteration(iteration) {
     const page = await context.newPage();
 
     console.log(`[${iteration}] TARGET: ${BASE_URL}`);
-
-    // 1. Visit Site
     await page.goto(BASE_URL, { waitUntil: 'networkidle2' });
-    await randomDelay(1500, 3000); // "Reading the page"
 
-    // 2. Login
-    console.log(`[${iteration}] 🔑 Logging in (human style)...`);
+    await page.evaluate(() => { sessionStorage.setItem('bot_type', 'human'); });
+
+    // Login
     await page.goto(`${BASE_URL}login.html`, { waitUntil: 'networkidle2' });
-
-    await randomDelay(1000, 2000);
-    await page.type('#email', USER_EMAIL, { delay: 100 + Math.random() * 100 }); // Typing speed
-    await randomDelay(500, 1000);
-    await page.type('#password', USER_PASS, { delay: 150 + Math.random() * 100 });
-
-    await randomDelay(800, 1500);
+    await page.type('#email', USER_EMAIL, { delay: 40 + Math.random() * 40 });
+    await page.type('#password', USER_PASS, { delay: 40 + Math.random() * 40 });
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
       page.click('button[type="submit"]')
     ]);
 
-    // 3. Select Performance
-    console.log(`[${iteration}] 🎭 Browsing performances...`);
-    await randomDelay(2000, 4000);
-    const perfCard = await page.$('.performance-card');
-    if (perfCard) {
-      await Promise.all([
-        page.waitForNavigation({ waitUntil: 'networkidle2' }),
-        perfCard.click()
-      ]);
-    }
+    // Perf Page
+    await page.waitForSelector('.performance-card');
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'networkidle2' }),
+      page.click('.performance-card')
+    ]);
 
-    // 🏷️ Tag this log as 'human'
-    await page.evaluate(() => {
-      if (typeof updateMetadata === 'function') {
-        updateMetadata({ bot_type: 'human' });
-      }
-    });
-
-    // 4. Select Date/Time
-    console.log(`[${iteration}] 📅 Selecting date and time...`);
+    // Date/Time
     await page.waitForSelector('.date-btn:not([disabled])');
-    const dateBtns = await page.$$('.date-btn:not([disabled])');
-    if (dateBtns.length > 0) {
-      await dateBtns[0].click();
-    }
-    await randomDelay(1000, 2000);
-
+    await page.click('.date-btn:not([disabled])');
+    await randomDelay(300, 600);
     await page.waitForSelector('.time-btn:not([disabled])');
-    const timeBtns = await page.$$('.time-btn:not([disabled])');
-    if (timeBtns.length > 0) {
-      await timeBtns[0].click();
-    }
-
-    await randomDelay(1500, 2500);
-    console.log(`[${iteration}] 🎫 Clicking Start Booking...`);
+    await page.click('.time-btn:not([disabled])');
+    await randomDelay(300, 600);
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
       page.click('#start-booking-btn')
     ]);
 
-    // 5. Seat Selection & Captcha
-    console.log(`[${iteration}] 🪑 Seat selection (human speed)...`);
-    // Wait through queue if exists
+    // ⏳ Handle Queue if it appears
     try {
       if (page.url().includes('queue.html')) {
-        console.log(`[${iteration}] ⏳ In queue...`);
+        console.log(`[${iteration}] ⏳ In queue... waiting for turn.`);
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 });
       }
-    } catch (e) { }
+    } catch (e) {
+      // If we are already on seat_select or queue timed out but we changed page
+    }
 
-    await page.waitForSelector('.seat.available', { timeout: 30000 });
+    // Seat Page & Captcha Bypass
+    await page.waitForSelector('#seat-grid', { timeout: 30000 });
 
-    // Simulate thinking about captcha
-    console.log(`[${iteration}] 🛡️ Solving captcha (simulated delay)...`);
-    await randomDelay(6000, 10000);
-
+    console.log(`[${iteration}] 🛡️ Bypassing Captcha (Macro-style)...`);
     await page.evaluate(() => {
-      if (window.isCaptchaVerified !== undefined) {
-        window.isCaptchaVerified = true;
-        const overlay = document.getElementById('captcha-overlay');
-        if (overlay) overlay.classList.add('captcha-hidden'); // The macro uses 'captcha-hidden'
-        if (sessionStorage) sessionStorage.setItem('captchaVerified', 'true');
+      // Direct access to state variables in seat_select.js
+      window.isCaptchaVerified = true;
+      if (typeof isCaptchaVerified !== 'undefined') isCaptchaVerified = true;
+
+      if (sessionStorage) sessionStorage.setItem('captchaVerified', 'true');
+      const overlay = document.getElementById('captcha-overlay');
+      if (overlay) {
+        overlay.classList.add('captcha-hidden');
+        overlay.style.display = 'none';
       }
     });
 
-    await randomDelay(3000, 5000);
-    const availableSeats = await page.$$('.seat.available');
-    if (availableSeats.length > 0) {
-      const targetSeat = availableSeats[Math.floor(Math.random() * Math.min(availableSeats.length, 10))];
-      await targetSeat.click();
+    await randomDelay(300, 600); // Shorter delay like a pro
+
+    let humanSeatSelected = false;
+    let humanAttempts = 0;
+    while (!humanSeatSelected && humanAttempts < 5) {
+      const availableSeats = await page.$$('.seat.available');
+      if (availableSeats.length > 0) {
+        const targetSeat = availableSeats[Math.floor(Math.random() * Math.min(availableSeats.length, 10))];
+        const box = await targetSeat.boundingBox();
+
+        if (box) {
+          await humanMove(page, box.x + box.width / 2, box.y + box.height / 2);
+          await targetSeat.click({ delay: 40 + Math.random() * 30 }); // 40-70ms elite human
+        } else {
+          await targetSeat.click();
+        }
+
+        await randomDelay(400, 600);
+        const isSelected = await page.evaluate(el => el.classList.contains('selected'), targetSeat);
+
+        if (isSelected) {
+          humanSeatSelected = true;
+          console.log(`[${iteration}] ⚡ Expert! Grabbed seat.`);
+        } else {
+          console.log(`[${iteration}] ⚠️ Taken! Reacting fast...`);
+          await randomDelay(300, 500); // 0.3s reaction
+          humanAttempts++;
+        }
+      } else {
+        break;
+      }
     }
 
-    await randomDelay(2000, 3500);
+    await randomDelay(400, 800);
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
       page.click('#next-btn')
     ]);
 
-    // 6. Discount/Order/Payment
-    const stages = ['💸 Discount', '📋 Order Info', '💳 Payment'];
-    for (const stageName of stages) {
-      console.log(`[${iteration}] ${stageName} Page...`);
-      await randomDelay(3000, 5000);
-
-      let nextBtn = await page.$('button.btn-primary');
-      if (!nextBtn) {
-        const allBtns = await page.$$('button');
-        for (const b of allBtns) {
-          const bText = await page.evaluate(el => el.textContent, b);
-          if (bText && (bText.includes('다음') || bText.includes('결제'))) {
-            nextBtn = b;
-            break;
-          }
-        }
-      }
-
-      if (nextBtn) {
+    // Fast finish
+    for (let i = 0; i < 3; i++) {
+      await randomDelay(500, 1000);
+      let btn = await page.$('button.btn-primary') || await page.$('button[onclick*="confirm"]');
+      if (btn) {
         await Promise.all([
-          page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => { }),
-          nextBtn.click()
+          page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 5000 }).catch(() => { }),
+          btn.click()
         ]);
       }
     }
 
     if (page.url().includes('booking_complete.html')) {
-      console.log(`[${iteration}] 🎉 SUCCESS! Human booking complete.`);
-      console.log(`[${iteration}] ⏳ Waiting for logs to sync...`);
-      await delay(5000);
+      console.log(`[${iteration}] 🎉 SUCCESS! Expert Human.`);
+      await delay(2000);
     }
 
   } catch (e) {
-    console.error(`[${iteration}] ❌ Error:`, e.stack);
+    console.error(`[${iteration}] ❌ Error:`, e.message);
   } finally {
     await browser.close();
   }
@@ -172,7 +167,7 @@ async function runHumanIteration(iteration) {
 (async () => {
   for (let i = 1; i <= LOOP_COUNT; i++) {
     await runHumanIteration(i);
-    if (i < LOOP_COUNT) await randomDelay(5000, 10000);
+    if (i < LOOP_COUNT) await randomDelay(2000, 4000);
   }
-  console.log('\n✅ Human data collection finished.');
+  console.log('\n✅ Expert Human data collection finished.');
 })();
