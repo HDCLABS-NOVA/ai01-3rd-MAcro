@@ -32,6 +32,13 @@
       "name": "test_bae",
       "phone": "01011112222",
       "created_at": "2026-01-31T15:31:42.624358"
+    },
+    {
+      "email": "test07@naver.com",
+      "password": "test0708",
+      "name": "현구름",
+      "phone": "01020160708",
+      "created_at": "2026-02-03T15:26:57.746298"
     }
   ]
 }

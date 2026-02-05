@@ -4,7 +4,7 @@
             "id": "perf001",
             "title": "아이유 콘서트 <The Golden Hour>",
             "category": "concert",
-            "venue": "고척스카이돔",
+            "venue": "고척스카이돔 (Updated)",
             "dates": [
                 "2026-02-15",
                 "2026-02-16",
@@ -67,7 +67,7 @@
             ],
             "image": "images/musical01.jpg",
             "description": "빅토르 위고 원작의 감동 뮤지컬",
-            "open_time": "2026-01-25T20:00:00+09:00",
+            "open_time": "2026-02-05T14:30:00+09:00",
             "status": "upcoming"
         },
         {
@@ -97,7 +97,7 @@
             ],
             "image": "images/sports01.jpg",
             "description": "K리그 라이벌 매치",
-            "open_time": "2026-02-22T10:00:00+09:00",
+            "open_time": "2026-02-05T14:31:00+09:00",
             "status": "upcoming"
         },
         {
@@ -124,7 +124,7 @@
             ],
             "image": "images/concert02.jpg",
             "description": "여름 페스티벌의 절대강자",
-            "open_time": "2026-06-01T14:00:00+09:00",
+            "open_time": "2026-02-05T14:32:00+09:00",
             "status": "upcoming"
         },
         {
@@ -158,7 +158,7 @@
             ],
             "image": "images/musical02.jpg",
             "description": "고딕 로맨스 뮤지컬의 걸작",
-            "open_time": "2026-02-13T18:00:00+09:00",
+            "open_time": "2026-02-05T14:33:00+09:00",
             "status": "upcoming"
         },
         {
@@ -189,7 +189,326 @@
             ],
             "image": "images/exhibition01.jpg",
             "description": "모네의 대표작을 한자리에",
-            "open_time": "2026-01-20T09:00:00+09:00",
+            "open_time": "2026-02-05T14:34:00+09:00",
+            "status": "upcoming"
+        },
+        {
+            "id": "perf007",
+            "title": "Misaki Higashida 내한 첫 팬미팅",
+            "category": "concert",
+            "venue": "잠실 실내체육관",
+            "dates": [
+                "2026-02-25",
+                "2026-02-27"
+            ],
+            "times": [
+                "15:00"
+            ],
+            "grades": [
+                {
+                    "grade": "VIP",
+                    "price": 150000,
+                    "seats": 100
+                },
+                {
+                    "grade": "R",
+                    "price": 120000,
+                    "seats": 200
+                },
+                {
+                    "grade": "S",
+                    "price": 90000,
+                    "seats": 300
+                }
+            ],
+            "image": "images/concert01.jpg",
+            "description": "",
+            "open_time": "2026-02-05T14:35:00+09:00",
+            "status": "upcoming"
+        },
+        {
+            "id": "perf008",
+            "title": "Stray Kids 'DO IT' POP-UP",
+            "category": "exhibition",
+            "venue": "사운드웨이브",
+            "dates": [
+                "2026-02-16",
+                "2026-02-17",
+                "2026-02-18",
+                "2026-02-19",
+                "2026-02-20",
+                "2026-02-21"
+            ],
+            "times": [
+                "11:00",
+                "12:00",
+                "13:00",
+                "14:00",
+                "15:00",
+                "16:00",
+                "17:00",
+                "18:00",
+                "19:00"
+            ],
+            "grades": [
+                {
+                    "grade": "VIP",
+                    "price": 150000,
+                    "seats": 100
+                },
+                {
+                    "grade": "R",
+                    "price": 120000,
+                    "seats": 200
+                },
+                {
+                    "grade": "S",
+                    "price": 90000,
+                    "seats": 300
+                }
+            ],
+            "image": "images/concert01.jpg",
+            "description": "",
+            "open_time": "2026-02-05T14:36:00+09:00",
+            "status": "upcoming"
+        },
+        {
+            "id": "perf009",
+            "title": "야외 결혼식",
+            "category": "exhibition",
+            "venue": "야외 웨딩홀",
+            "dates": [
+                "2026-02-14"
+            ],
+            "times": [
+                "13:00"
+            ],
+            "grades": [
+                {
+                    "grade": "VIP",
+                    "price": 150000,
+                    "seats": 100
+                },
+                {
+                    "grade": "R",
+                    "price": 120000,
+                    "seats": 200
+                },
+                {
+                    "grade": "S",
+                    "price": 90000,
+                    "seats": 300
+                }
+            ],
+            "image": "images/concert01.jpg",
+            "description": "",
+            "open_time": "2026-02-05T14:37:00+09:00",
+            "status": "upcoming"
+        },
+        {
+            "id": "perf010",
+            "title": "우주소녀 10th 팬 콘서트",
+            "category": "concert",
+            "venue": "KSPO DOME",
+            "dates": [
+                "2026-05-01",
+                "2026-05-02",
+                "2025-05-03"
+            ],
+            "times": [
+                "20:00"
+            ],
+            "grades": [
+                {
+                    "grade": "VIP",
+                    "price": 150000,
+                    "seats": 100
+                },
+                {
+                    "grade": "R",
+                    "price": 120000,
+                    "seats": 200
+                },
+                {
+                    "grade": "S",
+                    "price": 90000,
+                    "seats": 300
+                }
+            ],
+            "image": "images/concert01.jpg",
+            "description": "",
+            "open_time": "2026-02-05T14:38:00+09:00",
+            "status": "upcoming"
+        },
+        {
+            "id": "perf 011",
+            "title": "TEEN TOP WE GONNA ROCK IT DROP IT TOP IT HEY DON＇T STOP IT POP IT X 2 LIVE",
+            "category": "concert",
+            "venue": "고려대학교 화정체육관",
+            "dates": [
+                "2026-07-10",
+                "2026-07-11"
+            ],
+            "times": [
+                "14:00",
+                "19:00"
+            ],
+            "grades": [
+                {
+                    "grade": "VIP",
+                    "price": 150000,
+                    "seats": 100
+                },
+                {
+                    "grade": "R",
+                    "price": 120000,
+                    "seats": 200
+                },
+                {
+                    "grade": "S",
+                    "price": 90000,
+                    "seats": 300
+                }
+            ],
+            "image": "images/concert01.jpg",
+            "description": "",
+            "open_time": "2026-02-05T14:39:00+09:00",
+            "status": "upcoming"
+        },
+        {
+            "id": "perf 012",
+            "title": "두산 베어스 vs SSG 랜더스",
+            "category": "sports",
+            "venue": "잠실야구장",
+            "dates": [
+                "2026-05-08",
+                "2026-05-09",
+                "2026-05-10"
+            ],
+            "times": [
+                "18:00"
+            ],
+            "grades": [
+                {
+                    "grade": "VIP",
+                    "price": 150000,
+                    "seats": 100
+                },
+                {
+                    "grade": "R",
+                    "price": 120000,
+                    "seats": 200
+                },
+                {
+                    "grade": "S",
+                    "price": 90000,
+                    "seats": 300
+                }
+            ],
+            "image": "images/concert01.jpg",
+            "description": "",
+            "open_time": "2026-02-05T14:40:00+09:00",
+            "status": "upcoming"
+        },
+        {
+            "id": "perf013",
+            "title": "뮤지컬 〈말리〉",
+            "category": "concert",
+            "venue": "백암아트홀",
+            "dates": [
+                "2026-02-11",
+                "2026-02-12",
+                "2026-02-13"
+            ],
+            "times": [
+                "20:00"
+            ],
+            "grades": [
+                {
+                    "grade": "VIP",
+                    "price": 150000,
+                    "seats": 100
+                },
+                {
+                    "grade": "R",
+                    "price": 120000,
+                    "seats": 200
+                },
+                {
+                    "grade": "S",
+                    "price": 90000,
+                    "seats": 300
+                }
+            ],
+            "image": "images/concert01.jpg",
+            "description": "",
+            "open_time": "2026-02-05T14:41:00+09:00",
+            "status": "upcoming"
+        },
+        {
+            "id": "perf014",
+            "title": "임다영 뾱뾱회",
+            "category": "exhibition",
+            "venue": "스타쉽 엔터테이먼트",
+            "dates": [
+                "2026-05-14"
+            ],
+            "times": [
+                "19:00"
+            ],
+            "grades": [
+                {
+                    "grade": "VIP",
+                    "price": 150000,
+                    "seats": 100
+                },
+                {
+                    "grade": "R",
+                    "price": 120000,
+                    "seats": 200
+                },
+                {
+                    "grade": "S",
+                    "price": 90000,
+                    "seats": 300
+                }
+            ],
+            "image": "images/concert01.jpg",
+            "description": "",
+            "open_time": "2026-02-05T14:42:00+09:00",
+            "status": "upcoming"
+        },
+        {
+            "id": "perf015",
+            "title": "임창균 군입대 배웅회",
+            "category": "concert",
+            "venue": "논산훈련소",
+            "dates": [
+                "2026-02-09"
+            ],
+            "times": [
+                "10:00"
+            ],
+            "grades": [
+                {
+                    "grade": "VIP",
+                    "price": 150000,
+                    "seats": 100
+                },
+                {
+                    "grade": "R",
+                    "price": 120000,
+                    "seats": 200
+                },
+                {
+                    "grade": "S",
+                    "price": 90000,
+                    "seats": 300
+                }
+            ],
+            "image": "images/concert01.jpg",
+            "description": "",
+            "open_time": "2026-02-05T14:43:00+09:00",
             "status": "upcoming"
         }
     ]
