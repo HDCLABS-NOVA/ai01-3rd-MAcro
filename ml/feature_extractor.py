@@ -72,21 +72,44 @@ def extract_mouse_features(log):
             features['mouse_speed_std'] = np.std(speeds)  # 속도 변화 (떨림 지표)
             features['mouse_max_speed'] = np.max(speeds)
             features['mouse_min_speed'] = np.min(speeds)
+            
+            # 가속도 (Acceleration) 계산
+            accelerations = []
+            for i in range(1, len(speeds)):
+                accel = abs(speeds[i] - speeds[i-1])
+                accelerations.append(accel)
+            
+            if len(accelerations) > 0:
+                features['mouse_accel_avg'] = np.mean(accelerations)
+                features['mouse_accel_std'] = np.std(accelerations)
+            else:
+                features['mouse_accel_avg'] = 0
+                features['mouse_accel_std'] = 0
         else:
             features['mouse_avg_speed'] = 0
             features['mouse_speed_std'] = 0
             features['mouse_max_speed'] = 0
             features['mouse_min_speed'] = 0
+            features['mouse_accel_avg'] = 0
+            features['mouse_accel_std'] = 0
+            
+        # 곡률 (Curvature/Tortuosity) 계산
+        # 실제 경로 거리 / 직선 거리 (Straightness의 역수와 유사하지만 의미가 다름)
+        features['mouse_tortuosity'] = total_distance / straight_dist if straight_dist > 0 else 1.0
+        
     else:
         # 마우스 움직임이 없는 경우
         features['mouse_total_distance'] = 0
         features['mouse_num_moves'] = 0
         features['mouse_avg_distance'] = 0
         features['mouse_straightness'] = 0
+        features['mouse_tortuosity'] = 1.0
         features['mouse_avg_speed'] = 0
         features['mouse_speed_std'] = 0
         features['mouse_max_speed'] = 0
         features['mouse_min_speed'] = 0
+        features['mouse_accel_avg'] = 0
+        features['mouse_accel_std'] = 0
     
     # seat 단계 마우스 궤적
     seat_traj = stages.get('seat', {}).get('mouse_trajectory', [])
@@ -118,11 +141,16 @@ def extract_click_features(log):
             features['click_interval_std'] = np.std(click_intervals)
             features['click_min_interval'] = np.min(click_intervals)
             features['click_max_interval'] = np.max(click_intervals)
+            
+            # 클릭 간격의 변동 계수 (Coefficient of Variation) 
+            # 매크로는 이 값이 매우 낮음 (일정함)
+            features['click_interval_cv'] = (np.std(click_intervals) / np.mean(click_intervals)) if np.mean(click_intervals) > 0 else 0
         else:
             features['click_avg_interval'] = 0
             features['click_interval_std'] = 0
             features['click_min_interval'] = 0
             features['click_max_interval'] = 0
+            features['click_interval_cv'] = 0
         
         # isTrusted 비율
         trusted_count = sum(1 for c in perf_clicks if c.get('is_trusted', True))
@@ -133,17 +161,18 @@ def extract_click_features(log):
                            if c['x'] == int(c['x']) and c['y'] == int(c['y']))
         features['click_integer_ratio'] = integer_count / len(perf_clicks)
         
-        # 첫 번째 클릭 시간 (빠른 반응 = 매크로)
-        features['first_click_time'] = perf_clicks[0]['timestamp']
+        # 첫 번째 클릭 시간 (오픈 후 반응 속도)
+        features['first_click_response_time'] = perf_clicks[0]['timestamp']
     else:
         features['click_count'] = 0
         features['click_avg_interval'] = 0
         features['click_interval_std'] = 0
         features['click_min_interval'] = 0
         features['click_max_interval'] = 0
+        features['click_interval_cv'] = 0
         features['click_trusted_ratio'] = 1.0
         features['click_integer_ratio'] = 0
-        features['first_click_time'] = 0
+        features['first_click_response_time'] = 0
     
     return features
 

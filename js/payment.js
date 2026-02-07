@@ -1,7 +1,7 @@
 // payment.js - 결제 페이지
 
-loadLogFromSession();
-logStageEntry('payment');
+loadLogState();
+recordStageEntry('payment');
 
 const flowData = getFlowData();
 if (!flowData) {
@@ -35,14 +35,14 @@ async function processPayment() {
 
     const bookingId = generateBookingNumber();
 
-    logStageExit('payment', {
+    recordStageExit('payment', {
         payment_type: selectedPaymentType,
         completed: true,
-        completed_time: getISOTimestamp()
+        completed_time: getCollectTimestamp()
     });
 
     // 최종 로그 완료
-    await finalizeLog(true, bookingId);
+    await uploadLog(true, bookingId);
 
     hideLoading();
 

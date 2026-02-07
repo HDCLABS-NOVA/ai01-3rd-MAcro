@@ -1,7 +1,7 @@
 // order_info.js - 예매 정보 입력 페이지
 
-loadLogFromSession();
-logStageEntry('order_info');
+loadLogState();
+recordStageEntry('order_info');
 
 const flowData = getFlowData();
 const currentUser = getCurrentUser();
@@ -117,7 +117,7 @@ function confirmOrderInfo() {
         booker_email: email
     });
 
-    logStageExit('order_info', {
+    recordStageExit('order_info', {
         delivery_type: selectedDelivery,
         has_phone: true,
         has_email: true

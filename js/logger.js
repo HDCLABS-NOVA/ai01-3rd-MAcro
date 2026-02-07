@@ -80,7 +80,9 @@ function logStageEntry(stageName) {
     }
 
     if (!logData) {
-        console.error('로그 데이터가 초기화되지 않았습니다.');
+        // 예매 완료 페이지이거나 이미 전송된 경우 에러 무시
+        if (window.location.pathname.includes('booking_complete.html')) return;
+        console.warn('로그 데이터가 아직 초기화되지 않았습니다.');
         return;
     }
 
@@ -232,7 +234,8 @@ async function finalizeLog(isSuccess = true, bookingId = '') {
     }
 
     if (!logData) {
-        console.error('로그 데이터가 없습니다.');
+        if (window.location.pathname.includes('booking_complete.html')) return;
+        console.warn('전송할 로그 데이터가 없습니다.');
         return;
     }
 

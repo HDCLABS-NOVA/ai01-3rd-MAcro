@@ -78,6 +78,7 @@ class SignupData(BaseModel):
     password: str
     name: str
     phone: str
+    birthdate: Optional[str] = None
 
 class LoginData(BaseModel):
     email: str
@@ -108,6 +109,7 @@ async def signup(signup_data: SignupData):
             "password": signup_data.password,  # 실제로는 해시 처리 필요
             "name": signup_data.name,
             "phone": signup_data.phone,
+            "birthdate": signup_data.birthdate,
             "created_at": datetime.now().isoformat()
         }
         users_db['users'].append(new_user)

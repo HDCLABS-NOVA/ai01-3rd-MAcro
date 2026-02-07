@@ -6,6 +6,17 @@ const LOOP_COUNT = 300; // 🔄 Set this to the number of times you want to run
 const HEADLESS_MODE = true; // Set true for faster background execution
 
 // Utils
+async function resetPerformanceTime(page, perfId, secondsInFuture) {
+  const newOpenTime = new Date(Date.now() + secondsInFuture * 1000).toISOString();
+  await page.evaluate(async (id, time) => {
+    await fetch(`/api/admin/performances/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ open_time: time, status: 'upcoming' })
+    });
+  }, perfId, newOpenTime);
+}
+
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const randomDelay = (min, max) => delay(Math.floor(Math.random() * (max - min + 1)) + min);
 
@@ -26,13 +37,14 @@ async function runBotIteration(iteration) {
 
   try {
     // Use Incognito context to ensure fresh session
-    let context;
-    if (browser.createIncognitoBrowserContext) {
-      context = await browser.createIncognitoBrowserContext();
-    } else {
-      context = await browser.createBrowserContext(); // Fallback
-    }
+    const context = await browser.createIncognitoBrowserContext();
     const page = await context.newPage();
+
+    // Close any other open pages (like the default blank one) to keep only one window
+    const pages = await browser.pages();
+    for (const p of pages) {
+      if (p !== page) await p.close();
+    }
 
     // 🔍 Enable Browser Console Logging
     page.on('console', msg => {
@@ -89,13 +101,17 @@ async function runBotIteration(iteration) {
       } catch (e) { console.log('⚠️ Navigation timeout, assuming success if URL changed'); }
     }
 
-    // 4. Index -> Detail
-    console.log(`[${iteration}] 🎭 Selecting Performance...`);
+    // 4. Index -> Detail (Target: IU Concert with Auto-Reset)
+    const TARGET_PERF_ID = 'perf001';
+    await resetPerformanceTime(page, TARGET_PERF_ID, 15);
+
+    console.log(`[${iteration}] 🎭 Selecting Performance ${TARGET_PERF_ID}...`);
     await page.goto(`${BASE_URL}index.html`, { waitUntil: 'networkidle0' });
-    await page.waitForSelector('.performance-card');
-    const performances = await page.$$('.performance-card');
-    if (performances.length > 0) await performances[0].click();
-    await page.waitForNavigation();
+    await page.waitForSelector(`.performance-card[onclick*="${TARGET_PERF_ID}"]`);
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'networkidle0' }),
+      page.click(`.performance-card[onclick*="${TARGET_PERF_ID}"]`)
+    ]);
 
     // 🏷️ Tag this log as 'macro'
     await page.evaluate(() => {
@@ -104,25 +120,97 @@ async function runBotIteration(iteration) {
       }
     });
 
-    // 5. Detail Page
-    console.log(`[${iteration}] 📅 Selecting Date/Time...`);
-    await page.waitForSelector('.date-btn:not([disabled])', { timeout: 10000 });
-    const dateBtns = await page.$$('.date-btn:not([disabled])');
-    if (dateBtns.length > 0) await dateBtns[0].click();
-    await randomDelay(300, 600);
+    // 5. Detail Page - ⚡ REALISTIC DOM-BASED MACRO
+    console.log(`[${iteration}] 📅 Waiting for UI state change (Real Macro Style)...`);
 
-    await page.waitForSelector('.time-btn:not([disabled])');
-    const timeBtns = await page.$$('.time-btn:not([disabled])');
-    if (timeBtns.length > 0) await timeBtns[0].click();
-    await randomDelay(300, 600);
+    await page.evaluate(() => {
+      return new Promise((resolve) => {
+        let clickedDate = false;
+        let clickedTime = false;
+        let clickedStart = false;
 
-    await page.click('#start-booking-btn');
+        const dispatchSequence = (el) => {
+          const rect = el.getBoundingClientRect();
+          const x = rect.left + rect.width / 2;
+          const y = rect.top + rect.height / 2;
+          const opts = { view: window, bubbles: true, cancelable: true, clientX: x, clientY: y };
 
-    // 6. Seat Selection & Captcha
-    await page.waitForSelector('#seat-grid', { timeout: 30000 });
-    console.log(`[${iteration}] 🪑 Seat Selection...`);
+          // Real click sequence: mousedown -> mouseup -> click
+          el.dispatchEvent(new MouseEvent('mousedown', opts));
+          el.dispatchEvent(new MouseEvent('mouseup', opts));
+          el.dispatchEvent(new MouseEvent('click', opts));
+        };
 
-    await delay(2000);
+        const checkInterval = setInterval(() => {
+          if (!clickedDate) {
+            const dateBtn = document.querySelector('.date-btn:not([disabled])');
+            if (dateBtn) {
+              dispatchSequence(dateBtn);
+              clickedDate = true;
+              console.log('[Bot] Date clicked (Full Sequence)');
+            }
+          }
+
+          if (clickedDate && !clickedTime) {
+            const timeBtn = document.querySelector('.time-btn:not([disabled])');
+            if (timeBtn) {
+              dispatchSequence(timeBtn);
+              clickedTime = true;
+              console.log('[Bot] Time clicked (Full Sequence)');
+            }
+          }
+
+          if (clickedTime && !clickedStart) {
+            const startBtn = document.getElementById('start-booking-btn');
+            if (startBtn && (startBtn.style.display === 'block' || window.getComputedStyle(startBtn).display !== 'none')) {
+              dispatchSequence(startBtn);
+              clickedStart = true;
+              clearInterval(checkInterval);
+              resolve();
+            }
+          }
+        }, 30);
+      });
+    });
+
+    console.log(`[${iteration}] ⚡ Entry sequence clicked. Waiting for next page...`);
+
+    // 6. Resilient Page Transition (Handling "Target closed" errors)
+    let pageSettled = false;
+    const navStartTime = Date.now();
+
+    while (Date.now() - navStartTime < 20000) { // Max 20s
+      try {
+        const currentUrl = page.url();
+
+        // If we are in the Queue, just wait
+        if (currentUrl.includes('queue.html')) {
+          if (!pageSettled) {
+            console.log(`[${iteration}] ⏳ In Queue. Waiting for auto-redirect...`);
+            pageSettled = true;
+          }
+        }
+        // If we reached the Seat Map, wait for the grid
+        else if (currentUrl.includes('seat_select.html')) {
+          const grid = await page.$('#seat-grid');
+          if (grid) {
+            console.log(`[${iteration}] 🪑 Seat Map reached!`);
+            break;
+          }
+        }
+      } catch (e) {
+        // During navigation, page.url() or page.$() might throw "Target closed"
+        // We just ignore it and try again after a short sleep
+      }
+      await delay(200);
+    }
+
+    // 7. Seat Selection & Captcha
+    console.log(`[${iteration}] 🪑 Proceeding with Seat Selection...`);
+
+    // Ensure we give enough time for seat_select.js to initialize
+    await delay(1000);
+
     const captchaOverlay = await page.$('#captcha-overlay');
     if (captchaOverlay) {
       const isHidden = await page.evaluate(el => el.classList.contains('captcha-hidden'), captchaOverlay);
@@ -145,37 +233,71 @@ async function runBotIteration(iteration) {
       await dialog.dismiss();
     });
 
-    // Pick Seat
-    let seatSelected = false;
-    let attempts = 0;
-    while (!seatSelected && attempts < 10) {
-      const availableSeats = await page.$$('.seat.available');
-      if (availableSeats.length === 0) break;
-      const targetSeat = availableSeats[Math.floor(Math.random() * Math.min(10, availableSeats.length))];
+    // Auto-dismiss alerts (for "Already selected seat" messages)
+    page.on('dialog', async dialog => {
+      console.log(`[${iteration}] ⚠️ Alert detected: ${dialog.message()}`);
+      await dialog.dismiss();
+    });
 
-      if (!targetSeat) break;
+    // Pick Seat (High-Speed In-Page Logic with Retry)
+    console.log(`[${iteration}] ⚡ Starting High-Speed Seat Selection...`);
+    const seatSelectionResult = await page.evaluate(async () => {
+      const wait = (ms) => new Promise(res => setTimeout(res, ms));
+      let selected = false;
+      let attempts = 0;
 
-      // 🤖 Pure Macro: Instant click with 1ms delay (Unbeatable speed)
-      await targetSeat.click({ delay: 1 });
-      await randomDelay(50, 100); // Super fast retry
+      while (!selected && attempts < 50) {
+        // 1. Check for Custom Alert Overlay (Already Taken)
+        const alertOverlay = document.getElementById('alert-overlay');
+        if (alertOverlay && alertOverlay.classList.contains('active')) {
+          const confirmBtn = document.getElementById('alert-confirm-btn');
+          if (confirmBtn) confirmBtn.click();
+          await wait(300);
+        }
 
-      const isSelected = await page.evaluate(el => el.classList.contains('selected'), targetSeat);
-      if (isSelected) {
-        seatSelected = true;
-      } else {
+        const availableSeats = Array.from(document.querySelectorAll('.seat.available:not(.selected)'));
+        if (availableSeats.length === 0) {
+          await wait(100);
+          attempts++;
+          continue;
+        }
+
+        const randomIndex = Math.floor(Math.random() * Math.min(10, availableSeats.length));
+        const targetSeat = availableSeats[randomIndex];
+
+        // Dispatch realistic sequence
+        const rect = targetSeat.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const opts = { view: window, bubbles: true, cancelable: true, clientX: x, clientY: y };
+        targetSeat.dispatchEvent(new MouseEvent('mousedown', opts));
+        targetSeat.dispatchEvent(new MouseEvent('mouseup', opts));
+        targetSeat.dispatchEvent(new MouseEvent('click', opts));
+
+        await wait(400); // Wait for potential alert or state change
+
+        if (targetSeat.classList.contains('selected')) {
+          selected = true;
+          break;
+        }
         attempts++;
       }
-    }
+      return selected;
+    });
 
-    if (seatSelected) {
-      console.log(`[${iteration}] ✅ Seat selected. Clicking Next...`);
+    if (seatSelectionResult) {
+      console.log(`[${iteration}] ✅ Seat selected! Clicking Next...`);
       await page.waitForSelector('#next-btn', { visible: true });
 
-      await Promise.all([
-        page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
-        page.click('#next-btn')
-      ]);
-      console.log(`[${iteration}] ⏩ Moved to Discount Page`);
+      // Robust Click & Wait
+      try {
+        await Promise.all([
+          page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 10000 }).catch(() => { }),
+          page.click('#next-btn')
+        ]);
+      } catch (e) {
+        console.log(`[${iteration}] ⏩ Navigation handled: ${page.url()}`);
+      }
 
       // 7. Discount
       console.log(`[${iteration}] 💸 Discount Page...`);

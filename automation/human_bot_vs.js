@@ -2,10 +2,22 @@ const puppeteer = require('puppeteer');
 
 const BASE_URL = 'http://localhost:8000/';
 const LOOP_COUNT = 300;
-const HEADLESS_MODE = true;
+const HEADLESS_MODE = false;
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const randomDelay = (min, max) => delay(Math.floor(Math.random() * (max - min + 1)) + min);
+
+async function resetPerformanceTime(page, perfId, secondsInFuture) {
+  const newOpenTime = new Date(Date.now() + secondsInFuture * 1000).toISOString();
+  await page.evaluate(async (id, time) => {
+    await fetch(`/api/admin/performances/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ open_time: time, status: 'upcoming' })
+    });
+  }, perfId, newOpenTime);
+  console.log(`[SYSTEM] 🕒 Reset ${perfId} open time to ${secondsInFuture}s in future.`);
+}
 
 async function humanMove(page, targetX, targetY) {
   const start = await page.evaluate(() => ({ x: window.innerWidth / 2, y: window.innerHeight / 2 }));
@@ -45,14 +57,44 @@ async function runHumanIteration(iteration) {
     await page.type('#password', USER_PASS, { delay: 40 + Math.random() * 40 });
     await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle2' }), page.click('button[type="submit"]')]);
 
+    // 0. Sync & Reset (Target: IU Concert)
+    const TARGET_PERF_ID = 'perf001';
+    await resetPerformanceTime(page, TARGET_PERF_ID, 20); // 20s for battle sync
+
     // Perf
-    await page.waitForSelector('.performance-card');
-    await page.click('.performance-card');
-    await page.waitForSelector('.date-btn:not([disabled])');
-    await page.click('.date-btn:not([disabled])');
+    await page.goto(`${BASE_URL}index.html`, { waitUntil: 'networkidle2' });
+    await page.waitForSelector(`.performance-card[onclick*="${TARGET_PERF_ID}"]`);
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'networkidle2' }),
+      page.click(`.performance-card[onclick*="${TARGET_PERF_ID}"]`)
+    ]);
+    // Expert Human Wait Logic
+    await page.waitForSelector('.date-btn');
+    const dateBtn = await page.$('.date-btn');
+    const btnBox = await dateBtn.boundingBox();
+    if (btnBox) await humanMove(page, btnBox.x + btnBox.width / 2, btnBox.y + btnBox.height / 2);
+
+    let isBtnEnabled = false;
+    while (!isBtnEnabled) {
+      isBtnEnabled = await page.evaluate(() => {
+        const btn = document.querySelector('.date-btn');
+        return btn && !btn.disabled;
+      });
+      if (!isBtnEnabled) {
+        // Tremor: slight mouse shake while waiting
+        if (btnBox) await page.mouse.move(btnBox.x + btnBox.width / 2 + (Math.random() - 0.5) * 4, btnBox.y + btnBox.height / 2 + (Math.random() - 0.5) * 4);
+        await delay(100);
+      }
+    }
+
+    // Reaction
+    await randomDelay(300, 600);
+    await page.click('.date-btn:not([disabled])', { delay: 50 + Math.random() * 50 });
+
     await randomDelay(300, 600);
     await page.waitForSelector('.time-btn:not([disabled])');
-    await page.click('.time-btn:not([disabled])');
+    await page.click('.time-btn:not([disabled])', { delay: 50 + Math.random() * 50 });
+
     await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle2' }), page.click('#start-booking-btn')]);
 
     // Handle Queue

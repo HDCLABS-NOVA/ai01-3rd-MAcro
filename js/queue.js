@@ -1,7 +1,7 @@
 // queue.js - 대기열 페이지
 
-loadLogFromSession();
-logStageEntry('queue');
+loadLogState();
+recordStageEntry('queue');
 
 let currentPosition = Math.floor(Math.random() * 80) + 20; // 20-100
 const totalQueue = 8000;
@@ -29,13 +29,13 @@ setTimeout(() => {
     currentPosition = 0;
     document.getElementById('queue-position').textContent = '통과!';
 
-    logStageExit('queue', {
+    recordStageExit('queue', {
         initial_position: initialPosition,
         final_position: 0,
         total_queue: totalQueue,
         wait_duration_ms: Math.floor(waitTime),
         position_updates: [
-            { position: 0, status: 'ready', timestamp: getISOTimestamp() }
+            { position: 0, status: 'ready', timestamp: getCollectTimestamp() }
         ]
     });
 

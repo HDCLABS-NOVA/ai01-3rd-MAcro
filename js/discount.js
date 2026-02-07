@@ -1,7 +1,7 @@
 // discount.js - 할인 선택 페이지
 
-loadLogFromSession();
-logStageEntry('discount');
+loadLogState();
+recordStageEntry('discount');
 
 const flowData = getFlowData();
 if (!flowData || !flowData.selectedSeats || flowData.selectedSeats.length === 0) {
@@ -52,7 +52,7 @@ function updateSummary() {
 }
 
 function confirmDiscount() {
-    logStageExit('discount', {
+    recordStageExit('discount', {
         selected_discount: selectedType
     });
 

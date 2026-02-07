@@ -2,10 +2,21 @@ const puppeteer = require('puppeteer');
 
 const BASE_URL = 'http://localhost:8000/';
 const LOOP_COUNT = 300;
-const HEADLESS_MODE = true;
+const HEADLESS_MODE = false;
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const randomDelay = (min, max) => delay(Math.floor(Math.random() * (max - min + 1)) + min);
+
+async function resetPerformanceTime(page, perfId, secondsInFuture) {
+  const newOpenTime = new Date(Date.now() + secondsInFuture * 1000).toISOString();
+  await page.evaluate(async (id, time) => {
+    await fetch(`/api/admin/performances/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ open_time: time, status: 'upcoming' })
+    });
+  }, perfId, newOpenTime);
+}
 
 async function runBotIteration(iteration) {
   const USER_EMAIL = 'macro@email.com';
@@ -37,12 +48,26 @@ async function runBotIteration(iteration) {
     }, USER_EMAIL, USER_PASS);
     await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-    // Navigate (Instant)
-    await page.waitForSelector('.performance-card');
-    await page.click('.performance-card');
-    await page.waitForSelector('.date-btn:not([disabled])');
-    await page.click('.date-btn:not([disabled])');
-    await page.click('.time-btn:not([disabled])');
+    // Navigate (IU Concert with Battle Sync)
+    const TARGET_PERF_ID = 'perf001';
+    await resetPerformanceTime(page, TARGET_PERF_ID, 20);
+
+    await page.goto(`${BASE_URL}index.html`, { waitUntil: 'networkidle2' });
+    await page.waitForSelector(`.performance-card[onclick*="${TARGET_PERF_ID}"]`);
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: 'networkidle2' }),
+      page.click(`.performance-card[onclick*="${TARGET_PERF_ID}"]`)
+    ]);
+
+    // Instant Macro waiting logic
+    await page.waitForFunction(() => {
+      const btn = document.querySelector('.date-btn');
+      return btn && !btn.disabled;
+    }, { polling: 'mutation', timeout: 60000 });
+
+    await page.click('.date-btn:not([disabled])', { delay: 1 });
+    await page.waitForSelector('.time-btn:not([disabled])');
+    await page.click('.time-btn:not([disabled])', { delay: 1 });
     await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle2' }), page.click('#start-booking-btn')]);
 
     // Handle Queue

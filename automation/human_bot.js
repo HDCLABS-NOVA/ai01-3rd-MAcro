@@ -10,6 +10,18 @@ const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const randomDelay = (min, max) => delay(Math.floor(Math.random() * (max - min + 1)) + min);
 
 // Simulate Expert Human Mouse Movement (Bezier Curve for Organic Path)
+async function resetPerformanceTime(page, perfId, secondsInFuture) {
+  const newOpenTime = new Date(Date.now() + secondsInFuture * 1000).toISOString();
+  await page.evaluate(async (id, time) => {
+    await fetch(`/api/admin/performances/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ open_time: time, status: 'upcoming' })
+    });
+  }, perfId, newOpenTime);
+  console.log(`[SYSTEM] 🕒 Reset ${perfId} open time to ${secondsInFuture}s in future.`);
+}
+
 async function humanMove(page, targetX, targetY) {
   const start = await page.evaluate(() => ({ x: window.innerWidth / 2, y: window.innerHeight / 2 }));
   const cp1 = {
@@ -55,20 +67,78 @@ async function runHumanIteration(iteration) {
       page.click('button[type="submit"]')
     ]);
 
-    // Perf Page
-    await page.waitForSelector('.performance-card');
+    // 0. Index -> Detail (Target: IU Concert with Auto-Reset)
+    const TARGET_PERF_ID = 'perf001';
+    await resetPerformanceTime(page, TARGET_PERF_ID, 15);
+
+    console.log(`[${iteration}] 🎭 Selecting Performance ${TARGET_PERF_ID}...`);
+    await page.goto(`${BASE_URL}index.html`, { waitUntil: 'networkidle2' });
+    await page.waitForSelector(`.performance-card[onclick*="${TARGET_PERF_ID}"]`);
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
-      page.click('.performance-card')
+      page.click(`.performance-card[onclick*="${TARGET_PERF_ID}"]`)
     ]);
 
-    // Date/Time
-    await page.waitForSelector('.date-btn:not([disabled])');
-    await page.click('.date-btn:not([disabled])');
+    // --- Improved Expert Human Wait & Click Logic ---
+    console.log(`[${iteration}] ⏳ Waiting for ticket to open...`);
+
+    // 1. Wait for the date button to appear (even if disabled)
+    await page.waitForSelector('.date-btn');
+
+    // 2. Move mouse to the button area and hover while waiting
+    const dateBtn = await page.$('.date-btn');
+    const btnBox = await dateBtn.boundingBox();
+    if (btnBox) {
+      await humanMove(page, btnBox.x + btnBox.width / 2, btnBox.y + btnBox.height / 2);
+    }
+
+    // 3. Simulate human tension (micro-tremors) until enabled
+    let isBtnEnabled = false;
+    while (!isBtnEnabled) {
+      isBtnEnabled = await page.evaluate(() => {
+        const btn = document.querySelector('.date-btn');
+        return btn && !btn.disabled;
+      });
+
+      if (!isBtnEnabled) {
+        // Human tremor: slight movement while waiting
+        const tremorX = (btnBox?.x || 0) + (btnBox?.width || 0) / 2 + (Math.random() - 0.5) * 4;
+        const tremorY = (btnBox?.y || 0) + (btnBox?.height || 0) / 2 + (Math.random() - 0.5) * 4;
+        await page.mouse.move(tremorX, tremorY);
+        await delay(100); // 10hz polling with movement
+      }
+    }
+
+    // 4. Biological Reaction Time: Human takes 300-600ms to realize it's open
+    console.log(`[${iteration}] 📢 Open! Reacting...`);
     await randomDelay(300, 600);
+
+    // 5. Select Date with Curve
+    const activeDateBtn = await page.$('.date-btn:not([disabled])');
+    const activeBox = await activeDateBtn.boundingBox();
+    if (activeBox) {
+      await humanMove(page, activeBox.x + activeBox.width / 2, activeBox.y + activeBox.height / 2);
+      await activeDateBtn.click({ delay: 50 + Math.random() * 50 });
+    } else {
+      await activeDateBtn.click();
+    }
+
+    await randomDelay(400, 700);
+
+    // 6. Select Time
     await page.waitForSelector('.time-btn:not([disabled])');
-    await page.click('.time-btn:not([disabled])');
-    await randomDelay(300, 600);
+    const timeBtn = await page.$('.time-btn:not([disabled])');
+    const tBox = await timeBtn.boundingBox();
+    if (tBox) {
+      await humanMove(page, tBox.x + tBox.width / 2, tBox.y + tBox.height / 2);
+      await timeBtn.click({ delay: 50 + Math.random() * 50 });
+    } else {
+      await timeBtn.click();
+    }
+
+    await randomDelay(400, 800);
+
+    // 7. Start Booking
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
       page.click('#start-booking-btn')

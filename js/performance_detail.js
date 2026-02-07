@@ -21,9 +21,8 @@ async function loadPerformance() {
     displayPerformance();
 
     // 로그 초기화
-    await initLogger(currentPerformance.id, currentPerformance.title);
-    logStageEntry('perf');
-    enableMouseTracking();
+    await initLogCollector(currentPerformance.id, currentPerformance.title);
+    recordStageEntry('perf');
   } catch (error) {
     console.error(error);
     showAlert('공연 정보를 불러오는데 실패했습니다.', 'error');
@@ -153,17 +152,17 @@ function getBookingButton(isOpen, openTime) {
 function attachEventListeners() {
   // 날짜 버튼 이벤트 리스너
   document.querySelectorAll('.date-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
+    btn.addEventListener('click', function (e) {
       const date = this.dataset.date;
-      selectDate(date);
+      selectDate(date, this);
     });
   });
 
   // 시간 버튼 이벤트 리스너
   document.querySelectorAll('.time-btn').forEach(btn => {
-    btn.addEventListener('click', function () {
+    btn.addEventListener('click', function (e) {
       const time = this.dataset.time;
-      selectTime(time);
+      selectTime(time, this);
     });
   });
 
@@ -179,7 +178,7 @@ let selectedDate = '';
 let selectedTime = '';
 
 
-function selectDate(date) {
+function selectDate(date, btnElement) {
   // ✅ 추가: 오픈 시간 체크
   if (!isCurrentlyOpen()) {
     showAlert('티켓 오픈 시간 이후에 선택 가능합니다.', 'warning');
@@ -193,17 +192,22 @@ function selectDate(date) {
     btn.classList.remove('btn-primary');
     btn.classList.add('btn-outline');
   });
-  event.target.classList.remove('btn-outline');
-  event.target.classList.add('btn-primary');
+
+  const targetBtn = btnElement || document.querySelector(`.date-btn[data-date="${date}"]`);
+  if (targetBtn) {
+    targetBtn.classList.remove('btn-outline');
+    targetBtn.classList.add('btn-primary');
+  }
 
   // 시간 선택 섹션 표시
   document.getElementById('time-selection-section').style.display = 'block';
 
   // 로그 기록
-  trackClick(event, { action: 'date_select', target: date });
+  // trackClick은 log_collect.js에서 자동 처리되지만 메타데이터 성격이 강하면 별도로 남길 수 있습니다.
+  // 여기서는 기존 호환성을 위해 직접 남기지 않고 자동 수집에 맡깁니다.
 }
 
-function selectTime(time) {
+function selectTime(time, btnElement) {
   // ✅ 추가: 오픈 시간 체크
   if (!isCurrentlyOpen()) {
     showAlert('티켓 오픈 시간 이후에 선택 가능합니다.', 'warning');
@@ -217,14 +221,18 @@ function selectTime(time) {
     btn.classList.remove('btn-primary');
     btn.classList.add('btn-outline');
   });
-  event.target.classList.remove('btn-outline');
-  event.target.classList.add('btn-primary');
+
+  const targetBtn = btnElement || document.querySelector(`.time-btn[data-time="${time}"]`);
+  if (targetBtn) {
+    targetBtn.classList.remove('btn-outline');
+    targetBtn.classList.add('btn-primary');
+  }
 
   // 예매 시작 버튼 표시
   document.getElementById('start-booking-btn').style.display = 'block';
 
   // 로그 기록
-  trackClick(event, { action: 'time_select', target: time });
+  // 자동 수집에 맡깁니다.
 }
 
 function startBooking() {
@@ -255,23 +263,21 @@ function startBooking() {
   });
 
   // 로그 단계 종료
-  logStageExit('perf', {
+  recordStageExit('perf', {
     card_clicks: [{
       performance_id: currentPerformance.id,
       performance_title: currentPerformance.title,
-      timestamp: getISOTimestamp()
+      timestamp: getCollectTimestamp()
     }],
-    date_selections: [{ date: selectedDate, timestamp: getISOTimestamp() }],
-    time_selections: [{ time: selectedTime, timestamp: getISOTimestamp() }],
+    date_selections: [{ date: selectedDate, timestamp: getCollectTimestamp() }],
+    time_selections: [{ time: selectedTime, timestamp: getCollectTimestamp() }],
     actions: [
-      { action: 'card_click', target: currentPerformance.id, timestamp: getISOTimestamp() },
-      { action: 'date_select', target: selectedDate, timestamp: getISOTimestamp() },
-      { action: 'time_select', target: selectedTime, timestamp: getISOTimestamp() },
-      { action: 'booking_start', target: currentPerformance.id, date: selectedDate, time: selectedTime, timestamp: getISOTimestamp() }
+      { action: 'card_click', target: currentPerformance.id, timestamp: getCollectTimestamp() },
+      { action: 'date_select', target: selectedDate, timestamp: getCollectTimestamp() },
+      { action: 'time_select', target: selectedTime, timestamp: getCollectTimestamp() },
+      { action: 'booking_start', target: currentPerformance.id, date: selectedDate, time: selectedTime, timestamp: getCollectTimestamp() }
     ]
   });
-
-  disableMouseTracking();
   navigateTo('queue.html');
 }
 
