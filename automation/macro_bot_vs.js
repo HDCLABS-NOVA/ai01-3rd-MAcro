@@ -65,9 +65,9 @@ async function runBotIteration(iteration) {
       return btn && !btn.disabled;
     }, { polling: 'mutation', timeout: 60000 });
 
-    await page.click('.date-btn:not([disabled])', { delay: 1 });
+    await page.click('.date-btn:not([disabled])', { delay: Math.floor(Math.random() * 15) + 1 });
     await page.waitForSelector('.time-btn:not([disabled])');
-    await page.click('.time-btn:not([disabled])', { delay: 1 });
+    await page.click('.time-btn:not([disabled])', { delay: Math.floor(Math.random() * 15) + 1 });
     await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle2' }), page.click('#start-booking-btn')]);
 
     // Handle Queue
@@ -92,7 +92,7 @@ async function runBotIteration(iteration) {
       const availableSeats = await page.$$('.seat.available');
       if (availableSeats.length === 0) break;
       const targetSeat = availableSeats[Math.floor(Math.random() * Math.min(availableSeats.length, 10))];
-      await targetSeat.click({ delay: 1 });
+      await targetSeat.click({ delay: Math.floor(Math.random() * 15) + 1 });
       await delay(100);
       const isSelected = await page.evaluate(el => el.classList.contains('selected'), targetSeat);
       if (isSelected) seatSelected = true;

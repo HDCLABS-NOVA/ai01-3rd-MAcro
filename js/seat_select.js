@@ -252,7 +252,16 @@ async function createSeatGrid() {
                             this.style.background = gradeColor.hoverBg;
                             this.style.color = 'white';
                         }
-                        // 자동 수집(log_collect.js)에 맡깁니다.
+                        // Track hover event for ML analysis
+                        if (typeof trackHover === 'function') {
+                            trackHover(event, {
+                                target: 'seat',
+                                seat_id: seatId,
+                                grade: grade.name,
+                                row: row,
+                                col: col
+                            });
+                        }
                     };
                     seat.onmouseleave = function () {
                         if (!this.classList.contains('selected')) {

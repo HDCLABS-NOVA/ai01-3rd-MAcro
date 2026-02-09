@@ -192,13 +192,28 @@ async def save_log(log_data: LogData):
         elif completion_status == "failed":
             payment_status = "failed"
         else:
-            # 하위 호환성: payment_success 필드도 확인
+            # 하위 호환성: booking_id 또는 payment_success 필드로 판단
+            booking_id = metadata.get("booking_id", "")
             payment_success = metadata.get("payment_success", False)
-            payment_status = "success" if payment_success else "failed"
+            
+            # booking_id가 있으면 성공으로 간주 (기존 로그 호환)
+            if booking_id and booking_id.strip() != "":
+                payment_status = "success"
+            elif payment_success:
+                payment_status = "success"
+            else:
+                payment_status = "failed"
         
-        # 📂 분류 저장 로직 추가 (macro/human 등)
+        # 📂 분류 저장 로직 추가 (macro/human/real_human 등)
         bot_type = metadata.get("bot_type", "")
-        current_logs_dir = os.path.join(LOGS_DIR, bot_type) if bot_type else LOGS_DIR
+        
+        # bot_type이 없으면 실제 사용자로 간주
+        if not bot_type or bot_type.strip() == "":
+            folder_name = "real_human"
+        else:
+            folder_name = bot_type
+        
+        current_logs_dir = os.path.join(LOGS_DIR, folder_name)
         os.makedirs(current_logs_dir, exist_ok=True)
 
         # 파일명 형식: [날짜]_[공연ID]_[flow_id]_[결제성공여부].json

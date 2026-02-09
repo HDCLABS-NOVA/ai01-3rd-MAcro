@@ -41,8 +41,8 @@ async function processPayment() {
         completed_time: getCollectTimestamp()
     });
 
-    // 최종 로그 완료
-    await uploadLog(true, bookingId);
+    // ⚠️ 로그 전송 제거: booking_complete.js에서만 전송
+    // await uploadLog(true, bookingId);
 
     hideLoading();
 

@@ -3,43 +3,60 @@ const puppeteer = require('puppeteer');
 // Configuration
 const BASE_URL = 'http://localhost:8000/';
 const LOOP_COUNT = 300; // 🔄 Set this to the number of times you want to run
-const HEADLESS_MODE = true; // Set true for background execution
+const HEADLESS_MODE = false; // Set true for background execution
 
 // Utils
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const randomDelay = (min, max) => delay(Math.floor(Math.random() * (max - min + 1)) + min);
 
-// Simulate Expert Human Mouse Movement (Bezier Curve for Organic Path)
-async function resetPerformanceTime(page, perfId, secondsInFuture) {
-  const newOpenTime = new Date(Date.now() + secondsInFuture * 1000).toISOString();
-  await page.evaluate(async (id, time) => {
-    await fetch(`/api/admin/performances/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ open_time: time, status: 'upcoming' })
-    });
-  }, perfId, newOpenTime);
-  console.log(`[SYSTEM] 🕒 Reset ${perfId} open time to ${secondsInFuture}s in future.`);
-}
+// Track mouse position to avoid jumps (remove anchor points)
+let lastMouseX = 640;
+let lastMouseY = 400;
 
 async function humanMove(page, targetX, targetY) {
-  const start = await page.evaluate(() => ({ x: window.innerWidth / 2, y: window.innerHeight / 2 }));
+  const startX = lastMouseX;
+  const startY = lastMouseY;
+
+  // Bezier control point with more randomness
   const cp1 = {
-    x: start.x + (targetX - start.x) * Math.random(),
-    y: start.y + (targetY - start.y) * Math.random()
+    x: startX + (targetX - startX) * (0.3 + Math.random() * 0.4),
+    y: startY + (targetY - startY) * (0.3 + Math.random() * 0.4)
   };
 
-  const steps = 6;
+  const steps = 12; // More steps for smoother but jittery path
   for (let i = 0; i <= 1; i += 1 / steps) {
-    const x = Math.pow(1 - i, 2) * start.x + 2 * (1 - i) * i * cp1.x + Math.pow(i, 2) * targetX;
-    const y = Math.pow(1 - i, 2) * start.y + 2 * (1 - i) * i * cp1.y + Math.pow(i, 2) * targetY;
+    // Bezier formula
+    let x = Math.pow(1 - i, 2) * startX + 2 * (1 - i) * i * cp1.x + Math.pow(i, 2) * targetX;
+    let y = Math.pow(1 - i, 2) * startY + 2 * (1 - i) * i * cp1.y + Math.pow(i, 2) * targetY;
+
+    // Add micro-jitter (human tremor)
+    x += (Math.random() - 0.5) * 2;
+    y += (Math.random() - 0.5) * 2;
+
     await page.mouse.move(x, y);
+    // Randomize interval between steps
+    await delay(5 + Math.random() * 10);
   }
+
+  // Final precise move to target
+  await page.mouse.move(targetX, targetY);
+  lastMouseX = targetX;
+  lastMouseY = targetY;
+}
+
+// Helper for human-like click duration (1-10ms)
+async function humanClick(element, options = {}) {
+  const clickDelay = 1 + Math.floor(Math.random() * 9); // 1-10ms duration
+  await element.click({ ...options, delay: clickDelay });
 }
 
 async function runHumanIteration(iteration) {
   const USER_EMAIL = 'human@email.com';
   const USER_PASS = '1';
+
+  // Starting from a random position instead of fixed center
+  lastMouseX = Math.floor(Math.random() * 1280);
+  lastMouseY = Math.floor(Math.random() * 800);
 
   console.log(`\n👨‍💼 Starting Expert Human Iteration ${iteration} / ${LOOP_COUNT}`);
 
@@ -50,15 +67,18 @@ async function runHumanIteration(iteration) {
   });
 
   try {
-    const context = await browser.createIncognitoBrowserContext();
-    const page = await context.newPage();
+    // Use the default page instead of creating a new one
+    const pages = await browser.pages();
+    const page = pages[0]; // Use the first (default) page
 
     console.log(`[${iteration}] TARGET: ${BASE_URL}`);
+
+    // Load index page
     await page.goto(BASE_URL, { waitUntil: 'networkidle2' });
 
     await page.evaluate(() => { sessionStorage.setItem('bot_type', 'human'); });
 
-    // Login
+    // 3. Login
     await page.goto(`${BASE_URL}login.html`, { waitUntil: 'networkidle2' });
     await page.type('#email', USER_EMAIL, { delay: 40 + Math.random() * 40 });
     await page.type('#password', USER_PASS, { delay: 40 + Math.random() * 40 });
@@ -67,10 +87,8 @@ async function runHumanIteration(iteration) {
       page.click('button[type="submit"]')
     ]);
 
-    // 0. Index -> Detail (Target: IU Concert with Auto-Reset)
+    // 1. Index -> Detail (Target: IU Concert)
     const TARGET_PERF_ID = 'perf001';
-    await resetPerformanceTime(page, TARGET_PERF_ID, 15);
-
     console.log(`[${iteration}] 🎭 Selecting Performance ${TARGET_PERF_ID}...`);
     await page.goto(`${BASE_URL}index.html`, { waitUntil: 'networkidle2' });
     await page.waitForSelector(`.performance-card[onclick*="${TARGET_PERF_ID}"]`);
@@ -109,34 +127,53 @@ async function runHumanIteration(iteration) {
       }
     }
 
-    // 4. Biological Reaction Time: Human takes 300-600ms to realize it's open
+    // 4. Biological Reaction Time: Quick human reaction for competitive ticketing
     console.log(`[${iteration}] 📢 Open! Reacting...`);
-    await randomDelay(300, 600);
+    await randomDelay(100, 300); // Fast reaction (was 300-600)
 
     // 5. Select Date with Curve
+    await page.waitForSelector('.date-btn:not([disabled])', { visible: true });
     const activeDateBtn = await page.$('.date-btn:not([disabled])');
+    if (!activeDateBtn) {
+      throw new Error('Date button not found or still disabled');
+    }
+
+    // Scroll element into view if needed
+    await activeDateBtn.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'auto' }));
+    await delay(30); // Quick scroll
+
     const activeBox = await activeDateBtn.boundingBox();
     if (activeBox) {
       await humanMove(page, activeBox.x + activeBox.width / 2, activeBox.y + activeBox.height / 2);
-      await activeDateBtn.click({ delay: 50 + Math.random() * 50 });
+      await randomDelay(80, 200); // Cognitive thinking before click
+      await humanClick(activeDateBtn);
     } else {
-      await activeDateBtn.click();
+      await activeDateBtn.evaluate(el => el.click());
     }
 
-    await randomDelay(400, 700);
+    await randomDelay(150, 400); // Decision for time selection
 
     // 6. Select Time
-    await page.waitForSelector('.time-btn:not([disabled])');
+    await page.waitForSelector('.time-btn:not([disabled])', { visible: true });
     const timeBtn = await page.$('.time-btn:not([disabled])');
+    if (!timeBtn) {
+      throw new Error('Time button not found or still disabled');
+    }
+
+    // Scroll element into view if needed
+    await timeBtn.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'auto' }));
+    await delay(30); // Quick scroll
+
     const tBox = await timeBtn.boundingBox();
     if (tBox) {
       await humanMove(page, tBox.x + tBox.width / 2, tBox.y + tBox.height / 2);
-      await timeBtn.click({ delay: 50 + Math.random() * 50 });
+      await randomDelay(80, 200); // Thinking
+      await humanClick(timeBtn);
     } else {
-      await timeBtn.click();
+      await timeBtn.evaluate(el => el.click());
     }
 
-    await randomDelay(400, 800);
+    await randomDelay(150, 400);
 
     // 7. Start Booking
     await Promise.all([
@@ -157,7 +194,10 @@ async function runHumanIteration(iteration) {
     // Seat Page & Captcha Bypass
     await page.waitForSelector('#seat-grid', { timeout: 30000 });
 
-    console.log(`[${iteration}] 🛡️ Bypassing Captcha (Macro-style)...`);
+    // Wait 1 second for CAPTCHA to appear (same as macro)
+    await delay(1000);
+
+    console.log(`[${iteration}] 🛡️ Bypassing Captcha...`);
     await page.evaluate(() => {
       // Direct access to state variables in seat_select.js
       window.isCaptchaVerified = true;
@@ -171,32 +211,52 @@ async function runHumanIteration(iteration) {
       }
     });
 
-    await randomDelay(300, 600); // Shorter delay like a pro
-
+    // Seat selection - FAST HUMAN: No browsing, immediate click!
+    console.log(`[${iteration}] 💺 Selecting seat (FAST)...`);
     let humanSeatSelected = false;
     let humanAttempts = 0;
-    while (!humanSeatSelected && humanAttempts < 5) {
+    const maxAttempts = 10;
+
+    while (!humanSeatSelected && humanAttempts < maxAttempts) {
       const availableSeats = await page.$$('.seat.available');
       if (availableSeats.length > 0) {
-        const targetSeat = availableSeats[Math.floor(Math.random() * Math.min(availableSeats.length, 10))];
+        // Pick a random seat from top available (like real users)
+        const targetSeat = availableSeats[Math.floor(Math.random() * Math.min(5, availableSeats.length))];
         const box = await targetSeat.boundingBox();
 
         if (box) {
           await humanMove(page, box.x + box.width / 2, box.y + box.height / 2);
-          await targetSeat.click({ delay: 40 + Math.random() * 30 }); // 40-70ms elite human
+          await randomDelay(100, 300); // Human scans before clicking
+          await humanClick(targetSeat);
         } else {
           await targetSeat.click();
         }
 
-        await randomDelay(400, 600);
+        await randomDelay(200, 400); // Wait for potential alert
+
+        // Check if "already taken" alert appeared
+        const alertModal = await page.$('.custom-alert-overlay');
+        if (alertModal) {
+          console.log(`[${iteration}] ⚠️ Already taken! Closing alert...`);
+          // Close the alert
+          const closeBtn = await page.$('.custom-alert-overlay .alert-close, .custom-alert-overlay button');
+          if (closeBtn) {
+            await closeBtn.click();
+            await randomDelay(100, 200); // Quick reaction
+          }
+          humanAttempts++;
+          continue; // Try again immediately
+        }
+
+        // Check if seat was successfully selected
         const isSelected = await page.evaluate(el => el.classList.contains('selected'), targetSeat);
 
         if (isSelected) {
           humanSeatSelected = true;
-          console.log(`[${iteration}] ⚡ Expert! Grabbed seat.`);
+          console.log(`[${iteration}] ⚡ Got it!`);
         } else {
-          console.log(`[${iteration}] ⚠️ Taken! Reacting fast...`);
-          await randomDelay(300, 500); // 0.3s reaction
+          console.log(`[${iteration}] ⚠️ Taken! Retrying...`);
+          await randomDelay(100, 300); // Fast reaction
           humanAttempts++;
         }
       } else {

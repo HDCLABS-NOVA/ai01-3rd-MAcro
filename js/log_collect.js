@@ -13,8 +13,24 @@ let mouseTrajectory = [];
 let lastMouseMoveTime = 0;
 let lastMouseDownTime = 0;
 
-// 독립적인 타임스탬프 및 ID 생성 함수
-const getCollectTimestamp = () => new Date().toISOString();
+// 독립적인 타임스탬프 및 ID 생성 함수 (KST)
+const getCollectTimestamp = () => {
+  const now = new Date();
+  // KST로 변환 (UTC+9)
+  const kstOffset = 9 * 60; // 9시간을 분으로
+  const kstTime = new Date(now.getTime() + (kstOffset * 60 * 1000));
+
+  // ISO 8601 형식으로 반환 (YYYY-MM-DDTHH:mm:ss.sss+09:00)
+  const year = kstTime.getUTCFullYear();
+  const month = String(kstTime.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(kstTime.getUTCDate()).padStart(2, '0');
+  const hours = String(kstTime.getUTCHours()).padStart(2, '0');
+  const minutes = String(kstTime.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(kstTime.getUTCSeconds()).padStart(2, '0');
+  const ms = String(kstTime.getUTCMilliseconds()).padStart(3, '0');
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${ms}+09:00`;
+};
 const generateCollectId = (prefix, len) => prefix + Math.random().toString(36).substr(2, len);
 
 // --- 2. 환경 정보 수집기 (Collector) ---
@@ -175,6 +191,9 @@ async function uploadLog(isSuccess = true, bookingId = '') {
   logData.metadata.is_completed = isSuccess;
   logData.metadata.booking_id = bookingId;
 
+  // ✅ completion_status 추가 (예매 완료 페이지에서만 success)
+  logData.metadata.completion_status = isSuccess ? "success" : "failed";
+
   try {
     const response = await fetch('/api/logs', {
       method: 'POST',
@@ -190,6 +209,25 @@ async function uploadLog(isSuccess = true, bookingId = '') {
     console.error('[Collect] 전송 실패:', error);
   }
 }
+
+// --- 6. 페이지 이탈 시 자동 로그 전송 (실패 처리) ---
+window.addEventListener('beforeunload', () => {
+  // booking_complete.html이 아닌 경우에만 실패로 전송
+  if (!window.location.pathname.includes('booking_complete.html')) {
+    const currentLog = loadLogState();
+    if (currentLog && !currentLog.metadata.completion_status) {
+      // 동기 방식으로 전송 (페이지 언로드 전에 전송)
+      const flowStart = new Date(currentLog.metadata.flow_start_time);
+      currentLog.metadata.flow_end_time = getCollectTimestamp();
+      currentLog.metadata.total_duration_ms = Date.now() - flowStart.getTime();
+      currentLog.metadata.is_completed = false;
+      currentLog.metadata.completion_status = "abandoned";
+
+      // sendBeacon 사용 (페이지 언로드 시에도 전송 보장)
+      navigator.sendBeacon('/api/logs', JSON.stringify(currentLog));
+    }
+  }
+});
 
 // 초기화 실행
 setupEventListeners();

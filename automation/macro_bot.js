@@ -3,18 +3,19 @@ const puppeteer = require('puppeteer');
 // Configuration
 const BASE_URL = 'http://localhost:8000/';
 const LOOP_COUNT = 300; // 🔄 Set this to the number of times you want to run
-const HEADLESS_MODE = true; // Set true for faster background execution
+const HEADLESS_MODE = false; // Set true for faster background execution
 
 // Utils
-async function resetPerformanceTime(page, perfId, secondsInFuture) {
+async function resetPerformanceTime(page, perfId, secondsInFuture, baseUrl) {
   const newOpenTime = new Date(Date.now() + secondsInFuture * 1000).toISOString();
-  await page.evaluate(async (id, time) => {
-    await fetch(`/api/admin/performances/${id}`, {
+  await page.evaluate(async (id, time, url) => {
+    await fetch(`${url}api/admin/performances/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ open_time: time, status: 'upcoming' })
     });
-  }, perfId, newOpenTime);
+  }, perfId, newOpenTime, baseUrl);
+  console.log(`[SYSTEM] 🕒 Reset ${perfId} open time to ${secondsInFuture}s in future.`);
 }
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -36,15 +37,9 @@ async function runBotIteration(iteration) {
   });
 
   try {
-    // Use Incognito context to ensure fresh session
-    const context = await browser.createIncognitoBrowserContext();
-    const page = await context.newPage();
-
-    // Close any other open pages (like the default blank one) to keep only one window
+    // Use the default page instead of creating a new one
     const pages = await browser.pages();
-    for (const p of pages) {
-      if (p !== page) await p.close();
-    }
+    const page = pages[0]; // Use the first (default) page
 
     // 🔍 Enable Browser Console Logging
     page.on('console', msg => {
@@ -58,7 +53,7 @@ async function runBotIteration(iteration) {
 
     console.log(`[${iteration}] TARGET: ${BASE_URL}`);
 
-    // 1. Check ngrok
+    // Load index page
     await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
 
     // 🏷️ Set bot type globally for the session
@@ -101,10 +96,8 @@ async function runBotIteration(iteration) {
       } catch (e) { console.log('⚠️ Navigation timeout, assuming success if URL changed'); }
     }
 
-    // 4. Index -> Detail (Target: IU Concert with Auto-Reset)
+    // 4. Index -> Detail (Target: IU Concert)
     const TARGET_PERF_ID = 'perf001';
-    await resetPerformanceTime(page, TARGET_PERF_ID, 15);
-
     console.log(`[${iteration}] 🎭 Selecting Performance ${TARGET_PERF_ID}...`);
     await page.goto(`${BASE_URL}index.html`, { waitUntil: 'networkidle0' });
     await page.waitForSelector(`.performance-card[onclick*="${TARGET_PERF_ID}"]`);
@@ -120,58 +113,71 @@ async function runBotIteration(iteration) {
       }
     });
 
-    // 5. Detail Page - ⚡ REALISTIC DOM-BASED MACRO
+    // 5. Detail Page - ⚡ REALISTIC DOM-BASED MACRO (Using Puppeteer clicks for isTrusted=true)
     console.log(`[${iteration}] 📅 Waiting for UI state change (Real Macro Style)...`);
 
-    await page.evaluate(() => {
-      return new Promise((resolve) => {
-        let clickedDate = false;
-        let clickedTime = false;
-        let clickedStart = false;
+    // Fast polling with Puppeteer native clicks
+    let clickedDate = false;
+    let clickedTime = false;
+    let clickedStart = false;
 
-        const dispatchSequence = (el) => {
-          const rect = el.getBoundingClientRect();
-          const x = rect.left + rect.width / 2;
-          const y = rect.top + rect.height / 2;
-          const opts = { view: window, bubbles: true, cancelable: true, clientX: x, clientY: y };
-
-          // Real click sequence: mousedown -> mouseup -> click
-          el.dispatchEvent(new MouseEvent('mousedown', opts));
-          el.dispatchEvent(new MouseEvent('mouseup', opts));
-          el.dispatchEvent(new MouseEvent('click', opts));
-        };
-
-        const checkInterval = setInterval(() => {
-          if (!clickedDate) {
-            const dateBtn = document.querySelector('.date-btn:not([disabled])');
-            if (dateBtn) {
-              dispatchSequence(dateBtn);
-              clickedDate = true;
-              console.log('[Bot] Date clicked (Full Sequence)');
+    while (!clickedStart) {
+      try {
+        if (!clickedDate) {
+          const dateBtn = await page.$('.date-btn:not([disabled])');
+          if (dateBtn) {
+            // Macro-style: fast straight line movement
+            const box = await dateBtn.boundingBox();
+            if (box) {
+              await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 3 });
+              await delay(10);
             }
+            await dateBtn.click({ delay: Math.floor(Math.random() * 15) + 1 }); // 1-15ms
+            clickedDate = true;
+            console.log('[Bot] Date clicked (Puppeteer)');
           }
+        }
 
-          if (clickedDate && !clickedTime) {
-            const timeBtn = document.querySelector('.time-btn:not([disabled])');
-            if (timeBtn) {
-              dispatchSequence(timeBtn);
-              clickedTime = true;
-              console.log('[Bot] Time clicked (Full Sequence)');
+        if (clickedDate && !clickedTime) {
+          const timeBtn = await page.$('.time-btn:not([disabled])');
+          if (timeBtn) {
+            const box = await timeBtn.boundingBox();
+            if (box) {
+              await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 3 });
+              await delay(10);
             }
+            await timeBtn.click({ delay: Math.floor(Math.random() * 15) + 1 });
+            clickedTime = true;
+            console.log('[Bot] Time clicked (Puppeteer)');
           }
+        }
 
-          if (clickedTime && !clickedStart) {
-            const startBtn = document.getElementById('start-booking-btn');
-            if (startBtn && (startBtn.style.display === 'block' || window.getComputedStyle(startBtn).display !== 'none')) {
-              dispatchSequence(startBtn);
+        if (clickedTime && !clickedStart) {
+          const startBtn = await page.$('#start-booking-btn');
+          if (startBtn) {
+            const isVisible = await page.evaluate(el => {
+              const style = window.getComputedStyle(el);
+              return style.display !== 'none' && el.style.display !== 'none';
+            }, startBtn);
+
+            if (isVisible) {
+              const box = await startBtn.boundingBox();
+              if (box) {
+                await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 3 });
+                await delay(10);
+              }
+              await startBtn.click({ delay: Math.floor(Math.random() * 15) + 1 });
               clickedStart = true;
-              clearInterval(checkInterval);
-              resolve();
+              console.log('[Bot] Start booking clicked (Puppeteer)');
             }
           }
-        }, 30);
-      });
-    });
+        }
+
+        await delay(30); // Same fast polling interval as before
+      } catch (e) {
+        // Element might be stale, continue polling
+      }
+    }
 
     console.log(`[${iteration}] ⚡ Entry sequence clicked. Waiting for next page...`);
 
@@ -208,24 +214,19 @@ async function runBotIteration(iteration) {
     // 7. Seat Selection & Captcha
     console.log(`[${iteration}] 🪑 Proceeding with Seat Selection...`);
 
-    // Ensure we give enough time for seat_select.js to initialize
+    // Wait 1 second for CAPTCHA to appear (same as human)
     await delay(1000);
 
-    const captchaOverlay = await page.$('#captcha-overlay');
-    if (captchaOverlay) {
-      const isHidden = await page.evaluate(el => el.classList.contains('captcha-hidden'), captchaOverlay);
-      if (!isHidden) {
-        console.log(`[${iteration}] 🛡️ Bypassing Captcha...`);
-        await page.evaluate(() => {
-          if (window.verifyCaptcha) {
-            window.isCaptchaVerified = true;
-            if (sessionStorage) sessionStorage.setItem('captchaVerified', 'true');
-            const overlay = document.getElementById('captcha-overlay');
-            if (overlay) overlay.classList.add('captcha-hidden');
-          }
-        });
+    console.log(`[${iteration}] 🛡️ Bypassing Captcha...`);
+    await page.evaluate(() => {
+      window.isCaptchaVerified = true;
+      if (sessionStorage) sessionStorage.setItem('captchaVerified', 'true');
+      const overlay = document.getElementById('captcha-overlay');
+      if (overlay) {
+        overlay.classList.add('captcha-hidden');
+        overlay.style.display = 'none';
       }
-    }
+    });
 
     // Add safe dialog handler (Moved before loop to catch alerts during selection)
     page.on('dialog', async dialog => {
@@ -239,51 +240,66 @@ async function runBotIteration(iteration) {
       await dialog.dismiss();
     });
 
-    // Pick Seat (High-Speed In-Page Logic with Retry)
+    // Pick Seat (High-Speed In-Page Logic with Retry - Using Puppeteer clicks)
     console.log(`[${iteration}] ⚡ Starting High-Speed Seat Selection...`);
-    const seatSelectionResult = await page.evaluate(async () => {
-      const wait = (ms) => new Promise(res => setTimeout(res, ms));
-      let selected = false;
-      let attempts = 0;
 
-      while (!selected && attempts < 50) {
+    let selected = false;
+    let attempts = 0;
+
+    while (!selected && attempts < 50) {
+      try {
         // 1. Check for Custom Alert Overlay (Already Taken)
-        const alertOverlay = document.getElementById('alert-overlay');
-        if (alertOverlay && alertOverlay.classList.contains('active')) {
-          const confirmBtn = document.getElementById('alert-confirm-btn');
-          if (confirmBtn) confirmBtn.click();
-          await wait(300);
+        const alertOverlay = await page.$('#alert-overlay');
+        if (alertOverlay) {
+          const isActive = await page.evaluate(el => el.classList.contains('active'), alertOverlay);
+          if (isActive) {
+            const confirmBtn = await page.$('#alert-confirm-btn');
+            if (confirmBtn) {
+              await confirmBtn.click();
+              await delay(300);
+            }
+          }
         }
 
-        const availableSeats = Array.from(document.querySelectorAll('.seat.available:not(.selected)'));
+        // 2. Find available seats
+        const availableSeats = await page.$$('.seat.available:not(.selected)');
+
         if (availableSeats.length === 0) {
-          await wait(100);
+          await delay(100);
           attempts++;
           continue;
         }
 
+        // 3. Select random seat and click immediately (realistic macro: no scouting!)
         const randomIndex = Math.floor(Math.random() * Math.min(10, availableSeats.length));
         const targetSeat = availableSeats[randomIndex];
 
-        // Dispatch realistic sequence
-        const rect = targetSeat.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
-        const opts = { view: window, bubbles: true, cancelable: true, clientX: x, clientY: y };
-        targetSeat.dispatchEvent(new MouseEvent('mousedown', opts));
-        targetSeat.dispatchEvent(new MouseEvent('mouseup', opts));
-        targetSeat.dispatchEvent(new MouseEvent('click', opts));
+        // 4. Move to target FAST and click (isTrusted=true)
+        const box = await targetSeat.boundingBox();
+        if (box) {
+          // Fast straight-line movement
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2, { steps: 3 });
+          await delay(10); // Minimal pause
+        }
+        await targetSeat.click({ delay: Math.floor(Math.random() * 15) + 1 }); // 1-15ms macro speed
+        await delay(300); // Wait for potential alert or state change
 
-        await wait(400); // Wait for potential alert or state change
-
-        if (targetSeat.classList.contains('selected')) {
+        // 5. Verify selection
+        const isSelected = await page.evaluate(el => el.classList.contains('selected'), targetSeat);
+        if (isSelected) {
           selected = true;
+          console.log(`[${iteration}] ✅ Seat selected successfully (Puppeteer click)`);
           break;
         }
+
+        attempts++;
+      } catch (e) {
+        // Seat might have been taken or DOM changed, retry
         attempts++;
       }
-      return selected;
-    });
+    }
+
+    const seatSelectionResult = selected;
 
     if (seatSelectionResult) {
       console.log(`[${iteration}] ✅ Seat selected! Clicking Next...`);

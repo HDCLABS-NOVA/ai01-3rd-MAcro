@@ -10,7 +10,9 @@ async function loadPerformance() {
   }
 
   try {
-    const response = await fetch('data/performances.json');
+    const response = await fetch('data/performances.json', {
+      cache: 'no-cache' // Prevent cache issues
+    });
     const data = await response.json();
     currentPerformance = data.performances.find(p => p.id === perfId);
 
@@ -18,7 +20,29 @@ async function loadPerformance() {
       throw new Error('공연을 찾을 수 없습니다.');
     }
 
+    // 🕒 Virtual Auto-reset for the current session (5 seconds wait)
+    // This avoids race conditions on the server file and is much faster/reliable
+    const sessionOpenTimeKey = `vperf_${perfId}_opentime`;
+    let virtualOpenTime = sessionStorage.getItem(sessionOpenTimeKey);
+
+    if (!virtualOpenTime) {
+      // First time in this session: set a virtual open time 5 seconds in future
+      virtualOpenTime = new Date(Date.now() + 5000).toISOString();
+      sessionStorage.setItem(sessionOpenTimeKey, virtualOpenTime);
+
+      const botType = sessionStorage.getItem('bot_type') || 'REAL USER';
+      console.log(`[${botType}] 🕒 Virtual Reset for ${perfId}: 5s countdown started.`);
+    }
+
+    // Override the performance's open time with our virtual one for this session
+    currentPerformance.open_time = virtualOpenTime;
+
     displayPerformance();
+
+    // ✅ 카드 클릭 시점 기록 (페이지 진입 시점)
+    if (typeof cardClickTimestamp === 'undefined') {
+      cardClickTimestamp = new Date().toISOString();
+    }
 
     // 로그 초기화
     await initLogCollector(currentPerformance.id, currentPerformance.title);
@@ -177,6 +201,11 @@ function attachEventListeners() {
 let selectedDate = '';
 let selectedTime = '';
 
+// Action timestamps (실제 발생 시점 기록)
+let cardClickTimestamp = null;
+let dateSelectTimestamp = null;
+let timeSelectTimestamp = null;
+
 
 function selectDate(date, btnElement) {
   // ✅ 추가: 오픈 시간 체크
@@ -201,6 +230,9 @@ function selectDate(date, btnElement) {
 
   // 시간 선택 섹션 표시
   document.getElementById('time-selection-section').style.display = 'block';
+
+  // ✅ 실제 발생 시점 기록
+  dateSelectTimestamp = getCollectTimestamp();
 
   // 로그 기록
   // trackClick은 log_collect.js에서 자동 처리되지만 메타데이터 성격이 강하면 별도로 남길 수 있습니다.
@@ -230,6 +262,9 @@ function selectTime(time, btnElement) {
 
   // 예매 시작 버튼 표시
   document.getElementById('start-booking-btn').style.display = 'block';
+
+  // ✅ 실제 발생 시점 기록
+  timeSelectTimestamp = getCollectTimestamp();
 
   // 로그 기록
   // 자동 수집에 맡깁니다.
@@ -263,19 +298,21 @@ function startBooking() {
   });
 
   // 로그 단계 종료
+  const bookingStartTimestamp = getCollectTimestamp();
+
   recordStageExit('perf', {
     card_clicks: [{
       performance_id: currentPerformance.id,
       performance_title: currentPerformance.title,
-      timestamp: getCollectTimestamp()
+      timestamp: cardClickTimestamp || bookingStartTimestamp
     }],
-    date_selections: [{ date: selectedDate, timestamp: getCollectTimestamp() }],
-    time_selections: [{ time: selectedTime, timestamp: getCollectTimestamp() }],
+    date_selections: [{ date: selectedDate, timestamp: dateSelectTimestamp || bookingStartTimestamp }],
+    time_selections: [{ time: selectedTime, timestamp: timeSelectTimestamp || bookingStartTimestamp }],
     actions: [
-      { action: 'card_click', target: currentPerformance.id, timestamp: getCollectTimestamp() },
-      { action: 'date_select', target: selectedDate, timestamp: getCollectTimestamp() },
-      { action: 'time_select', target: selectedTime, timestamp: getCollectTimestamp() },
-      { action: 'booking_start', target: currentPerformance.id, date: selectedDate, time: selectedTime, timestamp: getCollectTimestamp() }
+      { action: 'card_click', target: currentPerformance.id, timestamp: cardClickTimestamp || bookingStartTimestamp },
+      { action: 'date_select', target: selectedDate, timestamp: dateSelectTimestamp || bookingStartTimestamp },
+      { action: 'time_select', target: selectedTime, timestamp: timeSelectTimestamp || bookingStartTimestamp },
+      { action: 'booking_start', target: currentPerformance.id, date: selectedDate, time: selectedTime, timestamp: bookingStartTimestamp }
     ]
   });
   navigateTo('queue.html');
