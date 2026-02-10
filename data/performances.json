@@ -406,7 +406,7 @@
                 }
             ],
             "image": "images/concert01.jpg",
-            "description": "",
+            "description": "두산 베어스 > SSG 랜더스 로 이적한 리코 소속 김재환\n이적 후 잠실 첫 등판!!!!!!!!!",
             "open_time": "2026-02-05T14:40:00+09:00",
             "status": "upcoming"
         },
@@ -449,7 +449,7 @@
             "id": "perf014",
             "title": "임다영 뾱뾱회",
             "category": "exhibition",
-            "venue": "스타쉽 엔터테이먼트",
+            "venue": "스타쉽 엔터테인먼트",
             "dates": [
                 "2026-05-14"
             ],
