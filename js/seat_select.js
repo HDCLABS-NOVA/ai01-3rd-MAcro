@@ -110,23 +110,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 페이지 로드 시 보안문자 팝업 표시 (이미 통과한 경우 제외)
+// 페이지 로드 시 보안문자 팝업 표시 (항상 표시)
 window.addEventListener('load', () => {
-    // 세션 동안 이미 보안문자를 통과한 경우 건너뛰기
-    const alreadyVerified = sessionStorage.getItem('captchaVerified') === 'true';
+    // 세션 기록과 상관없이 무조건 보안문자 표시
+    isCaptchaVerified = false; // 검증 상태 초기화
 
-    if (alreadyVerified) {
-        console.log('Captcha already verified in this session - skipping');
-        isCaptchaVerified = true;
-        // 오버레이를 표시하지 않음
-        document.getElementById('captcha-overlay').classList.add('captcha-hidden');
-    } else {
-        // 처음 방문하는 경우 보안문자 표시
-        setTimeout(() => {
-            document.getElementById('captcha-overlay').classList.remove('captcha-hidden');
-            generateCaptcha();
-        }, 500);
-    }
+    // 오버레이 표시 및 캡차 생성
+    setTimeout(() => {
+        document.getElementById('captcha-overlay').classList.remove('captcha-hidden');
+        generateCaptcha();
+    }, 500);
 });
 
 // 페이지 진입 시 플로우 데이터 확인
@@ -183,17 +176,20 @@ async function createSeatGrid() {
 
     // 등급별로 구역 생성
     perf.grades.forEach((grade, gradeIdx) => {
+        // [FIX] JSON 데이터에 따라 name 또는 grade 키 사용
+        const gradeName = grade.name || grade.grade;
+
         const gradeSection = document.createElement('div');
         gradeSection.style.marginBottom = 'var(--spacing-xl)';
 
         // 등급 헤더
         const gradeHeader = document.createElement('div');
-        const gradeColor = gradeColors[grade.name] || gradeColors['A'];
+        const gradeColor = gradeColors[gradeName] || gradeColors['A'];
         gradeHeader.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md); padding: var(--spacing-sm) var(--spacing-md); background: ${gradeColor.bg}; border-left: 4px solid ${gradeColor.border}; border-radius: 8px;">
                 <div style="display: flex; align-items: center; gap: var(--spacing-md);">
                     <div style="width: 24px; height: 24px; background: ${gradeColor.border}; border-radius: 4px;"></div>
-                    <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 18px;">${grade.name}석</span>
+                    <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 18px;">${gradeName.endsWith('석') ? gradeName : gradeName + '석'}</span>
                 </div>
                 <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 20px;">${formatPrice(grade.price)}</span>
             </div>
@@ -228,14 +224,14 @@ async function createSeatGrid() {
                     rowContainer.appendChild(aisle);
                 }
 
-                const seatId = `${grade.name}-${row}${col}`;
+                const seatId = `${gradeName}-${row}${col}`;
                 const seat = document.createElement('div');
 
                 const isTaken = Math.random() > 0.75;
                 seat.className = 'seat ' + (isTaken ? 'taken' : 'available');
                 seat.textContent = col;
                 seat.dataset.seat = seatId;
-                seat.dataset.grade = grade.name;
+                seat.dataset.grade = gradeName;
                 seat.dataset.price = grade.price;
                 seat.dataset.row = row;
                 seat.dataset.col = col;
@@ -257,7 +253,7 @@ async function createSeatGrid() {
                             trackHover(event, {
                                 target: 'seat',
                                 seat_id: seatId,
-                                grade: grade.name,
+                                grade: gradeName,
                                 row: row,
                                 col: col
                             });
@@ -270,7 +266,7 @@ async function createSeatGrid() {
                         }
                     };
 
-                    seat.onclick = function (event) { toggleSeat(seatId, grade.name, grade.price, this, event); };
+                    seat.onclick = function (event) { toggleSeat(seatId, gradeName, grade.price, this, event); };
                 }
 
                 rowContainer.appendChild(seat);
@@ -365,7 +361,7 @@ function updateSummary() {
             const seats = gradeGroups[grade];
             const gradeColor = gradeColors[grade];
             return seats.map(s => {
-                const seatLabel = s.id.split('-')[1];
+                const seatLabel = String(s.id).includes('-') ? s.id.split('-').pop() : s.id;
                 return `<div style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; background: ${gradeColor.border}; color: white; border-radius: 16px; margin: 4px; font-weight: 600; font-size: 13px; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
                         <span style="font-size: 10px; opacity: 0.9;">${grade}</span>
                         <span>${seatLabel}</span>
