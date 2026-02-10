@@ -142,7 +142,7 @@ function updateMetadata(data) {
 
 // 마우스 및 클릭 이벤트 리스너
 function setupEventListeners() {
-  document.addEventListener('mousemove', (e) => {
+  document.addEventListener('pointermove', (e) => {
     const now = Date.now();
     if (now - lastMouseMoveTime < 100) return; // 100ms 샘플링
     lastMouseMoveTime = now;
@@ -153,13 +153,14 @@ function setupEventListeners() {
       e.clientY,
       relTime,
       (e.clientX / window.innerWidth).toFixed(4),
-      (e.clientY / window.innerHeight).toFixed(4)
+      (e.clientY / window.innerHeight).toFixed(4),
+      e.pointerType || 'mouse'
     ]);
   });
 
-  document.addEventListener('mousedown', () => { lastMouseDownTime = Date.now(); });
+  document.addEventListener('pointerdown', () => { lastMouseDownTime = Date.now(); });
 
-  document.addEventListener('mouseup', (e) => {
+  document.addEventListener('pointerup', (e) => {
     if (!logData || !currentStage) return;
 
     const clickDuration = lastMouseDownTime > 0 ? Date.now() - lastMouseDownTime : 0;
@@ -172,7 +173,8 @@ function setupEventListeners() {
       is_trusted: e.isTrusted,
       duration: clickDuration,
       button: e.button,
-      is_integer: Number.isInteger(e.clientX) && Number.isInteger(e.clientY)
+      is_integer: Number.isInteger(e.clientX) && Number.isInteger(e.clientY),
+      pointer_type: e.pointerType || 'mouse'
     };
 
     if (!logData.stages[currentStage].clicks) logData.stages[currentStage].clicks = [];

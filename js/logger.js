@@ -144,7 +144,14 @@ function trackMouseMove(event) {
     const relativeTime = stageStartTime ? now - stageStartTime : 0;
     const nx = event.clientX / window.innerWidth;
     const ny = event.clientY / window.innerHeight;
-    mouseTrajectory.push([event.clientX, event.clientY, relativeTime, nx.toFixed(4), ny.toFixed(4)]);
+    mouseTrajectory.push([
+        event.clientX,
+        event.clientY,
+        relativeTime,
+        nx.toFixed(4),
+        ny.toFixed(4),
+        event.pointerType || 'mouse'
+    ]);
 }
 
 /**
@@ -194,9 +201,10 @@ function trackClick(event, targetInfo = {}) {
         ny: (event.clientY / window.innerHeight).toFixed(4),
         timestamp: stageStartTime ? Date.now() - stageStartTime : 0,
         is_trusted: event.isTrusted,
-        click_duration: clickDuration,
+        duration: clickDuration,
         button: event.button, // 0: 좌클릭, 2: 우클릭
         is_integer: Number.isInteger(event.clientX) && Number.isInteger(event.clientY),
+        pointer_type: event.pointerType || 'mouse',
         ...targetInfo
     };
 
@@ -288,14 +296,14 @@ async function sendLogToServer() {
  * 페이지 마우스 추적 활성화
  */
 function enableMouseTracking() {
-    document.addEventListener('mousemove', trackMouseMove);
-    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('pointermove', trackMouseMove);
+    document.addEventListener('pointerdown', handleMouseDown);
 }
 
 /**
  * 페이지 마우스 추적 비활성화
  */
 function disableMouseTracking() {
-    document.removeEventListener('mousemove', trackMouseMove);
-    document.removeEventListener('mousedown', handleMouseDown);
+    document.removeEventListener('pointermove', trackMouseMove);
+    document.removeEventListener('pointerdown', handleMouseDown);
 }
