@@ -72,9 +72,26 @@
             border-radius: var(--border-radius);
             margin-top: var(--spacing-md);
             border: 2px solid #2196F3;
+            position: relative;
         }
 
-        .analysis-grid {
+        .canvas-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            display: none;
+            z-index: 100;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            line-height: 1.5;
+        }
+
+        .stage-btn {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: var(--spacing-md);
@@ -185,6 +202,7 @@
 
                         <div class="tremor-view">
                             <canvas id="tremor-canvas" width="600" height="600"></canvas>
+                            <div id="tremor-tooltip" class="canvas-tooltip"></div>
                             <div id="tremor-stats" style="margin-top: var(--spacing-md);"></div>
                         </div>
                     </div>
@@ -371,11 +389,111 @@
                     currentHover.push(curr);
                 } else {
                     if (currentHover.length > 5) {
+                        // const hasTarget = currentHover.some(p => p.length > 3 && typeof p[3] === 'string' && isNaN(Number(p[3])));
+                        // if (hasTarget) {
                         hoverSegments.push([...currentHover]);
+                        // }
                     }
                     currentHover = [];
                 }
             }
+
+            // [추가] 중요: 호버 구간 병합 및 필터링 (노이즈 제거)
+            // 1. 같은 타겟에서 연속된 호버는 하나로 합침
+            // 2. 합친 결과가 0.5초 미만이면 "고민 아님"으로 간주하고 삭제
+            if (hoverSegments.length > 0) {
+                const mergedSegments = [];
+                let currentGroup = hoverSegments[0];
+
+                // 타겟 추출 헬퍼 함수
+                const getTarget = (seg) => {
+                    // 세그먼트 내에서 가장 많이 등장한 타겟 찾기
+                    const counts = {};
+                    let max = 0;
+                    let best = null;
+                    seg.forEach(p => {
+                        if (p.length > 3 && typeof p[3] === 'string' && isNaN(Number(p[3]))) {
+                            counts[p[3]] = (counts[p[3]] || 0) + 1;
+                            if (counts[p[3]] > max) { max = counts[p[3]]; best = p[3]; }
+                        }
+                    });
+                    return best;
+                };
+
+                let currentTarget = getTarget(currentGroup);
+
+                for (let i = 1; i < hoverSegments.length; i++) {
+                    const nextSeg = hoverSegments[i];
+                    const nextTarget = getTarget(nextSeg);
+
+                    // 같은 타겟이고, 시간 차이가 1초 이내라면 병합
+                    const timeDiff = nextSeg[0][2] - currentGroup[currentGroup.length - 1][2];
+
+                    if (currentTarget && nextTarget === currentTarget && timeDiff < 1000) {
+                        currentGroup = currentGroup.concat(nextSeg);
+                    } else {
+                        mergedSegments.push(currentGroup);
+                        currentGroup = nextSeg;
+                        currentTarget = nextTarget;
+                    }
+                }
+                mergedSegments.push(currentGroup);
+
+                // 0.3초(300ms) 이상인 것만 남김 (기준 완화)
+                hoverSegments = mergedSegments.filter(seg => {
+                    const duration = seg[seg.length - 1][2] - seg[0][2];
+                    return duration >= 300;
+                });
+            }
+
+            // [추가] 중요: 클릭이 발생한 지점은 속도와 상관없이 강제로 호버 구간으로 포함
+            // 사용자가 클릭했다는 것은 분명한 '관심'의 표현이므로 분석 대상에 포함되어야 함
+            clicks.forEach(click => {
+                let clickTime;
+
+                // 타임스탬프 정규화
+                if (typeof click.timestamp === 'string' && click.timestamp.includes('T')) {
+                    clickTime = new Date(click.timestamp).getTime();
+                    const startTime = new Date(stageData.entry_time).getTime();
+                    clickTime = clickTime - startTime; // 상대 시간으로 변환
+                } else {
+                    clickTime = click.timestamp;
+                }
+
+                // 클릭 시점 전후 0.5초(500ms) 구간의 궤적 찾기
+                let clickSegment = trajectory.filter(p => {
+                    const t = p[2];
+                    return t >= clickTime - 500 && t <= clickTime + 500;
+                });
+
+                // [중요] 궤적 데이터가 없거나 매칭되지 않아도, 클릭은 반드시 표시해야 함
+                // 인위적인 호버 포인트를 생성하여 추가
+                if (clickSegment.length === 0) {
+                    clickSegment = [];
+                    // 클릭 위치에 5개의 인위적 포인트 생성 (약 250ms 분량처럼 보이게)
+                    for (let k = 0; k < 5; k++) {
+                        const timeOffset = (k - 2) * 50; // -100ms ~ +100ms
+                        clickSegment.push([click.x, click.y, clickTime + timeOffset, click.target || null]);
+                    }
+                }
+
+                if (clickSegment.length > 0) {
+                    // 이미 존재하는 호버 구간과 겹치는지 확인
+                    const isOverlapping = hoverSegments.some(segment => {
+                        const start = segment[0][2];
+                        const end = segment[segment.length - 1][2];
+                        // 구간이 겹치면 중복 추가 방지
+                        return (clickTime >= start - 100 && clickTime <= end + 100);
+                    });
+
+                    if (!isOverlapping) {
+                        hoverSegments.push(clickSegment);
+                    }
+                }
+            });
+
+            // 시간순 정렬 (호버 구간이 뒤죽박죽되지 않도록)
+            hoverSegments.sort((a, b) => a[0][2] - b[0][2]);
 
             // 마우스 경로
             ctx.strokeStyle = '#2196F3';
@@ -474,6 +592,9 @@
 
             const canvas = document.getElementById('tremor-canvas');
             const ctx = canvas.getContext('2d');
+            const tooltip = document.getElementById('tremor-tooltip');
+
+            const stageData = currentLog.stages[currentStage]; // 현재 스테이지 데이터 가져오기
 
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -485,19 +606,32 @@
             const offsetX = canvas.width / 2;
             const offsetY = canvas.height / 2;
 
-            // 격자
+            // 격자 및 숫자 표시
             ctx.strokeStyle = '#eee';
             ctx.lineWidth = 1;
-            for (let i = -10; i <= 10; i++) {
+            ctx.fillStyle = '#aaa';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+
+            for (let i = -20; i <= 20; i++) {
+                if (i === 0) continue;
+                const x = offsetX + i * 20;
                 ctx.beginPath();
-                ctx.moveTo(offsetX + i * 20, 0);
-                ctx.lineTo(offsetX + i * 20, canvas.height);
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
                 ctx.stroke();
 
+                const y = offsetY + i * 20;
                 ctx.beginPath();
-                ctx.moveTo(0, offsetY + i * 20);
-                ctx.lineTo(canvas.width, offsetY + i * 20);
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
                 ctx.stroke();
+
+                if (i % 2 === 0) {
+                    ctx.fillText(i * 2, x, offsetY + 5);
+                    ctx.fillText(i * 2, offsetX + 5, y);
+                }
             }
 
             // 중심선
@@ -517,9 +651,13 @@
             ctx.lineWidth = 2;
             ctx.beginPath();
 
+            const displayPoints = [];
+            const displayClicks = [];
+
             segment.forEach((point, index) => {
                 const x = offsetX + (point[0] - centerX) * scale;
                 const y = offsetY + (point[1] - centerY) * scale;
+                displayPoints.push({ x: x, y: y, original: point });
 
                 if (index === 0) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
@@ -527,15 +665,160 @@
             ctx.stroke();
 
             // 포인트
-            segment.forEach(point => {
-                const x = offsetX + (point[0] - centerX) * scale;
-                const y = offsetY + (point[1] - centerY) * scale;
-
+            displayPoints.forEach(p => {
                 ctx.fillStyle = '#FF9800';
                 ctx.beginPath();
-                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
                 ctx.fill();
             });
+
+            // --- 타겟 확인 (직접 로깅된 데이터 우선) ---
+            let relevantClickTarget = null;
+
+            // 1. 직접 로깅된 타겟 확인 (trajectory 포인트의 4번째 값)
+            const targetCounts = {};
+            let maxCount = 0;
+            let bestTarget = null;
+
+            segment.forEach(p => {
+                // p[3]이 문자열이면서 숫자로 변환되지 않는 경우(좌석 ID 등)에만 타겟으로 인정
+                // 숫자 문자열(예: "0.5123")은 좌표값이므로 제외
+                if (p.length > 3 && typeof p[3] === 'string' && isNaN(Number(p[3]))) {
+                    const t = p[3];
+                    targetCounts[t] = (targetCounts[t] || 0) + 1;
+                    if (targetCounts[t] > maxCount) {
+                        maxCount = targetCounts[t];
+                        bestTarget = t;
+                    }
+                }
+            });
+
+            if (bestTarget) {
+                relevantClickTarget = bestTarget;
+            }
+
+            // 2. 기존 거리 기반 클릭 매칭 (백업)
+            if (!relevantClickTarget && stageData && stageData.clicks && stageData.clicks.length > 0) {
+                const startTime = segment[0][2];
+                const endTime = segment[segment.length - 1][2];
+
+                let candidates = stageData.clicks.filter(c =>
+                    (c.timestamp >= startTime - 30000 && c.timestamp <= endTime + 30000)
+                );
+
+                const viewW = stageData.viewport_width || 1920;
+                const viewH = stageData.viewport_height || 1080; // Assuming a default height if not provided
+
+                candidates = candidates.map(c => {
+                    let cx, cy;
+                    if (c.nx !== undefined) {
+                        cx = c.nx * viewW;
+                        cy = c.ny * viewH;
+                    } else {
+                        cx = c.x;
+                        cy = c.y;
+                    }
+                    const dist = Math.sqrt(Math.pow(cx - centerX, 2) + Math.pow(cy - centerY, 2));
+                    return { ...c, _dist: dist, _x: cx, _y: cy };
+                });
+
+                candidates.sort((a, b) => a._dist - b._dist);
+
+                const nearestClick = candidates[0];
+                if (nearestClick && nearestClick._dist < 150) {
+                    relevantClickTarget = nearestClick.label || nearestClick.target;
+                    if (nearestClick.target === 'seat_alert_confirm') {
+                        relevantClickTarget = "팝업 확인";
+                    }
+                }
+
+                candidates.forEach(click => {
+                    const clickX = click._x;
+                    const clickY = click._y;
+                    const drawX = offsetX + (clickX - centerX) * scale;
+                    const drawY = offsetY + (clickY - centerY) * scale;
+                    displayClicks.push({ x: drawX, y: drawY, data: click });
+
+                    ctx.fillStyle = 'rgba(255, 61, 127, 0.4)';
+                    ctx.beginPath();
+                    ctx.arc(drawX, drawY, 8, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#FF3D7F';
+                    ctx.beginPath();
+                    ctx.arc(drawX, drawY, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+
+            // 툴팁 이벤트
+            canvas.onmousemove = function (e) {
+                const mouseX = e.offsetX * (canvas.width / canvas.clientWidth);
+                const mouseY = e.offsetY * (canvas.height / canvas.clientHeight);
+
+                var found = null;
+                var foundType = null;
+
+                for (let i = 0; i < displayClicks.length; i++) {
+                    const obj = displayClicks[i];
+                    const dist = Math.sqrt(Math.pow(mouseX - obj.x, 2) + Math.pow(mouseY - obj.y, 2));
+                    if (dist < 10) {
+                        found = obj;
+                        foundType = 'click';
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    for (let i = 0; i < displayPoints.length; i++) {
+                        const obj = displayPoints[i];
+                        const dist = Math.sqrt(Math.pow(mouseX - obj.x, 2) + Math.pow(mouseY - obj.y, 2));
+                        if (dist < 10) {
+                            found = { point: obj, index: i };
+                            foundType = 'point';
+                            break;
+                        }
+                    }
+                }
+
+                if (found) {
+                    if (foundType === 'click') {
+                        const isFailed = found.data.result === 'failed' || found.data.action === 'click_taken';
+                        tooltip.innerHTML = `
+                            <strong>🖱️ 클릭 감지</strong> ${isFailed ? '<span style="color:red; font-size:0.9em;">(선택 실패)</span>' : ''}<br>
+                            ${found.data.label ? `<strong style="color: ${isFailed ? 'red' : '#FF3D7F'}; font-size: 1.1em;">${found.data.label}</strong><br>` : ''}
+                            ID: ${found.data.target || '-'}<br>
+                            ${isFailed ? '<span style="color:red;">⚠️ 이미 예매된 좌석입니다</span><br>' : ''}
+                            시간: ${(found.data.timestamp / 1000).toFixed(3)}s
+                        `;
+                    } else {
+                        // 호버 지속 시간 계산
+                        const startTime = segment[0][2];
+                        const endTime = segment[segment.length - 1][2];
+                        const duration = (endTime - startTime) / 1000;
+                        const isLongHover = duration >= 1.0;
+
+                        tooltip.innerHTML = `
+                            <strong>📍 호버 포인트 #${found.index + 1}</strong><br>
+                            ${relevantClickTarget ? `<strong style="color: ${isLongHover ? '#E91E63' : '#2196F3'}; font-size: 1.2em; display:block; margin: 4px 0;">🎯 타겟: ${relevantClickTarget}</strong>` : ''}
+                            지속 시간: <strong style="color: ${isLongHover ? '#E91E63' : 'inherit'}">${duration.toFixed(2)}초</strong> ${isLongHover ? '(진지한 고민)' : ''}<br>
+                            상대 좌표: (${(found.point.original[0] - centerX).toFixed(2)}, ${(found.point.original[1] - centerY).toFixed(2)})<br>
+                            절대 좌표: (${found.point.original[0].toFixed(1)}, ${found.point.original[1].toFixed(1)})
+                        `;
+                    }
+
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = (e.offsetX + 15) + 'px';
+                    tooltip.style.top = (e.offsetY + 15) + 'px';
+                } else {
+                    tooltip.style.display = 'none';
+                }
+            };
+
+            canvas.onmouseleave = function () {
+                tooltip.style.display = 'none';
+            };
+
 
             // 통계
             const distances = [];
