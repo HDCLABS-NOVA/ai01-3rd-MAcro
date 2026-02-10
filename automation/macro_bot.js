@@ -2,8 +2,8 @@ const puppeteer = require('puppeteer');
 
 // Configuration
 const BASE_URL = 'http://localhost:8000/';
-const LOOP_COUNT = 300; // 🔄 Set this to the number of times you want to run
-const HEADLESS_MODE = false; // Set true for faster background execution
+const LOOP_COUNT = 20; // 🔄 Set this to the number of times you want to run
+const HEADLESS_MODE = true; // Set true for faster background execution
 
 // Utils
 async function resetPerformanceTime(page, perfId, secondsInFuture, baseUrl) {
@@ -20,6 +20,20 @@ async function resetPerformanceTime(page, perfId, secondsInFuture, baseUrl) {
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const randomDelay = (min, max) => delay(Math.floor(Math.random() * (max - min + 1)) + min);
+
+// Smart Captcha Solver (Macro Style: Instant)
+async function solveCaptchaSmart(page) {
+  try {
+    // 1. Wait for captcha to be generated
+    await page.waitForFunction(() => window.currentCaptcha && window.currentCaptcha.length > 0, { timeout: 5000 });
+
+    // 2. Get the real answer directly from the page memory
+    const text = await page.evaluate(() => window.currentCaptcha);
+    return text;
+  } catch (e) {
+    return null;
+  }
+}
 
 async function runBotIteration(iteration) {
   const USER_EMAIL = 'macro@email.com';
@@ -214,19 +228,21 @@ async function runBotIteration(iteration) {
     // 7. Seat Selection & Captcha
     console.log(`[${iteration}] 🪑 Proceeding with Seat Selection...`);
 
-    // Wait 1 second for CAPTCHA to appear (same as human)
-    await delay(1000);
+    // 7. Seat Selection & Captcha
+    console.log(`[${iteration}] 🪑 Seat Map reached! Handling Captcha...`);
+    await page.waitForSelector('#captcha-overlay', { visible: true, timeout: 5000 }).catch(() => { });
 
-    console.log(`[${iteration}] 🛡️ Bypassing Captcha...`);
-    await page.evaluate(() => {
-      window.isCaptchaVerified = true;
-      if (sessionStorage) sessionStorage.setItem('captchaVerified', 'true');
-      const overlay = document.getElementById('captcha-overlay');
-      if (overlay) {
-        overlay.classList.add('captcha-hidden');
-        overlay.style.display = 'none';
+    // VLM Captcha Solve for Macro: Instant speed
+    const captchaOverlay = await page.$('#captcha-overlay:not(.captcha-hidden)');
+    if (captchaOverlay) {
+      console.log(`[${iteration}] 🛡️ Solving Captcha with Smart Logic (Macro Style)...`);
+      const text = await solveCaptchaSmart(page);
+      if (text) {
+        await page.type('#captcha-input', text, { delay: 0 }); // MACRO: Instant typing
+        await page.click('#captcha-submit-btn');
+        await delay(500); // Wait for overlay to hide
       }
-    });
+    }
 
     // Add safe dialog handler (Moved before loop to catch alerts during selection)
     page.on('dialog', async dialog => {

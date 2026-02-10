@@ -4,8 +4,8 @@
 loadLogState();
 recordStageEntry('seat');
 
-// 보안문자 관련 변수
-let currentCaptcha = '';
+// 보안문자 관련 변수 (전역 접근을 위해 window에 할당)
+window.currentCaptcha = '';
 let isCaptchaVerified = false;
 
 // 보안문자 생성 함수

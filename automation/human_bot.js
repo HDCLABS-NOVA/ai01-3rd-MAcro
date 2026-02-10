@@ -2,8 +2,8 @@ const puppeteer = require('puppeteer');
 
 // Configuration
 const BASE_URL = 'http://localhost:8000/';
-const LOOP_COUNT = 300; // 🔄 Set this to the number of times you want to run
-const HEADLESS_MODE = false; // Set true for background execution
+const LOOP_COUNT = 100; // 🔄 Set this to the number of times you want to run
+const HEADLESS_MODE = true; // Set true for background execution
 
 // Utils
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -44,10 +44,42 @@ async function humanMove(page, targetX, targetY) {
   lastMouseY = targetY;
 }
 
-// Helper for human-like click duration (1-10ms)
+// Helper for human-like click duration (80-150ms) - MATCHING REAL HUMAN LOGS
 async function humanClick(element, options = {}) {
-  const clickDelay = 1 + Math.floor(Math.random() * 9); // 1-10ms duration
+  const clickDelay = 80 + Math.floor(Math.random() * 70); // 80-150ms duration
   await element.click({ ...options, delay: clickDelay });
+}
+
+// Helper for micro-movements (breathing/waiting)
+async function humanJitter(page, durationMs) {
+  const startTime = Date.now();
+  while (Date.now() - startTime < durationMs) {
+    const offsetX = (Math.random() - 0.5) * 3; // -1.5 to 1.5 px
+    const offsetY = (Math.random() - 0.5) * 3;
+    await page.mouse.move(lastMouseX + offsetX, lastMouseY + offsetY);
+    await delay(100 + Math.random() * 200);
+  }
+}
+
+// Smart Captcha Solver: Reads from memory but acts like a human
+async function solveCaptchaSmart(page) {
+  try {
+    // 1. Wait for captcha to be generated
+    await page.waitForFunction(() => window.currentCaptcha && window.currentCaptcha.length > 0, { timeout: 5000 });
+
+    // 2. Get the real answer directly from the page memory (Instant!)
+    const text = await page.evaluate(() => window.currentCaptcha);
+    console.log(`[SmartSolve] Answer obtained: ${text}`);
+
+    // 3. Simulate human thinking time (1.5 ~ 3 seconds)
+    console.log('[SmartSolve] Simulating human thinking...');
+    await humanJitter(page, 1500 + Math.random() * 1500);
+
+    return text;
+  } catch (e) {
+    console.error('[SmartSolve] Error:', e.message);
+    return null;
+  }
 }
 
 async function runHumanIteration(iteration) {
@@ -191,25 +223,41 @@ async function runHumanIteration(iteration) {
       // If we are already on seat_select or queue timed out but we changed page
     }
 
-    // Seat Page & Captcha Bypass
+    // Seat Page & Captcha
     await page.waitForSelector('#seat-grid', { timeout: 30000 });
+    await page.waitForSelector('#captcha-overlay', { visible: true, timeout: 5000 }).catch(() => { });
 
-    // Wait 1 second for CAPTCHA to appear (same as macro)
-    await delay(1000);
+    // VLM Captcha Solve for Human: One by one with thinking time
+    const captchaOverlay = await page.$('#captcha-overlay:not(.captcha-hidden)');
+    if (captchaOverlay) {
+      console.log(`[${iteration}] 🛡️ Solving Captcha with Smart Logic (Human Style)...`);
+      const text = await solveCaptchaSmart(page);
 
-    console.log(`[${iteration}] 🛡️ Bypassing Captcha...`);
-    await page.evaluate(() => {
-      // Direct access to state variables in seat_select.js
-      window.isCaptchaVerified = true;
-      if (typeof isCaptchaVerified !== 'undefined') isCaptchaVerified = true;
+      if (text) {
+        // Move to input field
+        const inputField = await page.$('#captcha-input');
+        const iBox = await inputField.boundingBox();
+        if (iBox) {
+          await humanMove(page, iBox.x + iBox.width / 2, iBox.y + iBox.height / 2);
+          await inputField.click();
+        }
 
-      if (sessionStorage) sessionStorage.setItem('captchaVerified', 'true');
-      const overlay = document.getElementById('captcha-overlay');
-      if (overlay) {
-        overlay.classList.add('captcha-hidden');
-        overlay.style.display = 'none';
+        // Type one by one
+        for (const char of text) {
+          await page.type('#captcha-input', char, { delay: 40 + Math.random() * 100 });
+        }
+
+        // Move to submit button and click
+        const submitBtn = await page.$('#captcha-submit-btn');
+        const sBox = await submitBtn.boundingBox();
+        if (sBox) {
+          await humanMove(page, sBox.x + sBox.width / 2, sBox.y + sBox.height / 2);
+          await randomDelay(100, 300); // Thinking before confirmation
+          await humanClick(submitBtn);
+        }
+        await delay(1000); // Wait for overlay to hide
       }
-    });
+    }
 
     // Seat selection - FAST HUMAN: No browsing, immediate click!
     console.log(`[${iteration}] 💺 Selecting seat (FAST)...`);
