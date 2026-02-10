@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 
 // Configuration
 const BASE_URL = 'http://localhost:8000/';
-const LOOP_COUNT = 100; // 🔄 Set this to the number of times you want to run
+const LOOP_COUNT = 180; // 🔄 Set this to the number of times you want to run
 const HEADLESS_MODE = true; // Set true for background execution
 
 // Utils
@@ -82,15 +82,34 @@ async function solveCaptchaSmart(page) {
   }
 }
 
+const personas = ['elite', 'fast', 'pro'];
+
 async function runHumanIteration(iteration) {
+  const persona = personas[iteration % personas.length];
+  console.log(`\n🏆 Starting ${persona.toUpperCase()} (High-Skill Human) Iteration ${iteration} / ${LOOP_COUNT}`);
+
+  // Persona-based parameters: Focusing on HIGH SPEED but HUMAN CHARACTER
+  const getDelayRange = () => {
+    if (persona === 'elite') return { min: 30, max: 100 }; // Ultra fast
+    if (persona === 'pro') return { min: 100, max: 250 };   // Pro gamer
+    return { min: 200, max: 400 }; // Fast human
+  };
+
+  const reactionTime = () => {
+    if (persona === 'elite') return { min: 80, max: 150 };  // Human limit reaction
+    if (persona === 'pro') return { min: 150, max: 300 };
+    return { min: 250, max: 500 };
+  };
+
+  const pRange = getDelayRange();
+  const rTime = reactionTime();
+
   const USER_EMAIL = 'human@email.com';
   const USER_PASS = '1';
 
-  // Starting from a random position instead of fixed center
+  // Starting from a random position
   lastMouseX = Math.floor(Math.random() * 1280);
   lastMouseY = Math.floor(Math.random() * 800);
-
-  console.log(`\n👨‍💼 Starting Expert Human Iteration ${iteration} / ${LOOP_COUNT}`);
 
   const browser = await puppeteer.launch({
     headless: HEADLESS_MODE,
@@ -99,50 +118,41 @@ async function runHumanIteration(iteration) {
   });
 
   try {
-    // Use the default page instead of creating a new one
     const pages = await browser.pages();
-    const page = pages[0]; // Use the first (default) page
+    const page = pages[0];
 
-    console.log(`[${iteration}] TARGET: ${BASE_URL}`);
+    console.log(`[${iteration}] TARGET: ${BASE_URL} (Persona: ${persona})`);
 
-    // Load index page
     await page.goto(BASE_URL, { waitUntil: 'networkidle2' });
-
     await page.evaluate(() => { sessionStorage.setItem('bot_type', 'human'); });
 
     // 3. Login
     await page.goto(`${BASE_URL}login.html`, { waitUntil: 'networkidle2' });
-    await page.type('#email', USER_EMAIL, { delay: 40 + Math.random() * 40 });
-    await page.type('#password', USER_PASS, { delay: 40 + Math.random() * 40 });
+    await page.type('#email', USER_EMAIL, { delay: pRange.min / 2 + Math.random() * 40 });
+    await page.type('#password', USER_PASS, { delay: pRange.min / 2 + Math.random() * 40 });
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
       page.click('button[type="submit"]')
     ]);
 
-    // 1. Index -> Detail (Target: IU Concert)
+    // 1. Index -> Detail
     const TARGET_PERF_ID = 'perf001';
-    console.log(`[${iteration}] 🎭 Selecting Performance ${TARGET_PERF_ID}...`);
     await page.goto(`${BASE_URL}index.html`, { waitUntil: 'networkidle2' });
     await page.waitForSelector(`.performance-card[onclick*="${TARGET_PERF_ID}"]`);
+    await randomDelay(pRange.min, pRange.max);
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
       page.click(`.performance-card[onclick*="${TARGET_PERF_ID}"]`)
     ]);
 
-    // --- Improved Expert Human Wait & Click Logic ---
-    console.log(`[${iteration}] ⏳ Waiting for ticket to open...`);
-
-    // 1. Wait for the date button to appear (even if disabled)
+    // --- Human-like Wait & Click Logic ---
     await page.waitForSelector('.date-btn');
-
-    // 2. Move mouse to the button area and hover while waiting
     const dateBtn = await page.$('.date-btn');
     const btnBox = await dateBtn.boundingBox();
     if (btnBox) {
       await humanMove(page, btnBox.x + btnBox.width / 2, btnBox.y + btnBox.height / 2);
     }
 
-    // 3. Simulate human tension (micro-tremors) until enabled
     let isBtnEnabled = false;
     while (!isBtnEnabled) {
       isBtnEnabled = await page.evaluate(() => {
@@ -151,61 +161,42 @@ async function runHumanIteration(iteration) {
       });
 
       if (!isBtnEnabled) {
-        // Human tremor: slight movement while waiting
-        const tremorX = (btnBox?.x || 0) + (btnBox?.width || 0) / 2 + (Math.random() - 0.5) * 4;
-        const tremorY = (btnBox?.y || 0) + (btnBox?.height || 0) / 2 + (Math.random() - 0.5) * 4;
+        const tremorX = (btnBox?.x || 0) + (btnBox?.width || 0) / 2 + (Math.random() - 0.5) * (persona === 'erratic' ? 15 : 4);
+        const tremorY = (btnBox?.y || 0) + (btnBox?.height || 0) / 2 + (Math.random() - 0.5) * (persona === 'erratic' ? 15 : 4);
         await page.mouse.move(tremorX, tremorY);
-        await delay(100); // 10hz polling with movement
+        await delay(100);
       }
     }
 
-    // 4. Biological Reaction Time: Quick human reaction for competitive ticketing
-    console.log(`[${iteration}] 📢 Open! Reacting...`);
-    await randomDelay(100, 300); // Fast reaction (was 300-600)
+    // Reaction Time
+    await randomDelay(rTime.min, rTime.max);
 
-    // 5. Select Date with Curve
     await page.waitForSelector('.date-btn:not([disabled])', { visible: true });
     const activeDateBtn = await page.$('.date-btn:not([disabled])');
-    if (!activeDateBtn) {
-      throw new Error('Date button not found or still disabled');
+    if (activeDateBtn) {
+      const activeBox = await activeDateBtn.boundingBox();
+      if (activeBox) {
+        await humanMove(page, activeBox.x + activeBox.width / 2, activeBox.y + activeBox.height / 2);
+        await randomDelay(pRange.min / 2, pRange.max / 2);
+        await humanClick(activeDateBtn);
+      }
     }
 
-    // Scroll element into view if needed
-    await activeDateBtn.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'auto' }));
-    await delay(30); // Quick scroll
-
-    const activeBox = await activeDateBtn.boundingBox();
-    if (activeBox) {
-      await humanMove(page, activeBox.x + activeBox.width / 2, activeBox.y + activeBox.height / 2);
-      await randomDelay(80, 200); // Cognitive thinking before click
-      await humanClick(activeDateBtn);
-    } else {
-      await activeDateBtn.evaluate(el => el.click());
-    }
-
-    await randomDelay(150, 400); // Decision for time selection
+    await randomDelay(pRange.min, pRange.max);
 
     // 6. Select Time
     await page.waitForSelector('.time-btn:not([disabled])', { visible: true });
     const timeBtn = await page.$('.time-btn:not([disabled])');
-    if (!timeBtn) {
-      throw new Error('Time button not found or still disabled');
+    if (timeBtn) {
+      const tBox = await timeBtn.boundingBox();
+      if (tBox) {
+        await humanMove(page, tBox.x + tBox.width / 2, tBox.y + tBox.height / 2);
+        await randomDelay(pRange.min / 2, pRange.max / 2);
+        await humanClick(timeBtn);
+      }
     }
 
-    // Scroll element into view if needed
-    await timeBtn.evaluate(el => el.scrollIntoView({ block: 'center', behavior: 'auto' }));
-    await delay(30); // Quick scroll
-
-    const tBox = await timeBtn.boundingBox();
-    if (tBox) {
-      await humanMove(page, tBox.x + tBox.width / 2, tBox.y + tBox.height / 2);
-      await randomDelay(80, 200); // Thinking
-      await humanClick(timeBtn);
-    } else {
-      await timeBtn.evaluate(el => el.click());
-    }
-
-    await randomDelay(150, 400);
+    await randomDelay(pRange.min, pRange.max);
 
     // 7. Start Booking
     await Promise.all([
@@ -213,28 +204,22 @@ async function runHumanIteration(iteration) {
       page.click('#start-booking-btn')
     ]);
 
-    // ⏳ Handle Queue if it appears
+    // ⏳ Handle Queue
     try {
       if (page.url().includes('queue.html')) {
-        console.log(`[${iteration}] ⏳ In queue... waiting for turn.`);
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 });
       }
-    } catch (e) {
-      // If we are already on seat_select or queue timed out but we changed page
-    }
+    } catch (e) { }
 
     // Seat Page & Captcha
     await page.waitForSelector('#seat-grid', { timeout: 30000 });
     await page.waitForSelector('#captcha-overlay', { visible: true, timeout: 5000 }).catch(() => { });
 
-    // VLM Captcha Solve for Human: One by one with thinking time
     const captchaOverlay = await page.$('#captcha-overlay:not(.captcha-hidden)');
     if (captchaOverlay) {
-      console.log(`[${iteration}] 🛡️ Solving Captcha with Smart Logic (Human Style)...`);
-      const text = await solveCaptchaSmart(page);
+      const text = await solveCaptchaSmartPersona(page, persona);
 
       if (text) {
-        // Move to input field
         const inputField = await page.$('#captcha-input');
         const iBox = await inputField.boundingBox();
         if (iBox) {
@@ -242,85 +227,67 @@ async function runHumanIteration(iteration) {
           await inputField.click();
         }
 
-        // Type one by one
         for (const char of text) {
-          await page.type('#captcha-input', char, { delay: 40 + Math.random() * 100 });
+          await page.type('#captcha-input', char, { delay: 40 + Math.random() * (persona === 'slow' ? 200 : 100) });
         }
 
-        // Move to submit button and click
         const submitBtn = await page.$('#captcha-submit-btn');
         const sBox = await submitBtn.boundingBox();
         if (sBox) {
           await humanMove(page, sBox.x + sBox.width / 2, sBox.y + sBox.height / 2);
-          await randomDelay(100, 300); // Thinking before confirmation
+          await randomDelay(pRange.min / 2, pRange.max / 2);
           await humanClick(submitBtn);
         }
-        await delay(1000); // Wait for overlay to hide
+        await delay(1000);
       }
     }
 
-    // Seat selection - FAST HUMAN: No browsing, immediate click!
-    console.log(`[${iteration}] 💺 Selecting seat (FAST)...`);
+    // Seat selection
     let humanSeatSelected = false;
     let humanAttempts = 0;
-    const maxAttempts = 10;
-
-    while (!humanSeatSelected && humanAttempts < maxAttempts) {
+    while (!humanSeatSelected && humanAttempts < 10) {
       const availableSeats = await page.$$('.seat.available');
       if (availableSeats.length > 0) {
-        // Pick a random seat from top available (like real users)
-        const targetSeat = availableSeats[Math.floor(Math.random() * Math.min(5, availableSeats.length))];
+        const targetSeat = availableSeats[Math.floor(Math.random() * Math.min(10, availableSeats.length))];
         const box = await targetSeat.boundingBox();
-
         if (box) {
           await humanMove(page, box.x + box.width / 2, box.y + box.height / 2);
-          await randomDelay(100, 300); // Human scans before clicking
+          await randomDelay(pRange.min / 2, pRange.max / 2);
           await humanClick(targetSeat);
-        } else {
-          await targetSeat.click();
         }
 
-        await randomDelay(200, 400); // Wait for potential alert
+        await randomDelay(200, 400);
 
-        // Check if "already taken" alert appeared
         const alertModal = await page.$('.custom-alert-overlay');
         if (alertModal) {
-          console.log(`[${iteration}] ⚠️ Already taken! Closing alert...`);
-          // Close the alert
           const closeBtn = await page.$('.custom-alert-overlay .alert-close, .custom-alert-overlay button');
           if (closeBtn) {
             await closeBtn.click();
-            await randomDelay(100, 200); // Quick reaction
+            await randomDelay(pRange.min, pRange.max);
           }
           humanAttempts++;
-          continue; // Try again immediately
+          continue;
         }
 
-        // Check if seat was successfully selected
         const isSelected = await page.evaluate(el => el.classList.contains('selected'), targetSeat);
-
         if (isSelected) {
           humanSeatSelected = true;
-          console.log(`[${iteration}] ⚡ Got it!`);
         } else {
-          console.log(`[${iteration}] ⚠️ Taken! Retrying...`);
-          await randomDelay(100, 300); // Fast reaction
           humanAttempts++;
+          await randomDelay(pRange.min, pRange.max);
         }
-      } else {
-        break;
-      }
+      } else break;
     }
 
-    await randomDelay(400, 800);
+    await randomDelay(pRange.min, pRange.max);
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
       page.click('#next-btn')
     ]);
 
-    // Fast finish
+    // Finish
     for (let i = 0; i < 3; i++) {
-      await randomDelay(500, 1000);
+      await randomDelay(pRange.min * 2, pRange.max * 2);
       let btn = await page.$('button.btn-primary') || await page.$('button[onclick*="confirm"]');
       if (btn) {
         await Promise.all([
@@ -331,21 +298,35 @@ async function runHumanIteration(iteration) {
     }
 
     if (page.url().includes('booking_complete.html')) {
-      console.log(`[${iteration}] 🎉 SUCCESS! Expert Human.`);
-      await delay(2000);
+      console.log(`[${iteration}] 🎉 SUCCESS!`);
+      await delay(1500);
     }
 
   } catch (e) {
-    console.error(`[${iteration}] ❌ Error:`, e.message);
+    console.error(`[${iteration}] ❌ Error:`, e.name, e.message);
   } finally {
     await browser.close();
   }
 }
 
+async function solveCaptchaSmartPersona(page, persona) {
+  try {
+    await page.waitForFunction(() => window.currentCaptcha && window.currentCaptcha.length > 0, { timeout: 5000 });
+    const text = await page.evaluate(() => window.currentCaptcha);
+
+    let thinkTime = 1500 + Math.random() * 1500;
+    if (persona === 'fast') thinkTime = 500 + Math.random() * 500;
+    if (persona === 'slow') thinkTime = 3000 + Math.random() * 3000;
+
+    await humanJitter(page, thinkTime);
+    return text;
+  } catch (e) { return null; }
+}
+
 (async () => {
   for (let i = 1; i <= LOOP_COUNT; i++) {
     await runHumanIteration(i);
-    if (i < LOOP_COUNT) await randomDelay(2000, 4000);
+    await delay(1000 + Math.random() * 2000);
   }
-  console.log('\n✅ Expert Human data collection finished.');
+  console.log('\n✅ Persona Human data collection finished.');
 })();
