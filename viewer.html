@@ -111,6 +111,8 @@
             border-radius: var(--border-radius);
             margin-top: var(--spacing-md);
             border: 2px solid #2196F3;
+            position: relative;
+            /* 툴팁 위치 기준점 */
         }
 
         .canvas-tooltip {
@@ -239,6 +241,7 @@
                             <div id="perf-hover-buttons" style="margin-bottom: var(--spacing-sm);"></div>
                             <div class="tremor-view">
                                 <canvas id="perf-tremor-canvas" width="800" height="800"></canvas>
+                                <div id="perf-tremor-tooltip" class="canvas-tooltip"></div>
                                 <div id="perf-tremor-stats"></div>
                             </div>
                         </div>
@@ -289,6 +292,7 @@
                             <div id="book-hover-buttons" style="margin-bottom: var(--spacing-sm);"></div>
                             <div class="tremor-view">
                                 <canvas id="book-tremor-canvas" width="800" height="800"></canvas>
+                                <div id="book-tremor-tooltip" class="canvas-tooltip"></div>
                                 <div id="book-tremor-stats"></div>
                             </div>
                         </div>
@@ -519,7 +523,8 @@
             const hovers = type === 'perf' ? perfHovers : bookHovers;
             const segment = hovers[index];
             if (segment) {
-                analyzeHoverTremor(type, segment, canvasId, statsId);
+                const stageData = type === 'perf' ? currentPerfLog.stages.perf : currentBookLog.stages[currentBookStage];
+                analyzeHoverTremor(type, segment, canvasId, statsId, stageData);
 
                 // 버튼 활성화 상태 업데이트
                 const buttonsId = type === 'perf' ? 'perf-hover-buttons' : 'book-hover-buttons';
@@ -559,12 +564,16 @@
             const srcHeight = stageData.viewport_height || 1080;
 
             // 좌표 정규화 및 스케일링 함수
+            // 좌표 정규화 및 스케일링 함수
             function normalizePoint(point) {
-                // point 형식: [x, y, time] 또는 [x, y, time, nx, ny]
+                // point 형식: [x, y, time] 또는 [x, y, time, target] 또는 [x, y, time, nx, ny]
                 let nx, ny;
 
-                if (point.length >= 5) {
-                    // 이미 정규화된 좌표가 있는 경우
+                // 기존 데이터 유지
+                const newPoint = [...point];
+
+                if (point.length >= 5 && typeof point[3] === 'number' && typeof point[4] === 'number') {
+                    // 예전 로그 형식: [x, y, time, nx, ny]
                     nx = point[3];
                     ny = point[4];
                 } else {
@@ -573,12 +582,11 @@
                     ny = point[1] / srcHeight;
                 }
 
-                // 캔버스 크기로 스케일링
-                return [
-                    nx * canvas.width,
-                    ny * canvas.height,
-                    point[2]
-                ];
+                // 캔버스 크기로 스케일링하여 앞쪽 덮어쓰기 (x, y)
+                newPoint[0] = nx * canvas.width;
+                newPoint[1] = ny * canvas.height;
+
+                return newPoint;
             }
 
             // 정규화된 궤적 생성
@@ -624,9 +632,106 @@
             }
 
             // 마지막 호버 구간 처리
-            if (currentHover.length >= 3) {
-                hovers.push([].concat(currentHover));
+            if (currentHover.length > 5) {
+                const hasTarget = currentHover.some(p => p.length > 3 && typeof p[3] === 'string' && isNaN(Number(p[3])));
+                if (hasTarget) {
+                    hovers.push([].concat(currentHover));
+                }
             }
+
+            // [추가] 중요: 호버 구간 병합 및 필터링 (노이즈 제거)
+            if (hovers.length > 0) {
+                const mergedSegments = [];
+                let currentGroup = hovers[0];
+
+                // 타겟 추출 헬퍼 함수
+                const getTarget = (seg) => {
+                    const counts = {};
+                    let max = 0;
+                    let best = null;
+                    seg.forEach(p => {
+                        if (p.length > 3 && typeof p[3] === 'string' && isNaN(Number(p[3]))) {
+                            counts[p[3]] = (counts[p[3]] || 0) + 1;
+                            if (counts[p[3]] > max) { max = counts[p[3]]; best = p[3]; }
+                        }
+                    });
+                    return best;
+                };
+
+                let currentTarget = getTarget(currentGroup);
+
+                for (let i = 1; i < hovers.length; i++) {
+                    const nextSeg = hovers[i];
+                    const nextTarget = getTarget(nextSeg);
+
+                    // 같은 타겟이고, 시간 차이가 1초 이내라면 병합
+                    const timeDiff = nextSeg[0][2] - currentGroup[currentGroup.length - 1][2];
+
+                    if (currentTarget && nextTarget === currentTarget && timeDiff < 1000) {
+                        currentGroup = currentGroup.concat(nextSeg);
+                    } else {
+                        mergedSegments.push(currentGroup);
+                        currentGroup = nextSeg;
+                        currentTarget = nextTarget;
+                    }
+                }
+                mergedSegments.push(currentGroup);
+
+                // 0.3초(300ms) 이상인 것만 남김
+                hovers = mergedSegments.filter(seg => {
+                    const duration = seg[seg.length - 1][2] - seg[0][2];
+                    return duration >= 300;
+                });
+            }
+
+            // [추가] 중요: 클릭이 발생한 지점은 빨라도 강제로 호버 구간으로 포함
+            normalizedClicks.forEach(click => {
+                let clickTime;
+
+                // 타임스탬프 처리 (상대 시간으로 변환)
+                if (typeof click.timestamp === 'string' && click.timestamp.includes('T')) {
+                    // ISO 8601 형식
+                    const clickDate = new Date(click.timestamp).getTime();
+                    const startDate = new Date(stageData.entry_time).getTime();
+                    clickTime = clickDate - startDate;
+                } else {
+                    clickTime = click.timestamp;
+                }
+
+                // 클릭 시점 전후 0.5초(500ms) 구간의 궤적 찾기
+                let clickSegment = trajectory.filter(p => {
+                    const t = p[2];
+                    // trajectory의 시간값(p[2])과 clickTime 비교
+                    return t >= clickTime - 500 && t <= clickTime + 500;
+                });
+
+                // [중요] 궤적 데이터가 없거나 매칭되지 않아도, 클릭은 반드시 표시해야 함
+                // 인위적인 호버 포인트를 생성하여 추가
+                if (clickSegment.length === 0) {
+                    clickSegment = [];
+                    // 클릭 위치에 5개의 인위적 포인트 생성 (약 250ms 분량처럼 보이게)
+                    for (let k = 0; k < 5; k++) {
+                        const timeOffset = (k - 2) * 50; // -100ms ~ +100ms
+                        clickSegment.push([click.x, click.y, clickTime + timeOffset, click.target || null]);
+                    }
+                }
+
+                if (clickSegment.length > 0) {
+                    // 이미 존재하는 호버 구간과 겹치는지 확인
+                    const isOverlapping = hovers.some(segment => {
+                        const start = segment[0][2];
+                        const end = segment[segment.length - 1][2];
+                        return (clickTime >= start - 100 && clickTime <= end + 100);
+                    });
+
+                    if (!isOverlapping) {
+                        hovers.push(clickSegment);
+                    }
+                }
+            });
+
+            // 시간순 정렬
+            hovers.sort((a, b) => a[0][2] - b[0][2]);
 
             console.log(`${type} - 감지된 호버 구간: ${hovers.length}개, 전체 포인트: ${trajectory.length}개, 원본 해상도: ${srcWidth}x${srcHeight}`);
 
@@ -753,6 +858,7 @@
 
                         tooltip.innerHTML = `
                             <strong>🖱️ 클릭 #${foundClick.index + 1}</strong><br>
+                            ${click.label ? `<strong style="color: #FF3D7F; font-size: 1.1em;">${click.label}</strong><br>` : ''}
                             단계: ${stageName}<br>
                             좌표: (${Math.round(click.x)}, ${Math.round(click.y)})<br>
                             시간: ${formattedTime}<br>
@@ -823,7 +929,7 @@
                     </button>
                 `).join('');
 
-                analyzeHoverTremor(type, hovers[0], tremorCanvasId, tremorStatsId);
+                analyzeHoverTremor(type, hovers[0], tremorCanvasId, tremorStatsId, stageData);
             } else {
                 if (buttonsContainer) buttonsContainer.innerHTML = '';
                 const container = document.getElementById(tremorId);
@@ -866,15 +972,77 @@
             return count > 0 ? totalSpeed / count : 0;
         }
 
-        function analyzeHoverTremor(type, segment, canvasId, statsId) {
+        function analyzeHoverTremor(type, segment, canvasId, statsId, stageData) {
             if (!segment || segment.length < 3) return;
 
             const canvas = document.getElementById(canvasId);
             const ctx = canvas.getContext('2d');
-            const tooltip = document.getElementById(type === 'perf' ? 'perf-tooltip' : 'book-tooltip');
+            const tooltip = document.getElementById(type === 'perf' ? 'perf-tremor-tooltip' : 'book-tremor-tooltip');
 
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 캔버스 이벤트 핸들러 (툴팁)
+            canvas.onmousemove = function (e) {
+                // 부모 컨테이너(.tremor-view) 기준 좌표 계산 (position: relative 덕분에 가능)
+                // e.offsetX, e.offsetY를 바로 사용하면 가장 간단함
+                const mouseX = e.offsetX * (canvas.width / canvas.clientWidth);
+                const mouseY = e.offsetY * (canvas.height / canvas.clientHeight);
+
+                var found = null;
+                var foundType = null;
+
+                // 클릭 확인
+                for (var i = 0; i < displayClicks.length; i++) {
+                    const obj = displayClicks[i];
+                    const dist = Math.sqrt(Math.pow(mouseX - obj.x, 2) + Math.pow(mouseY - obj.y, 2));
+                    if (dist < 10) {
+                        found = obj;
+                        foundType = 'click';
+                        break;
+                    }
+                }
+
+                // 포인트 확인 (클릭이 없으면)
+                if (!found) {
+                    for (var i = 0; i < displayPoints.length; i++) {
+                        const obj = displayPoints[i];
+                        const dist = Math.sqrt(Math.pow(mouseX - obj.x, 2) + Math.pow(mouseY - obj.y, 2));
+                        if (dist < 10) {
+                            found = { point: obj, index: i };
+                            foundType = 'point';
+                            break;
+                        }
+                    }
+                }
+
+                if (found) {
+                    if (foundType === 'click') {
+                        tooltip.innerHTML = `
+                            <strong>🖱️ 클릭 감지</strong><br>
+                            ${found.data.label ? `<strong style="color: #FF3D7F; font-size: 1.1em;">${found.data.label}</strong><br>` : ''}
+                            ID: ${found.data.target || '-'}<br>
+                            시간: ${(found.data.timestamp / 1000).toFixed(3)}s
+                        `;
+                    } else {
+                        tooltip.innerHTML = `
+                            <strong>📍 호버 포인트 #${found.index + 1}</strong><br>
+                            상대 좌표: (${(found.point.original[0] - centerX).toFixed(2)}, ${(found.point.original[1] - centerY).toFixed(2)})<br>
+                            절대 좌표: (${found.point.original[0].toFixed(1)}, ${found.point.original[1].toFixed(1)})
+                            ${relevantClickTarget ? `<br><strong style="color: #2196F3; font-size: 1.1em; display:block; margin-top:4px;">🎯 타겟: ${relevantClickTarget}</strong>` : ''}
+                        `;
+                    }
+
+                    tooltip.style.display = 'block';
+                    // 캔버스 내에서의 위치 + 약간의 오프셋
+                    // .tremor-view가 relative이므로, 캔버스의 offsetTop/Left를 고려할 필요 없이
+                    // e.offsetX (마우스 좌표)를 기준으로 배치하면 됨
+                    tooltip.style.left = (e.offsetX + 15) + 'px';
+                    tooltip.style.top = (e.offsetY + 15) + 'px';
+                } else {
+                    tooltip.style.display = 'none';
+                }
+            };
 
             var centerX = segment.reduce((sum, p) => sum + p[0], 0) / segment.length;
             var centerY = segment.reduce((sum, p) => sum + p[1], 0) / segment.length;
@@ -934,6 +1102,7 @@
 
             // 포인트 좌표 저장을 위한 배열
             const displayPoints = [];
+            const displayClicks = []; // 클릭 저장
 
             segment.forEach((point, index) => {
                 var x = offsetX + (point[0] - centerX) * scale;
@@ -949,9 +1118,92 @@
             displayPoints.forEach(p => {
                 ctx.fillStyle = '#FF9800';
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2); // 크기 약간 키움
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
                 ctx.fill();
             });
+
+            // --- 타겟 확인 (직접 로깅된 데이터 우선) ---
+            let relevantClickTarget = null;
+
+            // 1. 직접 로깅된 타겟 확인 (trajectory 포인트의 4번째 값)
+            // 세그먼트 내에서 가장 많이 등장한 타겟을 찾음
+            const targetCounts = {};
+            let maxCount = 0;
+            let bestTarget = null;
+
+            segment.forEach(p => {
+                if (p.length > 3 && p[3]) {
+                    const t = p[3];
+                    targetCounts[t] = (targetCounts[t] || 0) + 1;
+                    if (targetCounts[t] > maxCount) {
+                        maxCount = targetCounts[t];
+                        bestTarget = t;
+                    }
+                }
+            });
+
+            if (bestTarget) {
+                relevantClickTarget = bestTarget;
+            }
+
+            // 2. 직접 로깅된 게 없다면, 기존 클릭 매칭 로직 사용 (하위 호환성)
+            if (!relevantClickTarget && stageData && stageData.clicks && stageData.clicks.length > 0) {
+                const startTime = segment[0][2];
+                const endTime = segment[segment.length - 1][2];
+
+                // 1. 시간 필터 대폭 완화 (±30초) - 사실상 같은 페이지 내 활동이면 잡히도록
+                let candidates = stageData.clicks.filter(c =>
+                    (c.timestamp >= startTime - 30000 && c.timestamp <= endTime + 30000)
+                );
+
+                // 2. 거리 기반 정렬 (호버 중심점과 클릭 좌표 간의 거리)
+                const viewW = stageData.viewport_width || 1920;
+                const viewH = stageData.viewport_height || 1080;
+
+                candidates = candidates.map(c => {
+                    let cx, cy;
+                    if (c.nx !== undefined) {
+                        cx = c.nx * viewW;
+                        cy = c.ny * viewH;
+                    } else {
+                        cx = c.x;
+                        cy = c.y;
+                    }
+                    const dist = Math.sqrt(Math.pow(cx - centerX, 2) + Math.pow(cy - centerY, 2));
+                    return { ...c, _dist: dist, _x: cx, _y: cy };
+                });
+
+                // 3. 가장 가까운 클릭 찾기 (거리 150px 이내만 유효하다고 판단)
+                candidates.sort((a, b) => a._dist - b._dist);
+
+                const nearestClick = candidates[0];
+                if (nearestClick && nearestClick._dist < 150) { // 150px 이내 (여유있게)
+                    relevantClickTarget = nearestClick.label || nearestClick.target;
+                    if (nearestClick.target === 'seat_alert_confirm') {
+                        relevantClickTarget = "팝업 확인";
+                    }
+                }
+
+                // 시각화를 위해 범위 내 모든 클릭 추가
+                candidates.forEach(click => {
+                    const clickX = click._x;
+                    const clickY = click._y;
+                    const drawX = offsetX + (clickX - centerX) * scale;
+                    const drawY = offsetY + (clickY - centerY) * scale;
+                    displayClicks.push({ x: drawX, y: drawY, data: click });
+
+                    // 클릭 그리기
+                    ctx.fillStyle = 'rgba(255, 61, 127, 0.4)';
+                    ctx.beginPath();
+                    ctx.arc(drawX, drawY, 8, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = '#FF3D7F';
+                    ctx.beginPath();
+                    ctx.arc(drawX, drawY, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
 
             // 캔버스 이벤트 핸들러 (툴팁)
             canvas.onmousemove = function (e) {
@@ -960,21 +1212,49 @@
                 const mouseY = (e.clientY - rect.top) * (canvas.height / rect.height);
 
                 var found = null;
-                var minInfo = 1000;
+                var foundType = null;
 
-                displayPoints.forEach((p, idx) => {
-                    const dist = Math.sqrt(Math.pow(mouseX - p.x, 2) + Math.pow(mouseY - p.y, 2));
+                // 클릭 확인
+                for (var i = 0; i < displayClicks.length; i++) {
+                    const obj = displayClicks[i];
+                    const dist = Math.sqrt(Math.pow(mouseX - obj.x, 2) + Math.pow(mouseY - obj.y, 2));
                     if (dist < 10) {
-                        found = { point: p, index: idx };
+                        found = obj;
+                        foundType = 'click';
+                        break;
                     }
-                });
+                }
+
+                // 포인트 확인 (클릭이 없으면)
+                if (!found) {
+                    for (var i = 0; i < displayPoints.length; i++) {
+                        const obj = displayPoints[i];
+                        const dist = Math.sqrt(Math.pow(mouseX - obj.x, 2) + Math.pow(mouseY - obj.y, 2));
+                        if (dist < 10) {
+                            found = { point: obj, index: i };
+                            foundType = 'point';
+                            break;
+                        }
+                    }
+                }
 
                 if (found) {
-                    tooltip.innerHTML = `
-                        <strong>📍 호버 포인트 #${found.index + 1}</strong><br>
-                        상대 좌표: (${(found.point.original[0] - centerX).toFixed(2)}, ${(found.point.original[1] - centerY).toFixed(2)})<br>
-                        절대 좌표: (${found.point.original[0].toFixed(1)}, ${found.point.original[1].toFixed(1)})
-                    `;
+                    if (foundType === 'click') {
+                        tooltip.innerHTML = `
+                            <strong>🖱️ 클릭 감지</strong><br>
+                            ${found.data.label ? `<strong style="color: #FF3D7F; font-size: 1.1em;">${found.data.label}</strong><br>` : ''}
+                            ID: ${found.data.target || '-'}<br>
+                            시간: ${(found.data.timestamp / 1000).toFixed(3)}s
+                        `;
+                    } else {
+                        tooltip.innerHTML = `
+                            <strong>📍 호버 포인트 #${found.index + 1}</strong><br>
+                            상대 좌표: (${(found.point.original[0] - centerX).toFixed(2)}, ${(found.point.original[1] - centerY).toFixed(2)})<br>
+                            절대 좌표: (${found.point.original[0].toFixed(1)}, ${found.point.original[1].toFixed(1)})
+                            ${relevantClickTarget ? `<br><strong style="color: #2196F3; font-size: 1.1em; display:block; margin-top:4px;">🎯 타겟: ${relevantClickTarget}</strong>` : ''}
+                        `;
+                    }
+
                     tooltip.style.display = 'block';
                     tooltip.style.left = (e.clientX + 15) + 'px';
                     tooltip.style.top = (e.clientY + 15) + 'px';
