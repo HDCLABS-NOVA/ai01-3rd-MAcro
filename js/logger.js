@@ -114,7 +114,8 @@ function logStageExit(stageName, additionalData = {}) {
 
     logData.stages[stageName].exit_time = now;
     logData.stages[stageName].duration_ms = duration;
-    logData.stages[stageName].mouse_trajectory = mouseTrajectory;
+    // mouse_trajectory는 trackMouseMove에서 실시간으로 업데이트되므로 여기서 덮어쓰지 않음
+    // logData.stages[stageName].mouse_trajectory = mouseTrajectory;
 
     // 추가 데이터 병합
     Object.assign(logData.stages[stageName], additionalData);
@@ -128,20 +129,49 @@ function logStageExit(stageName, additionalData = {}) {
 /**
  * 마우스 이동 추적
  */
-function trackMouseMove(event) {
-    const now = Date.now();
+let currentHoverTarget = null; // 현재 호버 중인 중요 요소 타겟 (예: 좌석 ID)
+let lastMouseLogTime = 0; // trackMouseMove에서 사용할 새로운 변수
 
-    // 샘플링: 100ms마다 기록
-    if (now - lastMouseMoveTime < 100) return;
-
-    lastMouseMoveTime = now;
-
-    const relativeTime = stageStartTime ? now - stageStartTime : 0;
-    // 정규화된 좌표 (0~1 범위)와 실제 픽셀 좌표 모두 저장
-    const nx = event.clientX / window.innerWidth;
-    const ny = event.clientY / window.innerHeight;
-    mouseTrajectory.push([event.clientX, event.clientY, relativeTime, nx, ny]);
+function setHoverTarget(target) {
+    currentHoverTarget = target;
 }
+
+function trackMouseMove(event) {
+    if (!logData || !currentStage) return;
+
+    const now = Date.now();
+    // 50ms 간격으로 쓰기 (스로틀링)
+    if (now - lastMouseLogTime < 50) return;
+
+    lastMouseLogTime = now;
+
+    // 좌표, 시간, 그리고 현재 호버 타겟(있다면) 저장
+    // [x, y, time, target]
+    const point = [
+        event.clientX,
+        event.clientY,
+        stageStartTime ? now - stageStartTime : 0
+    ];
+
+    if (currentHoverTarget) {
+        point.push(currentHoverTarget);
+    }
+
+    // 1. 전역 변수 배열에 추가 (logStageExit에서 덮어쓸 때 사용됨)
+    mouseTrajectory.push(point);
+
+    // 2. logData 객체에도 직접 추가 (실시간 업데이트용)
+    if (logData.stages[currentStage].mouse_trajectory) {
+        logData.stages[currentStage].mouse_trajectory.push(point);
+    }
+
+    // 3. 주기적으로 세션 스토리지에 저장 (1초마다) - 데이터 유실 방지
+    if (now - lastSessionSaveTime > 1000) {
+        saveLogToSession();
+        lastSessionSaveTime = now;
+    }
+}
+let lastSessionSaveTime = 0;
 
 /**
  * 클릭 이벤트 추적

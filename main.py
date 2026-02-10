@@ -196,7 +196,8 @@ async def get_logs():
     """저장된 모든 로그 파일 목록을 반환합니다."""
     try:
         log_files = [f for f in os.listdir(LOGS_DIR) if f.endswith('.json')]
-        log_files.sort(reverse=True)  # 최신순 정렬
+        # 파일 수정 시간 기준 내림차순 정렬 (최신 로그가 위로 오게)
+        log_files.sort(key=lambda x: os.path.getmtime(os.path.join(LOGS_DIR, x)), reverse=True)
         
         return {
             "success": True,

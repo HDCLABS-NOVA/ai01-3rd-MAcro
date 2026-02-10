@@ -187,17 +187,18 @@ async function createSeatGrid() {
 
     // 등급별로 구역 생성
     perf.grades.forEach((grade, gradeIdx) => {
+        const gradeName = grade.name || grade.grade; // 'name' 또는 'grade' 속성 모두 지원
         const gradeSection = document.createElement('div');
         gradeSection.style.marginBottom = 'var(--spacing-xl)';
 
         // 등급 헤더
         const gradeHeader = document.createElement('div');
-        const gradeColor = gradeColors[grade.name] || gradeColors['A'];
+        const gradeColor = gradeColors[gradeName] || gradeColors['A'];
         gradeHeader.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md); padding: var(--spacing-sm) var(--spacing-md); background: ${gradeColor.bg}; border-left: 4px solid ${gradeColor.border}; border-radius: 8px;">
                 <div style="display: flex; align-items: center; gap: var(--spacing-md);">
                     <div style="width: 24px; height: 24px; background: ${gradeColor.border}; border-radius: 4px;"></div>
-                    <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 18px;">${grade.name}석</span>
+                    <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 18px;">${gradeName}석</span>
                 </div>
                 <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 20px;">${formatPrice(grade.price)}</span>
             </div>
@@ -232,14 +233,14 @@ async function createSeatGrid() {
                     rowContainer.appendChild(aisle);
                 }
 
-                const seatId = `${grade.name}-${row}${col}`;
+                const seatId = `${gradeName}-${row}${col}`;
                 const seat = document.createElement('div');
 
                 const isTaken = Math.random() > 0.75;
                 seat.className = 'seat ' + (isTaken ? 'taken' : 'available');
                 seat.textContent = col;
                 seat.dataset.seat = seatId;
-                seat.dataset.grade = grade.name;
+                seat.dataset.grade = gradeName;
                 seat.dataset.price = grade.price;
                 seat.dataset.row = row;
                 seat.dataset.col = col;
@@ -251,20 +252,46 @@ async function createSeatGrid() {
                     seat.style.borderColor = gradeColor.border;
                     seat.style.color = gradeColor.color;
 
-                    seat.onmouseenter = function () {
+                    seat.onclick = function (e) { toggleSeat(seatId, gradeName, grade.price, this, e); };
+
+                    // 이벤트 리스너 통합 (이전 핸들러 덮어쓰기 방지)
+                    seat.addEventListener('mouseenter', function () {
+                        // 1. 시각적 효과
                         if (!this.classList.contains('selected')) {
                             this.style.background = gradeColor.hoverBg;
                             this.style.color = 'white';
                         }
-                    };
-                    seat.onmouseleave = function () {
+                        // 2. 로깅
+                        if (typeof setHoverTarget === 'function') {
+                            setHoverTarget(seatId);
+                        }
+                    });
+
+                    seat.addEventListener('mouseleave', function () {
+                        // 1. 시각적 효과
                         if (!this.classList.contains('selected')) {
                             this.style.background = gradeColor.bg;
                             this.style.color = gradeColor.color;
                         }
+                        // 2. 로깅
+                        if (typeof setHoverTarget === 'function') {
+                            setHoverTarget(null);
+                        }
+                    });
+                } else {
+                    // [추가] 이미 예약된 좌석도 클릭 로그를 남겨야 함 (사용자의 실패한 시도 분석)
+                    seat.onclick = function (e) {
+                        alert('이미 예약된 좌석입니다.');
+                        trackClick(e, { target: seatId, grade: gradeName, price: grade.price, action: 'click_taken', result: 'failed' });
                     };
 
-                    seat.onclick = function () { toggleSeat(seatId, grade.name, grade.price, this); };
+                    // 예약된 좌석도 호버 타겟으로 잡혀야 함 (고민했을 수 있음)
+                    seat.addEventListener('mouseenter', function () {
+                        if (typeof setHoverTarget === 'function') setHoverTarget(seatId);
+                    });
+                    seat.addEventListener('mouseleave', function () {
+                        if (typeof setHoverTarget === 'function') setHoverTarget(null);
+                    });
                 }
 
                 rowContainer.appendChild(seat);
@@ -284,7 +311,7 @@ async function createSeatGrid() {
     });
 }
 
-function toggleSeat(seatId, grade, price, element) {
+function toggleSeat(seatId, grade, price, element, e) {
     const idx = selectedSeats.findIndex(s => s.id === seatId);
 
     if (idx > -1) {
@@ -314,7 +341,7 @@ function toggleSeat(seatId, grade, price, element) {
             element.style.boxShadow = '';
 
             // 로그 기록
-            trackClick(event, { target: seatId, grade, price, action: 'already_taken', result: 'failed' });
+            trackClick(e, { target: seatId, grade, price, action: 'already_taken', result: 'failed' });
             return;
         }
 
@@ -331,7 +358,7 @@ function toggleSeat(seatId, grade, price, element) {
         element.style.color = 'white';
         element.style.boxShadow = '0 4px 12px rgba(255, 61, 127, 0.4)';
 
-        trackClick(event, { target: seatId, grade, price, action: 'select', result: 'success' });
+        trackClick(e, { target: seatId, grade, price, action: 'select', result: 'success' });
     }
 
     updateSummary();
@@ -409,10 +436,7 @@ function confirmSeats() {
 
     logStageExit('seat', {
         selected_seats: selectedSeats.map(s => s.id),
-        seat_details: selectedSeats,
-        clicks: [],
-        hovers: [],
-        seat_taken_events: []
+        seat_details: selectedSeats
     });
 
     disableMouseTracking();
@@ -420,6 +444,14 @@ function confirmSeats() {
 }
 
 createSeatGrid();
+
+// 다음 단계 버튼 이벤트 연결
+document.addEventListener('DOMContentLoaded', () => {
+    const nextBtn = document.getElementById('next-btn');
+    if (nextBtn) {
+        nextBtn.addEventListener('click', confirmSeats);
+    }
+});
 
 // --- Custom Alert Modal Logic ---
 function showSeatAlert(title, message, callback) {
@@ -436,7 +468,10 @@ function showSeatAlert(title, message, callback) {
         const newBtn = btn.cloneNode(true);
         btn.parentNode.replaceChild(newBtn, btn);
 
-        newBtn.addEventListener('click', () => {
+        newBtn.addEventListener('click', (e) => {
+            // [LOG] 이선좌 팝업 확인 버튼 클릭 기록
+            trackClick(e, { target: 'seat_alert_confirm', action: 'close', label: '[이선좌 팝업]' });
+
             overlay.classList.remove('active');
             if (callback) callback();
         });
