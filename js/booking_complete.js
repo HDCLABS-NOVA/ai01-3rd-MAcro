@@ -39,9 +39,8 @@ if (!bookingId || !flowData) {
         console.error('❌ 로그 전송 실패:', error);
     });
 
-    // 예매 완료 후 플로우 데이터 정리
-    setTimeout(() => {
-        clearFlowData();
-        // sessionStorage.removeItem('bookingLog'); // logger.js에서 전송 성공 시 이미 삭제함
-    }, 5000);
+    // 🧹 [FIX] 예매 완료 후 즉시 플로우 데이터 정리 (5초 기다리지 않음)
+    // 사용자가 빠르게 돌아가는 경우에도 다음 예매 시 5초 카운트다운이 뜨도록 보장
+    console.log('🧹 [Booking Complete] 예매 완료. 즉시 세션 데이터를 초기화합니다.');
+    clearFlowData();
 }

@@ -49,8 +49,25 @@ function updateFlowData(updates) {
  * 플로우 데이터 삭제
  */
 function clearFlowData() {
+    console.log('🧹 [Flow] 모든 예매 데이터 및 가상 타이머를 초기화합니다.');
+
+    // 1. 기본 플로우 데이터 제거
     sessionStorage.removeItem('bookingFlow');
-    sessionStorage.removeItem('captchaVerified'); // 보안문자 통과 플래그도 제거
+    sessionStorage.removeItem('captchaVerified');
+    sessionStorage.removeItem('bookingLog');
+
+    // 2. 🕒 가상 오픈 시간 데이터 일괄 제거 (vperf_ 로 시작하는 모든 항목)
+    const toRemove = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && key.indexOf('vperf_') === 0) {
+            toRemove.push(key);
+        }
+    }
+    toRemove.forEach(key => {
+        console.log(`🗑️ 가상 타이머 삭제: ${key}`);
+        sessionStorage.removeItem(key);
+    });
 }
 
 /**
