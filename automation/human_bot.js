@@ -23,19 +23,19 @@ async function humanMove(page, targetX, targetY) {
     y: startY + (targetY - startY) * (0.3 + Math.random() * 0.4)
   };
 
-  const steps = 12; // More steps for smoother but jittery path
+  const steps = 6; // Optimized for speed but still curved
   for (let i = 0; i <= 1; i += 1 / steps) {
     // Bezier formula
     let x = Math.pow(1 - i, 2) * startX + 2 * (1 - i) * i * cp1.x + Math.pow(i, 2) * targetX;
     let y = Math.pow(1 - i, 2) * startY + 2 * (1 - i) * i * cp1.y + Math.pow(i, 2) * targetY;
 
     // Add micro-jitter (human tremor)
-    x += (Math.random() - 0.5) * 2;
-    y += (Math.random() - 0.5) * 2;
+    x += (Math.random() - 0.5) * 1.5;
+    y += (Math.random() - 0.5) * 1.5;
 
     await page.mouse.move(x, y);
-    // Randomize interval between steps
-    await delay(5 + Math.random() * 10);
+    // Faster interval between steps
+    await delay(2 + Math.random() * 3);
   }
 
   // Final precise move to target
@@ -44,9 +44,9 @@ async function humanMove(page, targetX, targetY) {
   lastMouseY = targetY;
 }
 
-// Helper for human-like click duration (80-150ms) - MATCHING REAL HUMAN LOGS
+// Helper for FAST human-like click duration (40-80ms)
 async function humanClick(element, options = {}) {
-  const clickDelay = 80 + Math.floor(Math.random() * 70); // 80-150ms duration
+  const clickDelay = 40 + Math.floor(Math.random() * 40); // 40-80ms duration (Pro-gamer level)
   await element.click({ ...options, delay: clickDelay });
 }
 
@@ -130,19 +130,24 @@ async function runHumanIteration(iteration) {
     await page.goto(`${BASE_URL}login.html`, { waitUntil: 'networkidle2' });
     await page.type('#email', USER_EMAIL, { delay: pRange.min / 2 + Math.random() * 40 });
     await page.type('#password', USER_PASS, { delay: pRange.min / 2 + Math.random() * 40 });
+    const loginBtn = await page.$('button[type="submit"]');
+    const lBox = await loginBtn.boundingBox();
+    if (lBox) await humanMove(page, lBox.x + lBox.width / 2, lBox.y + lBox.height / 2);
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
-      page.click('button[type="submit"]')
+      loginBtn.click({ delay: 80 + Math.random() * 70 })
     ]);
 
     // 1. Index -> Detail
     const TARGET_PERF_ID = 'perf001';
     await page.goto(`${BASE_URL}index.html`, { waitUntil: 'networkidle2' });
-    await page.waitForSelector(`.performance-card[onclick*="${TARGET_PERF_ID}"]`);
+    const perfCard = await page.$(`.performance-card[onclick*="${TARGET_PERF_ID}"]`);
+    const cBox = await perfCard.boundingBox();
+    if (cBox) await humanMove(page, cBox.x + cBox.width / 2, cBox.y + cBox.height / 2);
     await randomDelay(pRange.min, pRange.max);
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
-      page.click(`.performance-card[onclick*="${TARGET_PERF_ID}"]`)
+      perfCard.click({ delay: 80 + Math.random() * 70 })
     ]);
 
     // --- Human-like Wait & Click Logic ---
@@ -199,9 +204,13 @@ async function runHumanIteration(iteration) {
     await randomDelay(pRange.min, pRange.max);
 
     // 7. Start Booking
+    const startBtn = await page.$('#start-booking-btn');
+    const sBtnBox = await startBtn.boundingBox();
+    if (sBtnBox) await humanMove(page, sBtnBox.x + sBtnBox.width / 2, sBtnBox.y + sBtnBox.height / 2);
+    await randomDelay(pRange.min / 2, pRange.max / 2);
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
-      page.click('#start-booking-btn')
+      startBtn.click({ delay: 80 + Math.random() * 70 })
     ]);
 
     // ⏳ Handle Queue
@@ -224,7 +233,7 @@ async function runHumanIteration(iteration) {
         const iBox = await inputField.boundingBox();
         if (iBox) {
           await humanMove(page, iBox.x + iBox.width / 2, iBox.y + iBox.height / 2);
-          await inputField.click();
+          await inputField.click({ delay: 80 + Math.random() * 70 });
         }
 
         for (const char of text) {
@@ -262,7 +271,9 @@ async function runHumanIteration(iteration) {
         if (alertModal) {
           const closeBtn = await page.$('.custom-alert-overlay .alert-close, .custom-alert-overlay button');
           if (closeBtn) {
-            await closeBtn.click();
+            const clBox = await closeBtn.boundingBox();
+            if (clBox) await humanMove(page, clBox.x + clBox.width / 2, clBox.y + clBox.height / 2);
+            await closeBtn.click({ delay: 80 + Math.random() * 70 });
             await randomDelay(pRange.min, pRange.max);
           }
           humanAttempts++;
@@ -280,9 +291,12 @@ async function runHumanIteration(iteration) {
     }
 
     await randomDelay(pRange.min, pRange.max);
+    const nextBtn = await page.$('#next-btn');
+    const nBox = await nextBtn.boundingBox();
+    if (nBox) await humanMove(page, nBox.x + nBox.width / 2, nBox.y + nBox.height / 2);
     await Promise.all([
       page.waitForNavigation({ waitUntil: 'networkidle2' }),
-      page.click('#next-btn')
+      nextBtn.click({ delay: 80 + Math.random() * 70 })
     ]);
 
     // Finish
@@ -290,9 +304,11 @@ async function runHumanIteration(iteration) {
       await randomDelay(pRange.min * 2, pRange.max * 2);
       let btn = await page.$('button.btn-primary') || await page.$('button[onclick*="confirm"]');
       if (btn) {
+        const fBox = await btn.boundingBox();
+        if (fBox) await humanMove(page, fBox.x + fBox.width / 2, fBox.y + fBox.height / 2);
         await Promise.all([
           page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 5000 }).catch(() => { }),
-          btn.click()
+          btn.click({ delay: 80 + Math.random() * 70 })
         ]);
       }
     }

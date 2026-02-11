@@ -149,8 +149,7 @@ function trackMouseMove(event) {
         event.clientY,
         relativeTime,
         nx.toFixed(4),
-        ny.toFixed(4),
-        event.pointerType || 'mouse'
+        ny.toFixed(4)
     ]);
 }
 
@@ -204,7 +203,6 @@ function trackClick(event, targetInfo = {}) {
         duration: clickDuration,
         button: event.button, // 0: 좌클릭, 2: 우클릭
         is_integer: Number.isInteger(event.clientX) && Number.isInteger(event.clientY),
-        pointer_type: event.pointerType || 'mouse',
         ...targetInfo
     };
 

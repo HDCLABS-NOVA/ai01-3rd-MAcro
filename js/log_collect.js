@@ -153,8 +153,7 @@ function setupEventListeners() {
       e.clientY,
       relTime,
       (e.clientX / window.innerWidth).toFixed(4),
-      (e.clientY / window.innerHeight).toFixed(4),
-      e.pointerType || 'mouse'
+      (e.clientY / window.innerHeight).toFixed(4)
     ]);
   });
 
@@ -173,8 +172,7 @@ function setupEventListeners() {
       is_trusted: e.isTrusted,
       duration: clickDuration,
       button: e.button,
-      is_integer: Number.isInteger(e.clientX) && Number.isInteger(e.clientY),
-      pointer_type: e.pointerType || 'mouse'
+      is_integer: Number.isInteger(e.clientX) && Number.isInteger(e.clientY)
     };
 
     if (!logData.stages[currentStage].clicks) logData.stages[currentStage].clicks = [];
