@@ -180,8 +180,10 @@ function updateUserMenu() {
     const currentUser = getCurrentUser();
 
     if (currentUser) {
+        const adminBtn = isAdmin() ? '<a href="admin.html" class="btn btn-outline" style="margin-right:8px; text-decoration: none; border-color: var(--primary-color); color: var(--primary-color);">⚙️ 관리자</a>' : '';
         userMenuDiv.innerHTML = `
       <span>${currentUser.name}님</span>
+      ${adminBtn}
       <button class="btn btn-secondary" onclick="logout()">로그아웃</button>
     `;
     } else {

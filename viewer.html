@@ -560,8 +560,9 @@
             }
 
             // 원본 viewport 크기 (로그된 화면 크기)
-            const srcWidth = stageData.viewport_width || 1920;
-            const srcHeight = stageData.viewport_height || 1080;
+            // 로그 형식에 따라 viewport.w/h 또는 viewport_width/height
+            const srcWidth = stageData.viewport_width || (stageData.viewport && stageData.viewport.w) || 1920;
+            const srcHeight = stageData.viewport_height || (stageData.viewport && stageData.viewport.h) || 1080;
 
             // 좌표 정규화 및 스케일링 함수
             // 좌표 정규화 및 스케일링 함수
@@ -573,9 +574,9 @@
                 const newPoint = [...point];
 
                 if (point.length >= 5 && typeof point[3] === 'number' && typeof point[4] === 'number') {
-                    // 예전 로그 형식: [x, y, time, nx, ny]
-                    nx = point[3];
-                    ny = point[4];
+                    // 이미 정규화된 좌표가 있는 경우
+                    nx = parseFloat(point[3]);
+                    ny = parseFloat(point[4]);
                 } else {
                     // 픽셀 좌표를 정규화
                     nx = point[0] / srcWidth;
@@ -613,6 +614,7 @@
 
             // 호버 구간 찾기 (속도가 느린 구간)
             var currentHover = [];
+            let tempHovers = [];
             for (var i = 1; i < trajectory.length; i++) {
                 const prev = trajectory[i - 1];
                 const curr = trajectory[i];
@@ -625,7 +627,7 @@
                     currentHover.push(curr);
                 } else {
                     if (currentHover.length >= 3) {  // 3개 이상이면 호버로 인정
-                        hovers.push([].concat(currentHover));
+                        tempHovers.push([].concat(currentHover));
                     }
                     currentHover = [];
                 }
@@ -635,14 +637,14 @@
             if (currentHover.length > 5) {
                 const hasTarget = currentHover.some(p => p.length > 3 && typeof p[3] === 'string' && isNaN(Number(p[3])));
                 if (hasTarget) {
-                    hovers.push([].concat(currentHover));
+                    tempHovers.push([].concat(currentHover));
                 }
             }
 
             // [추가] 중요: 호버 구간 병합 및 필터링 (노이즈 제거)
-            if (hovers.length > 0) {
+            if (tempHovers.length > 0) {
                 const mergedSegments = [];
-                let currentGroup = hovers[0];
+                let currentGroup = tempHovers[0];
 
                 // 타겟 추출 헬퍼 함수
                 const getTarget = (seg) => {
@@ -660,8 +662,8 @@
 
                 let currentTarget = getTarget(currentGroup);
 
-                for (let i = 1; i < hovers.length; i++) {
-                    const nextSeg = hovers[i];
+                for (let i = 1; i < tempHovers.length; i++) {
+                    const nextSeg = tempHovers[i];
                     const nextTarget = getTarget(nextSeg);
 
                     // 같은 타겟이고, 시간 차이가 1초 이내라면 병합
@@ -678,11 +680,14 @@
                 mergedSegments.push(currentGroup);
 
                 // 0.3초(300ms) 이상인 것만 남김
-                hovers = mergedSegments.filter(seg => {
+                tempHovers = mergedSegments.filter(seg => {
                     const duration = seg[seg.length - 1][2] - seg[0][2];
                     return duration >= 300;
                 });
             }
+
+            // 최종 결과를 전역 배열에 추가
+            hovers.push(...tempHovers);
 
             // [추가] 중요: 클릭이 발생한 지점은 빨라도 강제로 호버 구간으로 포함
             normalizedClicks.forEach(click => {
@@ -709,10 +714,31 @@
                 // 인위적인 호버 포인트를 생성하여 추가
                 if (clickSegment.length === 0) {
                     clickSegment = [];
-                    // 클릭 위치에 5개의 인위적 포인트 생성 (약 250ms 분량처럼 보이게)
-                    for (let k = 0; k < 5; k++) {
-                        const timeOffset = (k - 2) * 50; // -100ms ~ +100ms
-                        clickSegment.push([click.x, click.y, clickTime + timeOffset, click.target || null]);
+                    // trajectory에서 clickTime 바로 이전 포인트 찾기
+                    let prevPoint = null;
+                    for (let m = trajectory.length - 1; m >= 0; m--) {
+                        if (trajectory[m][2] < clickTime) {
+                            prevPoint = trajectory[m];
+                            break;
+                        }
+                    }
+
+                    if (prevPoint) {
+                        // 이전 포인트에서 클릭 위치까지 보간 (Interpolation)
+                        for (let k = 0; k < 5; k++) {
+                            const ratio = (k + 1) / 5; // 0.2, 0.4, 0.6, 0.8, 1.0
+                            const interpX = prevPoint[0] + (click.displayX - prevPoint[0]) * ratio;
+                            const interpY = prevPoint[1] + (click.displayY - prevPoint[1]) * ratio;
+                            const interpTime = prevPoint[2] + (clickTime - prevPoint[2]) * ratio;
+
+                            clickSegment.push([interpX, interpY, interpTime, click.target || null]);
+                        }
+                    } else {
+                        // 이전 포인트가 없으면 클릭 위치에 고정 포인트 생성
+                        for (let k = 0; k < 5; k++) {
+                            const timeOffset = (k - 2) * 50;
+                            clickSegment.push([click.displayX, click.displayY, clickTime + timeOffset, click.target || null]);
+                        }
                     }
                 }
 
@@ -1148,8 +1174,8 @@
 
             // 2. 직접 로깅된 게 없다면, 기존 클릭 매칭 로직 사용 (하위 호환성)
             if (!relevantClickTarget && stageData && stageData.clicks && stageData.clicks.length > 0) {
-                const startTime = segment[0][2];
-                const endTime = segment[segment.length - 1][2];
+                let startTime = segment[0][2];
+                let endTime = segment[segment.length - 1][2];
 
                 // 1. 시간 필터 대폭 완화 (±30초) - 사실상 같은 페이지 내 활동이면 잡히도록
                 let candidates = stageData.clicks.filter(c =>
@@ -1307,116 +1333,139 @@
         }
 
         function analyzeBotBehavior(type, stageData, containerId) {
-            const trajectory = stageData.mouse_trajectory || [];
-            const clicks = stageData.clicks || [];
-            const hovers = type === 'perf' ? perfHovers : bookHovers;
+            try {
+                const trajectory = stageData.mouse_trajectory || [];
+                const clicks = stageData.clicks || [];
+                const hovers = type === 'perf' ? perfHovers : bookHovers;
 
-            if (trajectory.length < 3) {
-                document.getElementById(containerId).innerHTML = '<p style="text-align: center; color: var(--text-secondary);">분석할 데이터가 부족합니다</p>';
-                return;
-            }
-
-            var speeds = [];
-            var angles = [];
-
-            for (var i = 1; i < trajectory.length; i++) {
-                const prev = trajectory[i - 1];
-                const curr = trajectory[i];
-                const timeDiff = (curr[2] - prev[2]) / 1000;
-
-                if (timeDiff > 0) {
-                    const distance = Math.sqrt(Math.pow(curr[0] - prev[0], 2) + Math.pow(curr[1] - prev[1], 2));
-                    speeds.push(distance / timeDiff);
+                if (trajectory.length < 3) {
+                    document.getElementById(containerId).innerHTML = '<p style="text-align: center; color: var(--text-secondary);">분석할 데이터가 부족합니다</p>';
+                    return;
                 }
 
-                if (i < trajectory.length - 1) {
-                    const next = trajectory[i + 1];
-                    const angle1 = Math.atan2(curr[1] - prev[1], curr[0] - prev[0]);
-                    const angle2 = Math.atan2(next[1] - curr[1], next[0] - curr[0]);
-                    angles.push(Math.abs(angle2 - angle1));
+                var speeds = [];
+                var angles = [];
+
+                for (var i = 1; i < trajectory.length; i++) {
+                    const prev = trajectory[i - 1];
+                    const curr = trajectory[i];
+                    const timeDiff = (curr[2] - prev[2]) / 1000;
+
+                    if (timeDiff > 0) {
+                        const distance = Math.sqrt(Math.pow(curr[0] - prev[0], 2) + Math.pow(curr[1] - prev[1], 2));
+                        speeds.push(distance / timeDiff);
+                    }
+
+                    if (i < trajectory.length - 1) {
+                        const next = trajectory[i + 1];
+                        const angle1 = Math.atan2(curr[1] - prev[1], curr[0] - prev[0]);
+                        const angle2 = Math.atan2(next[1] - curr[1], next[0] - curr[0]);
+                        angles.push(Math.abs(angle2 - angle1));
+                    }
                 }
-            }
 
-            var avgSpeed = speeds.reduce((a, b) => a + b, 0) / speeds.length;
-            var speedVariance = speeds.reduce((sum, s) => sum + Math.pow(s - avgSpeed, 2), 0) / speeds.length;
-            var speedStdDev = Math.sqrt(speedVariance);
-            var avgAngle = angles.reduce((a, b) => a + b, 0) / angles.length;
+                var avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
+                var speedVariance = speeds.length > 0 ? speeds.reduce((sum, s) => sum + Math.pow(s - avgSpeed, 2), 0) / speeds.length : 0;
+                var speedStdDev = Math.sqrt(speedVariance);
+                var avgAngle = angles.length > 0 ? angles.reduce((a, b) => a + b, 0) / angles.length : 0;
 
-            var botScore = 0;
-            var reasons = [];
+                var botScore = 0;
+                var reasons = [];
 
-            var speedCV = speedStdDev / avgSpeed;
-            if (speedCV < 0.3) {
-                botScore += 30;
-                reasons.push('속도가 매우 일정함');
-            }
+                var speedCV = avgSpeed > 0 ? speedStdDev / avgSpeed : 0;
+                if (speedCV < 0.3 && speeds.length > 10) {
+                    botScore += 30;
+                    reasons.push('속도가 매우 일정함');
+                }
 
-            if (avgAngle < 0.2) {
-                botScore += 25;
-                reasons.push('경로가 거의 직선');
-            }
+                if (avgAngle < 0.2 && angles.length > 10) {
+                    botScore += 25;
+                    reasons.push('경로가 거의 직선');
+                }
 
-            if (avgSpeed > 5000) {
-                botScore += 20;
-                reasons.push('비정상적으로 빠른 속도');
-            }
+                if (avgSpeed > 5000) {
+                    botScore += 20;
+                    reasons.push('비정상적으로 빠른 속도');
+                }
 
-            var integerClicks = clicks.filter(function (c) { return c.is_integer; }).length;
-            if (integerClicks > clicks.length * 0.8) {
-                botScore += 15;
-                reasons.push('클릭 좌표가 정수값');
-            }
+                var integerClicks = clicks.filter(function (c) { return c.is_integer; }).length;
+                if (clicks.length > 0 && integerClicks > clicks.length * 0.8) {
+                    botScore += 15;
+                    reasons.push('클릭 좌표가 정수값');
+                }
 
-            if (hovers.length === 0) {
-                botScore += 10;
-                reasons.push('호버 구간 없음');
-            }
+                if (hovers.length === 0) {
+                    botScore += 10;
+                    reasons.push('호버 구간 없음');
+                }
 
-            var scoreClass = 'human';
-            var verdict = '✅ 정상 사용자';
-            if (botScore > 60) {
-                scoreClass = 'bot';
-                verdict = '🤖 봇 의심';
-            } else if (botScore > 30) {
-                scoreClass = 'suspicious';
-                verdict = '⚠️ 의심스러움';
-            }
+                var scoreClass = 'human';
+                var verdict = '✅ 정상 사용자';
+                if (botScore > 60) {
+                    scoreClass = 'bot';
+                    verdict = '🤖 봇 의심';
+                } else if (botScore > 30) {
+                    scoreClass = 'suspicious';
+                    verdict = '⚠️ 의심스러움';
+                }
 
-            document.getElementById(containerId).innerHTML = `
-                <div class="bot-score ${scoreClass}">${verdict}</div>
-                <div class="analysis-grid">
-                    <div class="analysis-card">
-                        <h5 style="color: var(--primary-color);">봇 점수</h5>
-                        <p style="font-size: 24px; font-weight: 700;">${botScore.toFixed(1)} / 100</p>
+                document.getElementById(containerId).innerHTML = `
+                    <div class="bot-score ${scoreClass}">${verdict}</div>
+                    <div class="analysis-grid">
+                        <div class="analysis-card">
+                            <h5 style="color: var(--primary-color);">봇 점수</h5>
+                            <p style="font-size: 24px; font-weight: 700;">${botScore.toFixed(1)} / 100</p>
+                        </div>
+                        <div class="analysis-card">
+                            <h5 style="color: var(--primary-color);">속도 변동성</h5>
+                            <p style="font-size: 20px; font-weight: 700;">${(speedCV * 100).toFixed(1)}%</p>
+                            <small>${speedCV < 0.3 ? '⚠️ 낮음' : '✅ 정상'}</small>
+                        </div>
+                        <div class="analysis-card">
+                            <h5 style="color: var(--primary-color);">경로 곡선성</h5>
+                            <p style="font-size: 20px; font-weight: 700;">${avgAngle.toFixed(2)} rad</p>
+                            <small>${avgAngle < 0.2 ? '⚠️ 직선적' : '✅ 자연스러움'}</small>
+                        </div>
+                        <div class="analysis-card">
+                            <h5 style="color: var(--primary-color);">호버 구간</h5>
+                            <p style="font-size: 20px; font-weight: 700;">${hovers.length}개</p>
+                            <small>${hovers.length === 0 ? '⚠️ 없음' : '✅ 발견'}</small>
+                        </div>
                     </div>
-                    <div class="analysis-card">
-                        <h5 style="color: var(--primary-color);">속도 변동성</h5>
-                        <p style="font-size: 20px; font-weight: 700;">${(speedCV * 100).toFixed(1)}%</p>
-                        <small>${speedCV < 0.3 ? '⚠️ 낮음' : '✅ 정상'}</small>
-                    </div>
-                    <div class="analysis-card">
-                        <h5 style="color: var(--primary-color);">경로 곡선성</h5>
-                        <p style="font-size: 20px; font-weight: 700;">${avgAngle.toFixed(2)} rad</p>
-                        <small>${avgAngle < 0.2 ? '⚠️ 직선적' : '✅ 자연스러움'}</small>
-                    </div>
-                    <div class="analysis-card">
-                        <h5 style="color: var(--primary-color);">호버 구간</h5>
-                        <p style="font-size: 20px; font-weight: 700;">${hovers.length}개</p>
-                        <small>${hovers.length === 0 ? '⚠️ 없음' : '✅ 발견'}</small>
-                    </div>
-                </div>
-                ${reasons.length > 0 ? `
-                    <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: rgba(255, 152, 0, 0.1); border-left: 4px solid #FF9800; border-radius: var(--border-radius);">
-                        <h5>⚠️ 의심 요인:</h5>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            ${reasons.map(function (r) { return `<li>${r}</li>`; }).join('')}
-                        </ul>
-                    </div>
-                ` : ''}
-            `;
+                    ${reasons.length > 0 ? `
+                        <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: rgba(255, 152, 0, 0.1); border-left: 4px solid #FF9800; border-radius: var(--border-radius);">
+                            <h5>⚠️ 의심 요인:</h5>
+                            <ul style="margin: 0; padding-left: 20px;">
+                                ${reasons.map(function (r) { return `<li>${r}</li>`; }).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                `;
+            } catch (e) {
+                console.error('Bot Analysis Error:', e);
+                document.getElementById(containerId).innerHTML = `<div style="color:red; padding:10px; border:1px solid red;">분석 중 오류 발생: ${e.message}</div>`;
+            }
         }
 
         loadLogs();
+    </script>
+
+    <div id="error-console"
+        style="display:none; position:fixed; bottom:0; left:0; right:0; height:150px; background:rgba(0,0,0,0.8); color:red; overflow-y:scroll; z-index:99999; padding:10px; font-family:monospace; font-size:12px;">
+    </div>
+    <script>
+        window.onerror = function (msg, url, lineNo, columnNo, error) {
+            const consoleDiv = document.getElementById('error-console');
+            consoleDiv.style.display = 'block';
+            consoleDiv.innerHTML += `<div>[JS Error] ${msg} (${url}:${lineNo}:${columnNo})</div>`;
+            return false;
+        };
+
+        window.addEventListener('unhandledrejection', function (event) {
+            const consoleDiv = document.getElementById('error-console');
+            consoleDiv.style.display = 'block';
+            consoleDiv.innerHTML += `<div>[Promise Error] ${event.reason}</div>`;
+        });
     </script>
 </body>
 
