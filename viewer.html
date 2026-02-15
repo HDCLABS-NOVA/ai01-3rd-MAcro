@@ -90,6 +90,77 @@
             margin-top: var(--spacing-lg);
         }
 
+        /* 검색 박스 */
+        .search-container {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            align-items: center;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input-wrapper .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .search-filter-select {
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 15px;
+            cursor: pointer;
+            min-width: 140px;
+            transition: all 0.3s;
+        }
+
+        .search-filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .search-result-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: -12px;
+            margin-bottom: var(--spacing-md);
+            padding-left: 4px;
+        }
+
         canvas {
             border: 1px solid #333;
             border-radius: var(--border-radius);
@@ -183,6 +254,104 @@
             border-color: var(--primary-color);
             color: white;
         }
+
+        /* 상위 네비게이션 (admin 스타일) */
+        .viewer-nav-header {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .viewer-nav-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .viewer-nav-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .viewer-nav-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-btn.active {
+            background: white;
+            color: #4f46e5;
+        }
+
+        .nav-btn:not(.active) {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .nav-btn-home {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .top-section {
+            display: none;
+        }
+
+        .top-section.active {
+            display: block;
+        }
+
+        /* 리포트 플레이스홀더 */
+        .report-placeholder {
+            text-align: center;
+            padding: 80px 20px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            border: 2px dashed var(--border-color);
+        }
+
+        .report-placeholder .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .report-placeholder h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .report-placeholder p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
     </style>
 </head>
 
@@ -196,113 +365,155 @@
 
     <main class="page-wrapper">
         <div class="container">
-            <h1 class="page-title">📊 로그 뷰어</h1>
-            <p class="page-subtitle">마우스 트래킹 분석 및 봇 탐지</p>
-
-            <div class="tab-container">
-                <button class="tab-btn active" onclick="switchTab('performance')">🎭 공연창</button>
-                <button class="tab-btn" onclick="switchTab('booking')">🎫 예매창</button>
+            <!-- 상위 네비게이션 (admin 스타일) -->
+            <div class="viewer-nav-header">
+                <h1>📊 로그 분석 시스템</h1>
+                <p>마우스 트래킹 분석 및 봇 의심자 리포트</p>
+                <div class="viewer-nav-actions">
+                    <button class="nav-btn active" id="nav-viewer-btn" onclick="switchTopSection('viewer')">📊
+                        로그뷰어</button>
+                    <button class="nav-btn" id="nav-report-btn" onclick="switchTopSection('report')">📋 모델링 리포트</button>
+                    <button class="nav-btn nav-btn-home" onclick="window.location.href='/'">🏠 메인으로</button>
+                </div>
             </div>
 
-            <!-- 공연창 탭 -->
-            <div id="performance-tab" class="tab-content active">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="perf-total">0</div>
-                        <div class="stat-label">총 로그 수</div>
+            <!-- ===== 로그뷰어 섹션 ===== -->
+            <div id="section-viewer" class="top-section active">
+
+                <!-- 검색 박스 -->
+                <div class="search-container">
+                    <div class="search-input-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-input" class="search-input" placeholder="아이디, 예매번호, 예매자명으로 검색..."
+                            oninput="handleSearch()">
                     </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%);">
-                        <div class="stat-number" id="perf-avg-duration">-</div>
-                        <div class="stat-label">평균 소요시간</div>
-                    </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);">
-                        <div class="stat-number" id="perf-avg-movements">-</div>
-                        <div class="stat-label">평균 마우스 이동</div>
-                    </div>
+                    <select id="search-filter" class="search-filter-select" onchange="handleSearch()">
+                        <option value="all">전체</option>
+                        <option value="email">아이디</option>
+                        <option value="booking_id">예매번호</option>
+                        <option value="booker_name">예매자명</option>
+                    </select>
+                </div>
+                <div id="search-result-info" class="search-result-info" style="display:none;"></div>
+
+                <div class="tab-container">
+                    <button class="tab-btn active" onclick="switchTab('performance')">🎭 공연창</button>
+                    <button class="tab-btn" onclick="switchTab('booking')">🎫 예매창</button>
                 </div>
 
-                <div class="card">
-                    <h3 style="margin-bottom: var(--spacing-md);">로그 목록</h3>
-                    <div id="perf-logs-list">
-                        <p style="text-align: center; color: var(--text-secondary);">로그를 불러오는 중...</p>
-                    </div>
-                </div>
-
-                <div id="perf-analysis" style="display: none;">
-                    <h3 style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-md);">🔍 마우스 트래킹 분석</h3>
-                    <div class="card">
-                        <div class="canvas-container" style="position: relative;">
-                            <canvas id="perf-canvas" class="main-canvas" width="1920" height="1080"></canvas>
-                            <div id="perf-tooltip" class="canvas-tooltip"></div>
+                <!-- 공연창 탭 -->
+                <div id="performance-tab" class="tab-content active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="perf-total">0</div>
+                            <div class="stat-label">총 로그 수</div>
                         </div>
-                        <div id="perf-tremor" style="display: none;">
-                            <h4 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">🔬 호버 영역 미세 떨림
-                                분석 (10배 확대)</h4>
-                            <div id="perf-hover-buttons" style="margin-bottom: var(--spacing-sm);"></div>
-                            <div class="tremor-view">
-                                <canvas id="perf-tremor-canvas" width="800" height="800"></canvas>
-                                <div id="perf-tremor-tooltip" class="canvas-tooltip"></div>
-                                <div id="perf-tremor-stats"></div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%);">
+                            <div class="stat-number" id="perf-avg-duration">-</div>
+                            <div class="stat-label">평균 소요시간</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);">
+                            <div class="stat-number" id="perf-avg-movements">-</div>
+                            <div class="stat-label">평균 마우스 이동</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: var(--spacing-md);">로그 목록</h3>
+                        <div id="perf-logs-list">
+                            <p style="text-align: center; color: var(--text-secondary);">로그를 불러오는 중...</p>
+                        </div>
+                    </div>
+
+                    <div id="perf-analysis" style="display: none;">
+                        <h3 style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-md);">🔍 마우스 트래킹 분석</h3>
+                        <div class="card">
+                            <div class="canvas-container" style="position: relative;">
+                                <canvas id="perf-canvas" class="main-canvas" width="1920" height="1080"></canvas>
+                                <div id="perf-tooltip" class="canvas-tooltip"></div>
+                            </div>
+                            <div id="perf-tremor" style="display: none;">
+                                <h4 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">🔬 호버 영역 미세
+                                    떨림
+                                    분석 (10배 확대)</h4>
+                                <div id="perf-hover-buttons" style="margin-bottom: var(--spacing-sm);"></div>
+                                <div class="tremor-view">
+                                    <canvas id="perf-tremor-canvas" width="800" height="800"></canvas>
+                                    <div id="perf-tremor-tooltip" class="canvas-tooltip"></div>
+                                    <div id="perf-tremor-stats"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="card" style="margin-top: var(--spacing-lg);">
-                        <h4 style="margin-bottom: var(--spacing-md);">🤖 봇 탐지 분석</h4>
-                        <div id="perf-bot-analysis"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 예매창 탭 -->
-            <div id="booking-tab" class="tab-content">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="book-total">0</div>
-                        <div class="stat-label">총 로그 수</div>
-                    </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%);">
-                        <div class="stat-number" id="book-avg-duration">-</div>
-                        <div class="stat-label">평균 소요시간</div>
-                    </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);">
-                        <div class="stat-number" id="book-completion">-</div>
-                        <div class="stat-label">완료율</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3 style="margin-bottom: var(--spacing-md);">로그 목록</h3>
-                    <div id="book-logs-list">
-                        <p style="text-align: center; color: var(--text-secondary);">로그를 불러오는 중...</p>
-                    </div>
-                </div>
-
-                <div id="book-analysis" style="display: none;">
-                    <h3 style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-md);">🔍 마우스 트래킹 분석</h3>
-                    <div class="card">
-                        <h4 style="margin-bottom: var(--spacing-md);">단계별 분석</h4>
-                        <div id="book-stage-selector"></div>
-                        <div class="canvas-container" style="position: relative;">
-                            <canvas id="book-canvas" class="main-canvas" width="1920" height="1080"></canvas>
-                            <div id="book-tooltip" class="canvas-tooltip"></div>
+                        <div class="card" style="margin-top: var(--spacing-lg);">
+                            <h4 style="margin-bottom: var(--spacing-md);">🤖 봇 탐지 분석</h4>
+                            <div id="perf-bot-analysis"></div>
                         </div>
-                        <div id="book-tremor" style="display: none;">
-                            <h4 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">🔬 호버 영역 미세 떨림
-                                분석 (10배 확대)</h4>
-                            <div id="book-hover-buttons" style="margin-bottom: var(--spacing-sm);"></div>
-                            <div class="tremor-view">
-                                <canvas id="book-tremor-canvas" width="800" height="800"></canvas>
-                                <div id="book-tremor-tooltip" class="canvas-tooltip"></div>
-                                <div id="book-tremor-stats"></div>
+                    </div>
+                </div>
+
+                <!-- 예매창 탭 -->
+                <div id="booking-tab" class="tab-content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="book-total">0</div>
+                            <div class="stat-label">총 로그 수</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%);">
+                            <div class="stat-number" id="book-avg-duration">-</div>
+                            <div class="stat-label">평균 소요시간</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);">
+                            <div class="stat-number" id="book-completion">-</div>
+                            <div class="stat-label">완료율</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: var(--spacing-md);">로그 목록</h3>
+                        <div id="book-logs-list">
+                            <p style="text-align: center; color: var(--text-secondary);">로그를 불러오는 중...</p>
+                        </div>
+                    </div>
+
+                    <div id="book-analysis" style="display: none;">
+                        <h3 style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-md);">🔍 마우스 트래킹 분석</h3>
+                        <div class="card">
+                            <h4 style="margin-bottom: var(--spacing-md);">단계별 분석</h4>
+                            <div id="book-stage-selector"></div>
+                            <div class="canvas-container" style="position: relative;">
+                                <canvas id="book-canvas" class="main-canvas" width="1920" height="1080"></canvas>
+                                <div id="book-tooltip" class="canvas-tooltip"></div>
+                            </div>
+                            <div id="book-tremor" style="display: none;">
+                                <h4 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">🔬 호버 영역 미세
+                                    떨림
+                                    분석 (10배 확대)</h4>
+                                <div id="book-hover-buttons" style="margin-bottom: var(--spacing-sm);"></div>
+                                <div class="tremor-view">
+                                    <canvas id="book-tremor-canvas" width="800" height="800"></canvas>
+                                    <div id="book-tremor-tooltip" class="canvas-tooltip"></div>
+                                    <div id="book-tremor-stats"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="card" style="margin-top: var(--spacing-lg);">
-                        <h4 style="margin-bottom: var(--spacing-md);">🤖 봇 탐지 분석</h4>
-                        <div id="book-bot-analysis"></div>
+                        <div class="card" style="margin-top: var(--spacing-lg);">
+                            <h4 style="margin-bottom: var(--spacing-md);">🤖 봇 탐지 분석</h4>
+                            <div id="book-bot-analysis"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+            </div><!-- /section-viewer -->
+
+            <!-- ===== 모델링 리포트 섹션 ===== -->
+            <div id="section-report" class="top-section">
+                <div class="report-placeholder">
+                    <div class="icon">📋</div>
+                    <h3>모델링 리포트</h3>
+                    <p>봇 의심자 분류 리포트가 이 곳에 표시됩니다.<br>기준이 정해지면 추가될 예정입니다.</p>
+                </div>
+            </div><!-- /section-report -->
+
         </div>
     </main>
 
@@ -319,6 +530,8 @@
         var allLogs = [];
         var perfLogs = [];
         var bookLogs = [];
+        var filteredPerfLogs = [];
+        var filteredBookLogs = [];
         var currentTab = 'performance';
         var currentPerfLog = null;
         var currentBookLog = null;
@@ -334,6 +547,17 @@
             'payment': '결제'
         };
 
+        function switchTopSection(section) {
+            document.querySelectorAll('.top-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.classList.contains('nav-btn-home')) return;
+                btn.classList.remove('active');
+            });
+
+            document.getElementById('section-' + section).classList.add('active');
+            document.getElementById('nav-' + section + '-btn').classList.add('active');
+        }
+
         function switchTab(tab) {
             currentTab = tab;
 
@@ -347,6 +571,54 @@
                 document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
                 document.getElementById('booking-tab').classList.add('active');
             }
+        }
+
+        // 검색 기능
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+            const filter = document.getElementById('search-filter').value;
+            const infoEl = document.getElementById('search-result-info');
+
+            if (!query) {
+                filteredPerfLogs = perfLogs;
+                filteredBookLogs = bookLogs;
+                infoEl.style.display = 'none';
+                displayPerfLogs();
+                displayBookLogs();
+                return;
+            }
+
+            function matchLog(log) {
+                const meta = log.metadata || {};
+                const email = (meta.user_email || '').toLowerCase();
+                const bookingId = (meta.booking_id || '').toLowerCase();
+                const bookerEmail = (meta.booker_email || '').toLowerCase();
+                const bookerPhone = (meta.booker_phone || '').toLowerCase();
+                const flowId = (meta.flow_id || '').toLowerCase();
+
+                switch (filter) {
+                    case 'email':
+                        return email.includes(query);
+                    case 'booking_id':
+                        return bookingId.includes(query);
+                    case 'booker_name':
+                        return bookerEmail.includes(query) || bookerPhone.includes(query);
+                    default: // 'all'
+                        return email.includes(query) || bookingId.includes(query) ||
+                            bookerEmail.includes(query) || bookerPhone.includes(query) ||
+                            flowId.includes(query);
+                }
+            }
+
+            filteredPerfLogs = perfLogs.filter(matchLog);
+            filteredBookLogs = bookLogs.filter(matchLog);
+
+            const totalFound = filteredPerfLogs.length + filteredBookLogs.length;
+            infoEl.style.display = 'block';
+            infoEl.textContent = `🔍 "${query}" 검색 결과: 공연창 ${filteredPerfLogs.length}건, 예매창 ${filteredBookLogs.length}건 (총 ${totalFound}건)`;
+
+            displayPerfLogs();
+            displayBookLogs();
         }
 
         async function loadLogs() {
@@ -369,6 +641,8 @@
 
                 perfLogs = allLogs.filter(log => log.stages.perf);
                 bookLogs = allLogs.filter(log => log.stages.seat);
+                filteredPerfLogs = perfLogs;
+                filteredBookLogs = bookLogs;
 
                 updatePerfStats();
                 updateBookStats();
@@ -415,18 +689,25 @@
         function displayPerfLogs() {
             const container = document.getElementById('perf-logs-list');
 
-            container.innerHTML = perfLogs.map((log, index) => {
+            if (filteredPerfLogs.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">검색 결과가 없습니다.</p>';
+                return;
+            }
+
+            container.innerHTML = filteredPerfLogs.map((log, index) => {
                 const perf = log.stages.perf;
                 const duration = (perf.duration_ms / 1000).toFixed(1);
                 const date = new Date(log.metadata.created_at).toLocaleString('ko-KR');
+                const realIndex = perfLogs.indexOf(log);
 
                 return `
-                    <div class="log-item" onclick="showPerfAnalysis(${index})">
+                    <div class="log-item" onclick="showPerfAnalysis(${realIndex})">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
                             <span style="font-weight: 700; color: var(--primary-color);">${log.metadata.flow_id}</span>
                             <span style="color: var(--text-secondary); font-size: 14px;">${date}</span>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--spacing-sm); font-size: 14px;">
+                            <div><strong>아이디:</strong> ${log.metadata.user_email || '-'}</div>
                             <div><strong>공연:</strong> ${log.metadata.performance_title || '-'}</div>
                             <div><strong>소요시간:</strong> ${duration}초</div>
                             <div><strong>마우스:</strong> ${perf.mouse_trajectory?.length || 0}개</div>
@@ -440,7 +721,12 @@
         function displayBookLogs() {
             const container = document.getElementById('book-logs-list');
 
-            container.innerHTML = bookLogs.map((log, index) => {
+            if (filteredBookLogs.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">검색 결과가 없습니다.</p>';
+                return;
+            }
+
+            container.innerHTML = filteredBookLogs.map((log, index) => {
                 const completed = log.stages.payment && log.stages.payment.completed;
                 const status = completed ? '✅ 완료' : '❌ 미완료';
 
@@ -451,9 +737,10 @@
 
                 const date = new Date(log.metadata.created_at).toLocaleString('ko-KR');
                 const seats = log.metadata.final_seats?.join(', ') || '-';
+                const realIndex = bookLogs.indexOf(log);
 
                 return `
-                    <div class="log-item" onclick="showBookAnalysis(${index})">
+                    <div class="log-item" onclick="showBookAnalysis(${realIndex})">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
                             <div style=" display: flex; gap: var(--spacing-md); align-items: center;">
                                 <span style="font-size: 20px;">${status}</span>
@@ -462,6 +749,8 @@
                             <span style="color: var(--text-secondary); font-size: 14px;">${date}</span>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--spacing-sm); font-size: 14px;">
+                            <div><strong>아이디:</strong> ${log.metadata.user_email || '-'}</div>
+                            <div><strong>예매번호:</strong> ${log.metadata.booking_id || '-'}</div>
                             <div><strong>공연:</strong> ${log.metadata.performance_title || '-'}</div>
                             <div><strong>좌석:</strong> ${seats}</div>
                             <div><strong>소요시간:</strong> ${(totalDuration / 1000).toFixed(1)}초</div>
