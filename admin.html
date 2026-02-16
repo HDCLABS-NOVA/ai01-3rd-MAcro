@@ -258,12 +258,14 @@
         }
 
         async function adminUnrestrict(email) {
-            if (!confirm(`${email}의 예매 제한을 해제하시겠습니까?`)) return;
+            const reason = prompt(`${email}의 예매 제한 해제 사유를 입력해주세요:`);
+            if (!reason) return;
             try {
+                const adminEmail = JSON.parse(sessionStorage.getItem('currentUser') || '{}').email || 'admin';
                 const res = await fetch('/api/admin/unrestrict-user', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email })
+                    body: JSON.stringify({ email, reason, unrestricted_by: adminEmail })
                 });
                 const data = await res.json();
                 if (data.success) {

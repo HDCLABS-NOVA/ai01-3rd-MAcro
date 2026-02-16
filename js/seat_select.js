@@ -17,7 +17,7 @@ enableMouseTracking();
                 const expires = data.expires_at
                     ? new Date(data.expires_at).toLocaleDateString('ko-KR') + '까지'
                     : '영구';
-                alert(`⚠️ 예매 제한 안내\n\n제한 단계: ${levelNames[data.level]}\n사유: ${data.reason}\n기간: ${expires}\n\n문의사항은 고객센터로 연락해주세요.`);
+                alert(`⚠️ 예매 제한 안내\n\n제한 단계: ${levelNames[data.level]}\n기간: ${expires}\n\n문의사항은 고객센터로 연락해주세요.`);
                 window.location.href = '/';
             }
         } catch (e) {

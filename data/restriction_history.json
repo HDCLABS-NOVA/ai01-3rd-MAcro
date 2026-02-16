@@ -1,0 +1,12 @@
+{
+  "history": [
+    {
+      "action": "restrict",
+      "email": "test4444@ticket.com",
+      "level": 1,
+      "reason": "test",
+      "by": "admin@ticket.com",
+      "timestamp": "2026-02-16T19:26:55.007561+09:00"
+    }
+  ]
+}
