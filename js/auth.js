@@ -84,11 +84,20 @@ async function login(email, password) {
         };
 
         sessionStorage.setItem('currentUser', JSON.stringify(session));
+        sessionStorage.setItem('user', JSON.stringify(data.user));
+
+        // 제한 상태 저장
+        if (data.restriction) {
+            sessionStorage.setItem('restriction', JSON.stringify(data.restriction));
+        } else {
+            sessionStorage.removeItem('restriction');
+        }
 
         return {
             success: true,
             message: data.message,
-            user: data.user
+            user: data.user,
+            restriction: data.restriction
         };
     } catch (error) {
         throw new Error(error.message || '로그인에 실패했습니다.');

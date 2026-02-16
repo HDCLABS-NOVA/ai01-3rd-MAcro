@@ -352,6 +352,188 @@
             margin: 0 auto;
             line-height: 1.7;
         }
+
+        /* 관리 패널 스타일 */
+        .admin-panel {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+            border-left: 4px solid #4f46e5;
+        }
+
+        .admin-panel h4 {
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .restriction-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .restriction-badge.none {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .restriction-badge.level-1 {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .restriction-badge.level-2 {
+            background: #fce4ec;
+            color: #c62828;
+        }
+
+        .restriction-badge.level-3 {
+            background: #f3e5f5;
+            color: #6a1b9a;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .admin-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .admin-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .admin-btn.restrict {
+            background: #ef4444;
+            color: white;
+        }
+
+        .admin-btn.cancel-booking {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .admin-btn.unrestrict {
+            background: #10b981;
+            color: white;
+        }
+
+        .admin-user-info {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 4px 16px;
+            font-size: 14px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .admin-user-info dt {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .admin-user-info dd {
+            margin: 0;
+        }
+
+        /* 모달 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-box h3 {
+            margin-bottom: 20px;
+        }
+
+        .modal-box label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #374151;
+        }
+
+        .modal-box select,
+        .modal-box textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            font-family: inherit;
+        }
+
+        .modal-box textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .modal-btn-cancel {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .modal-btn-confirm {
+            background: #ef4444;
+            color: white;
+        }
+
+        .modal-btn-confirm.booking {
+            background: #f59e0b;
+        }
     </style>
 </head>
 
@@ -503,7 +685,52 @@
                     </div>
                 </div>
 
+                <!-- 관리 패널 (공용) -->
+                <div id="admin-panel" class="admin-panel" style="display: none;">
+                    <h4>🛡️ 사용자 관리 <span id="admin-restriction-badge"></span></h4>
+                    <dl class="admin-user-info" id="admin-user-info"></dl>
+                    <div class="admin-actions">
+                        <button class="admin-btn restrict" onclick="showRestrictModal()">🚫 예매 제한</button>
+                        <button class="admin-btn cancel-booking" onclick="showCancelModal()">❌ 예매 취소</button>
+                        <button class="admin-btn unrestrict" id="btn-unrestrict" style="display:none;"
+                            onclick="unrestrictUser()">✅ 제한 해제</button>
+                    </div>
+                </div>
+
             </div><!-- /section-viewer -->
+
+            <!-- 제한 모달 -->
+            <div id="restrict-modal" class="modal-overlay">
+                <div class="modal-box">
+                    <h3>🚫 예매 제한 부여</h3>
+                    <label>제한 단계</label>
+                    <select id="restrict-level">
+                        <option value="1">1차 - 3개월 제한</option>
+                        <option value="2">2차 - 6개월 제한</option>
+                        <option value="3">3차 - 영구 제한</option>
+                    </select>
+                    <label>사유</label>
+                    <textarea id="restrict-reason" placeholder="제한 사유를 입력하세요..."></textarea>
+                    <div class="modal-buttons">
+                        <button class="modal-btn-cancel" onclick="closeModal('restrict-modal')">취소</button>
+                        <button class="modal-btn-confirm" onclick="confirmRestrict()">제한 적용</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 예매 취소 모달 -->
+            <div id="cancel-modal" class="modal-overlay">
+                <div class="modal-box">
+                    <h3>❌ 예매 취소</h3>
+                    <p id="cancel-info" style="margin-bottom: 16px; color: #6b7280;"></p>
+                    <label>취소 사유</label>
+                    <textarea id="cancel-reason" placeholder="취소 사유를 입력하세요..."></textarea>
+                    <div class="modal-buttons">
+                        <button class="modal-btn-cancel" onclick="closeModal('cancel-modal')">닫기</button>
+                        <button class="modal-btn-confirm booking" onclick="confirmCancel()">예매 취소</button>
+                    </div>
+                </div>
+            </div>
 
             <!-- ===== 모델링 리포트 섹션 ===== -->
             <div id="section-report" class="top-section">
@@ -538,6 +765,9 @@
         var currentBookStage = null;
         var perfHovers = [];
         var bookHovers = [];
+        var currentSelectedLog = null;
+        var currentFilename = null;
+        var allFilenames = [];
 
         const BOOKING_STAGES = ['seat', 'discount', 'order_info', 'payment'];
         const STAGE_NAMES = {
@@ -637,7 +867,11 @@
                 );
 
                 const logDetails = await Promise.all(logPromises);
-                allLogs = logDetails.map(log => log.data);
+                allFilenames = data.files;
+                allLogs = logDetails.map((log, i) => {
+                    log.data._filename = data.files[i];
+                    return log.data;
+                });
 
                 perfLogs = allLogs.filter(log => log.stages.perf);
                 bookLogs = allLogs.filter(log => log.stages.seat);
@@ -701,9 +935,12 @@
                 const realIndex = perfLogs.indexOf(log);
 
                 return `
-                    <div class="log-item" onclick="showPerfAnalysis(${realIndex})">
+                    <div class="log-item" onclick="showPerfAnalysis(${realIndex})" style="${log.metadata.cancelled ? 'border-left: 3px solid #ef4444;' : ''}">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
-                            <span style="font-weight: 700; color: var(--primary-color);">${log.metadata.flow_id}</span>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span style="font-weight: 700; color: var(--primary-color);">${log.metadata.flow_id}</span>
+                                ${log.metadata.cancelled ? '<span style="background:#ef4444; color:white; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700;">취소됨</span>' : ''}
+                            </div>
                             <span style="color: var(--text-secondary); font-size: 14px;">${date}</span>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--spacing-sm); font-size: 14px;">
@@ -728,7 +965,8 @@
 
             container.innerHTML = filteredBookLogs.map((log, index) => {
                 const completed = log.stages.payment && log.stages.payment.completed;
-                const status = completed ? '✅ 완료' : '❌ 미완료';
+                const cancelled = log.metadata.cancelled;
+                const status = cancelled ? '🚫 취소' : (completed ? '✅ 완료' : '❌ 미완료');
 
                 var totalDuration = 0;
                 BOOKING_STAGES.forEach(stage => {
@@ -740,7 +978,7 @@
                 const realIndex = bookLogs.indexOf(log);
 
                 return `
-                    <div class="log-item" onclick="showBookAnalysis(${realIndex})">
+                    <div class="log-item" onclick="showBookAnalysis(${realIndex})" style="${cancelled ? 'border-left: 3px solid #ef4444;' : ''}">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
                             <div style=" display: flex; gap: var(--spacing-md); align-items: center;">
                                 <span style="font-size: 20px;">${status}</span>
@@ -762,20 +1000,26 @@
 
         function showPerfAnalysis(index) {
             currentPerfLog = perfLogs[index];
+            currentSelectedLog = currentPerfLog;
+            currentFilename = currentPerfLog._filename;
             document.getElementById('perf-analysis').style.display = 'block';
 
             drawCanvas('perf', currentPerfLog.stages.perf, 'perf-canvas', 'perf-tremor', 'perf-tremor-canvas', 'perf-tremor-stats');
             analyzeBotBehavior('perf', currentPerfLog.stages.perf, 'perf-bot-analysis');
+            updateAdminPanel(currentPerfLog);
 
             document.getElementById('perf-analysis').scrollIntoView({ behavior: 'smooth' });
         }
 
         function showBookAnalysis(index) {
             currentBookLog = bookLogs[index];
+            currentSelectedLog = currentBookLog;
+            currentFilename = currentBookLog._filename;
             document.getElementById('book-analysis').style.display = 'block';
 
             createBookStageSelector();
             selectBookStage('seat');
+            updateAdminPanel(currentBookLog);
 
             document.getElementById('book-analysis').scrollIntoView({ behavior: 'smooth' });
         }
@@ -1755,6 +1999,176 @@
             consoleDiv.style.display = 'block';
             consoleDiv.innerHTML += `<div>[Promise Error] ${event.reason}</div>`;
         });
+
+        // ============================================
+        // 관리 패널 기능
+        // ============================================
+
+        async function updateAdminPanel(log) {
+            const panel = document.getElementById('admin-panel');
+            const userInfo = document.getElementById('admin-user-info');
+            const badge = document.getElementById('admin-restriction-badge');
+            const unrestrictBtn = document.getElementById('btn-unrestrict');
+
+            const meta = log.metadata || {};
+            const email = meta.user_email || '-';
+            const bookingId = meta.booking_id || '-';
+            const perfTitle = meta.performance_title || '-';
+            const cancelled = meta.cancelled
+                ? `취소됨 [${meta.cancelled_by || '관리자'}, ${meta.cancel_reason || '-'}]`
+                : '';
+
+            userInfo.innerHTML = `
+                <dt>아이디</dt><dd>${email}</dd>
+                <dt>예매번호</dt><dd>${bookingId}</dd>
+                <dt>공연</dt><dd>${perfTitle}</dd>
+                <dt>파일</dt><dd style="font-size:12px; color:#9ca3af;">${currentFilename || '-'}</dd>
+                ${cancelled ? `<dt>상태</dt><dd style="color:#ef4444; font-weight:700;">${cancelled}</dd>` : ''}
+            `;
+
+            // 제한 상태 확인
+            if (email && email !== '-') {
+                try {
+                    const res = await fetch(`/api/admin/check-restriction/${encodeURIComponent(email)}`);
+                    const data = await res.json();
+
+                    if (data.restricted) {
+                        const levelNames = { 1: '1차 (3개월)', 2: '2차 (6개월)', 3: '3차 (영구)' };
+                        const expires = data.expires_at
+                            ? new Date(data.expires_at).toLocaleDateString('ko-KR')
+                            : '영구';
+                        badge.innerHTML = `<span class="restriction-badge level-${data.level}">🚫 ${levelNames[data.level]} 제한 중 (만료: ${expires})</span>`;
+                        unrestrictBtn.style.display = 'inline-flex';
+                    } else {
+                        badge.innerHTML = `<span class="restriction-badge none">✅ 제한 없음</span>`;
+                        unrestrictBtn.style.display = 'none';
+                    }
+                } catch (e) {
+                    badge.innerHTML = `<span class="restriction-badge none">✅ 제한 없음</span>`;
+                    unrestrictBtn.style.display = 'none';
+                }
+            } else {
+                badge.innerHTML = '';
+                unrestrictBtn.style.display = 'none';
+            }
+
+            panel.style.display = 'block';
+        }
+
+        function showRestrictModal() {
+            if (!currentSelectedLog || !currentSelectedLog.metadata.user_email) {
+                alert('사용자 정보가 없습니다.');
+                return;
+            }
+            document.getElementById('restrict-reason').value = '';
+            document.getElementById('restrict-modal').classList.add('show');
+        }
+
+        async function confirmRestrict() {
+            const level = parseInt(document.getElementById('restrict-level').value);
+            const reason = document.getElementById('restrict-reason').value.trim();
+
+            if (!reason) {
+                alert('사유를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/restrict-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentSelectedLog.metadata.user_email,
+                        level: level,
+                        reason: reason
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    closeModal('restrict-modal');
+                    updateAdminPanel(currentSelectedLog);
+                } else {
+                    alert('제한 적용 실패: ' + (data.detail || '알 수 없는 오류'));
+                }
+            } catch (e) {
+                alert('오류 발생: ' + e.message);
+            }
+        }
+
+        async function unrestrictUser() {
+            if (!currentSelectedLog || !currentSelectedLog.metadata.user_email) return;
+
+            if (!confirm(`${currentSelectedLog.metadata.user_email}의 예매 제한을 해제하시겠습니까?`)) return;
+
+            try {
+                const res = await fetch('/api/admin/unrestrict-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: currentSelectedLog.metadata.user_email })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    updateAdminPanel(currentSelectedLog);
+                } else {
+                    alert('해제 실패: ' + (data.detail || '알 수 없는 오류'));
+                }
+            } catch (e) {
+                alert('오류 발생: ' + e.message);
+            }
+        }
+
+        function showCancelModal() {
+            if (!currentFilename) {
+                alert('로그 파일 정보가 없습니다.');
+                return;
+            }
+            document.getElementById('cancel-info').textContent =
+                `파일: ${currentFilename}\n예매번호: ${currentSelectedLog?.metadata?.booking_id || '-'}`;
+            document.getElementById('cancel-reason').value = '';
+            document.getElementById('cancel-modal').classList.add('show');
+        }
+
+        async function confirmCancel() {
+            const reason = document.getElementById('cancel-reason').value.trim();
+            if (!reason) {
+                alert('취소 사유를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/cancel-booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: currentFilename,
+                        reason: reason,
+                        cancelled_by: JSON.parse(sessionStorage.getItem('currentUser') || '{}').email || 'admin'
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    closeModal('cancel-modal');
+                    currentSelectedLog.metadata.cancelled = true;
+                    currentSelectedLog.metadata.cancel_reason = reason;
+                    currentSelectedLog.metadata.cancelled_by = JSON.parse(sessionStorage.getItem('currentUser') || '{}').email || 'admin';
+                    updateAdminPanel(currentSelectedLog);
+                } else {
+                    alert('예매 취소 실패: ' + (data.detail || '알 수 없는 오류'));
+                }
+            } catch (e) {
+                alert('오류 발생: ' + e.message);
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
     </script>
 </body>
 

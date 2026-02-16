@@ -42,6 +42,19 @@
                 <div class="loading">공연 목록을 불러오는 중...</div>
             </div>
         </section>
+
+        <!-- 제한 사용자 관리 -->
+        <section style="margin-top: 40px;">
+            <div
+                style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 24px 30px; border-radius: 12px 12px 0 0;">
+                <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 4px;">🚫 예매 제한 사용자</h2>
+                <p style="opacity: 0.85; font-size: 14px;">봇 의심으로 예매가 제한된 사용자 목록</p>
+            </div>
+            <div id="restrictedUsersContainer"
+                style="background: #1e1e2e; border-radius: 0 0 12px 12px; padding: 20px; min-height: 80px;">
+                <div class="loading">제한 사용자 목록을 불러오는 중...</div>
+            </div>
+        </section>
     </div>
 
     <!-- Add Performance Modal -->
@@ -189,6 +202,84 @@
 
     <!-- Admin Logic -->
     <script src="js/admin.js"></script>
+
+    <script>
+        // 제한 사용자 목록 로드
+        async function loadRestrictedUsers() {
+            const container = document.getElementById('restrictedUsersContainer');
+            try {
+                const res = await fetch('/api/admin/restricted-users');
+                const data = await res.json();
+                const users = data.restricted_users || [];
+
+                if (users.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:#9ca3af; padding:20px;">제한된 사용자가 없습니다.</p>';
+                    return;
+                }
+
+                const levelNames = { 1: '1차 (3개월)', 2: '2차 (6개월)', 3: '3차 (영구)' };
+                const levelColors = { 1: '#f59e0b', 2: '#ef4444', 3: '#7c3aed' };
+
+                container.innerHTML = `
+                    <table style="width:100%; border-collapse:collapse; font-size:14px;">
+                        <thead>
+                            <tr style="border-bottom:2px solid #374151; color:#9ca3af;">
+                                <th style="padding:10px; text-align:left;">이메일</th>
+                                <th style="padding:10px; text-align:center;">단계</th>
+                                <th style="padding:10px; text-align:left;">사유</th>
+                                <th style="padding:10px; text-align:center;">제한일</th>
+                                <th style="padding:10px; text-align:center;">만료</th>
+                                <th style="padding:10px; text-align:center;">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${users.map(u => `
+                                <tr style="border-bottom:1px solid #2d2d3f;">
+                                    <td style="padding:10px; color:#e2e8f0;">${u.email}</td>
+                                    <td style="padding:10px; text-align:center;">
+                                        <span style="background:${levelColors[u.level]}; color:white; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:700;">
+                                            ${levelNames[u.level]}
+                                        </span>
+                                    </td>
+                                    <td style="padding:10px; color:#94a3b8; max-width:200px;">${u.reason}</td>
+                                    <td style="padding:10px; text-align:center; color:#94a3b8;">${new Date(u.restricted_at).toLocaleDateString('ko-KR')}</td>
+                                    <td style="padding:10px; text-align:center; color:#94a3b8;">${u.expires_at ? new Date(u.expires_at).toLocaleDateString('ko-KR') : '영구'}</td>
+                                    <td style="padding:10px; text-align:center;">
+                                        <button onclick="adminUnrestrict('${u.email}')" style="background:#10b981; color:white; border:none; padding:6px 14px; border-radius:6px; cursor:pointer; font-weight:600; font-size:12px;">해제</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (e) {
+                container.innerHTML = '<p style="text-align:center; color:#ef4444;">로드 실패</p>';
+            }
+        }
+
+        async function adminUnrestrict(email) {
+            if (!confirm(`${email}의 예매 제한을 해제하시겠습니까?`)) return;
+            try {
+                const res = await fetch('/api/admin/unrestrict-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    loadRestrictedUsers();
+                } else {
+                    alert('실패: ' + (data.detail || ''));
+                }
+            } catch (e) {
+                alert('오류: ' + e.message);
+            }
+        }
+
+        // 페이지 로드 시 제한 목록 로드
+        loadRestrictedUsers();
+    </script>
 </body>
 
 </html>

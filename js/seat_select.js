@@ -5,6 +5,27 @@ loadLogFromSession();
 logStageEntry('seat');
 enableMouseTracking();
 
+// 예매 제한 체크
+(async function checkRestriction() {
+    const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    if (user.email) {
+        try {
+            const res = await fetch(`/api/admin/check-restriction/${encodeURIComponent(user.email)}`);
+            const data = await res.json();
+            if (data.restricted) {
+                const levelNames = { 1: '1차 (3개월)', 2: '2차 (6개월)', 3: '3차 (영구)' };
+                const expires = data.expires_at
+                    ? new Date(data.expires_at).toLocaleDateString('ko-KR') + '까지'
+                    : '영구';
+                alert(`⚠️ 예매 제한 안내\n\n제한 단계: ${levelNames[data.level]}\n사유: ${data.reason}\n기간: ${expires}\n\n문의사항은 고객센터로 연락해주세요.`);
+                window.location.href = '/';
+            }
+        } catch (e) {
+            console.error('제한 상태 확인 실패:', e);
+        }
+    }
+})();
+
 // 보안문자 관련 변수
 let currentCaptcha = '';
 let isCaptchaVerified = false;
