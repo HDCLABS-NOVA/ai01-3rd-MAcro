@@ -153,6 +153,16 @@ RISK_RUNTIME_CACHE: Dict[str, Any] = {
     "error": "",
 }
 
+# 실시간 차단/챌린지 응답을 즉시 적용할 API 경로/메서드
+# (예매 시작 ~ 대기열 ~ 로그 제출 구간)
+RISK_REALTIME_ENFORCE_RULES = {
+    "/api/booking/start-token": {"POST"},
+    "/api/queue/join": {"POST"},
+    "/api/queue/status": {"GET"},
+    "/api/queue/enter": {"POST"},
+    "/api/logs": {"POST"},
+}
+
 LLM_REPORT_ENABLED = os.getenv("LLM_REPORT_ENABLED", "true").strip().lower() in {"1", "true", "yes", "on"}
 LLM_REPORT_MODEL = os.getenv("LLM_REPORT_MODEL", "gpt-4.1-mini").strip() or "gpt-4.1-mini"
 LLM_REPORT_TIMEOUT_SEC = int(os.getenv("LLM_REPORT_TIMEOUT_SEC", "20"))
@@ -200,6 +210,14 @@ def _extract_ip_key(request: Request) -> str:
     if request.client and request.client.host:
         return request.client.host
     return 'unknown'
+
+
+def _should_enforce_realtime_decision(request: Request) -> bool:
+    """현재 요청에 대해 block/challenge 응답을 즉시 반환할지 판단한다."""
+    path = str(request.url.path or "").strip()
+    method = str(request.method or "").upper()
+    allowed_methods = RISK_REALTIME_ENFORCE_RULES.get(path, set())
+    return method in allowed_methods
 
 
 def _update_behavior(ip_key: str, endpoint: str, now_ms: int) -> Dict[str, int]:
@@ -966,6 +984,67 @@ def _mask_email(email: str) -> str:
     return f"{masked_local}@{domain}"
 
 
+def _compact_text(text: Any, max_len: int = 80) -> str:
+    value = " ".join(str(text or "").split()).strip()
+    if not value:
+        return ""
+    if len(value) <= max_len:
+        return value
+    return value[:max_len].rstrip(" .,;:") + "..."
+
+
+def _build_realtime_block_user_message(
+    *,
+    llm_analysis: Dict[str, Any],
+    rule_entries: List[str],
+) -> str:
+    # 사용자 노출 문구는 과도한 내부 규칙 노출 없이 간결하게 유지
+    default_message = "비정상적인 접근 패턴이 감지되어 요청이 차단되었습니다."
+    if not isinstance(llm_analysis, dict):
+        return default_message
+
+    candidates: List[str] = []
+    summary_ko = _compact_text(llm_analysis.get("summary_ko", ""), max_len=90)
+    if summary_ko:
+        candidates.append(summary_ko)
+
+    ui_fields = llm_analysis.get("ui_fields", {}) or {}
+    if isinstance(ui_fields, dict):
+        reasons = ui_fields.get("suspicion_reasons", []) or []
+        if isinstance(reasons, list):
+            for r in reasons[:2]:
+                s = _compact_text(r, max_len=60)
+                if s:
+                    candidates.append(s)
+
+    top_reasons = llm_analysis.get("top_reasons", []) or []
+    if isinstance(top_reasons, list):
+        for r in top_reasons[:2]:
+            s = _compact_text(r, max_len=60)
+            if s:
+                candidates.append(s)
+
+    if not candidates:
+        for r in rule_entries[:2]:
+            s = _compact_text(r, max_len=60)
+            if s:
+                candidates.append(s)
+
+    for reason in candidates:
+        # 내부 룰 식별자/임계값 표현은 사용자 메시지에서 제외
+        if re.search(r"[<>=]|requests_last_|concurrent_sessions_|queue_|browser_", reason):
+            continue
+        if reason.endswith("차단되었습니다.") or reason.endswith("차단되었습니다"):
+            return reason if reason.endswith(".") else reason + "."
+        if reason.endswith("요청이 차단되었습니다."):
+            return reason
+        if reason.endswith("."):
+            return f"{reason} 요청이 차단되었습니다."
+        return f"{reason}로 요청이 차단되었습니다."
+
+    return default_message
+
+
 def _build_ui_fields_fallback(report_seed: Dict[str, Any]) -> Dict[str, Any]:
     risk_summary = report_seed.get("risk_summary", {}) if isinstance(report_seed, dict) else {}
     ui_seed = report_seed.get("ui_metric_seed", {}) if isinstance(report_seed, dict) else {}
@@ -1354,10 +1433,10 @@ def _build_realtime_block_report(
     browser_log: Optional[Dict[str, Any]],
     server_log_path: str,
     bot_folder: str,
-) -> str:
+) -> Dict[str, str]:
     risk = (server_log or {}).get("risk", {}) or {}
     if str(risk.get("decision")) != "block":
-        return ""
+        return {}
 
     hard_rules = list(risk.get("hard_rules_triggered", []) or [])
     soft_rules = list(risk.get("soft_rules_triggered", []) or [])
@@ -1468,8 +1547,10 @@ def _build_realtime_block_report(
     masked_email = _mask_email(str(browser_meta.get("user_email", "")).strip() or user_id)
     report_filename = f"{date_str}_{safe_booking_id}.json"
     report_path = os.path.join(BLOCK_REPORT_DIR, report_filename)
-    llm_report_filename = f"{date_str}_{safe_booking_id}_llm.json"
-    llm_report_path = os.path.join(BLOCK_REPORT_DIR, llm_report_filename)
+    llm_report_filename_json = f"{date_str}_{safe_booking_id}_llm.json"
+    llm_report_json_path = os.path.join(BLOCK_REPORT_DIR, llm_report_filename_json)
+    llm_report_filename_txt = f"{date_str}_{safe_booking_id}_llm.txt"
+    llm_report_path = os.path.join(BLOCK_REPORT_DIR, llm_report_filename_txt)
 
     llm_seed = {
         "report_identity": {
@@ -1508,6 +1589,10 @@ def _build_realtime_block_report(
     }
     llm_analysis = _generate_llm_report_payload(report_seed=llm_seed)
     llm_ui_fields = llm_analysis.get("ui_fields", _build_ui_fields_fallback(llm_seed))
+    user_message = _build_realtime_block_user_message(
+        llm_analysis=llm_analysis,
+        rule_entries=rule_entries,
+    )
 
     llm_report_payload = {
         "report_type": "realtime_block_llm_v1",
@@ -1519,16 +1604,40 @@ def _build_realtime_block_report(
         "session_id": str(metadata.get("session_id", "")),
         "target_masked_user": masked_email,
         "decision": "block",
+        "user_message": user_message,
         "llm_analysis": llm_analysis,
         "ui_fields": llm_ui_fields,
         "markdown_report": str(llm_analysis.get("markdown_report", "")).strip(),
     }
     llm_report_error = ""
+    markdown_report_text = str(llm_analysis.get("markdown_report", "")).strip()
     try:
-        with open(llm_report_path, "w", encoding="utf-8") as f:
+        with open(llm_report_json_path, "w", encoding="utf-8") as f:
             json.dump(llm_report_payload, f, ensure_ascii=False, indent=2)
     except Exception as e:
-        llm_report_error = str(e)
+        llm_report_error = f"json_write_error:{e}"
+
+    try:
+        llm_txt_lines = [
+            f"report_id: {report_id}",
+            f"created_at_iso: {created_at}",
+            f"booking_id: {booking_id}",
+            f"flow_id: {str(metadata.get('flow_id', ''))}",
+            f"session_id: {str(metadata.get('session_id', ''))}",
+            f"decision: block",
+            "",
+            f"user_message: {user_message}",
+            "",
+            "=== LLM REPORT ===",
+            markdown_report_text or "(markdown_report is empty)",
+        ]
+        with open(llm_report_path, "w", encoding="utf-8") as f:
+            f.write("\n".join(llm_txt_lines))
+    except Exception as e:
+        if llm_report_error:
+            llm_report_error += f"; txt_write_error:{e}"
+        else:
+            llm_report_error = f"txt_write_error:{e}"
 
     report = {
         "report_type": "realtime_block_v1",
@@ -1575,10 +1684,12 @@ def _build_realtime_block_report(
             "realtime_enforced": True,
             "response_status_code": 403,
         },
+        "user_message": user_message,
         "ui_fields": llm_ui_fields,
         "llm_analysis": llm_analysis,
-        "markdown_report": str(llm_analysis.get("markdown_report", "")).strip(),
+        "markdown_report": markdown_report_text,
         "llm_report_path": llm_report_path,
+        "llm_report_json_path": llm_report_json_path,
         "llm_report_error": llm_report_error,
     }
 
@@ -1596,11 +1707,17 @@ def _build_realtime_block_report(
         "risk_score": total_score,
         "report_path": report_path,
         "llm_report_path": llm_report_path,
+        "llm_report_json_path": llm_report_json_path,
     }
     with open(BLOCK_REPORT_INDEX_JSONL, "a", encoding="utf-8") as f:
         f.write(json.dumps(index_entry, ensure_ascii=False) + "\n")
 
-    return report_path
+    return {
+        "report_path": report_path,
+        "llm_report_path": llm_report_path,
+        "llm_report_json_path": llm_report_json_path,
+        "user_message": user_message,
+    }
 
 
 @app.middleware('http')
@@ -1611,11 +1728,11 @@ async def server_log_middleware(request: Request, call_next):
             return RedirectResponse(url="/queue.html?reason=queue_required", status_code=302)
 
     # Collect and store server logs for all /api/* requests.
-    # Real-time enforcement remains focused on /api/logs.
+    # Real-time enforcement is applied to booking flow endpoints.
     if not request.url.path.startswith('/api/'):
         return await call_next(request)
 
-    enforce_decision = request.method == 'POST' and request.url.path == '/api/logs'
+    enforce_decision = _should_enforce_realtime_decision(request)
 
     start = time.time()
     body_bytes = b""
@@ -1851,29 +1968,35 @@ async def server_log_middleware(request: Request, call_next):
 
         if server_log['risk']['decision'] == 'block':
             try:
-                realtime_report_path = _build_realtime_block_report(
+                report_result = _build_realtime_block_report(
                     request=request,
                     server_log=server_log,
                     browser_log=browser_payload,
                     server_log_path=filepath,
                     bot_folder=folder_name,
                 )
+                realtime_report_path = str((report_result or {}).get("report_path", "")).strip()
                 if realtime_report_path:
                     server_log['risk']['realtime_report_path'] = realtime_report_path
+
+                user_message = str((report_result or {}).get("user_message", "")).strip()
+                if user_message:
+                    server_log['security']['block_message'] = user_message
+                    server_log['risk']['alert_message'] = user_message
             except Exception as report_error:
                 server_log['risk']['realtime_report_error'] = str(report_error)
 
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(server_log, f, ensure_ascii=False, indent=2)
 
-        # Enforce real action only on /api/logs.
+        # Enforce real action on booking flow endpoints.
         if enforce_decision and server_log['risk']['decision'] == 'block':
             return JSONResponse(
                 status_code=403,
                 content={
                     'success': False,
                     'decision': 'block',
-                    'message': '비정상적인 접근으로 요청이 차단되었습니다.',
+                    'message': str(server_log.get('security', {}).get('block_message') or '비정상적인 접근으로 요청이 차단되었습니다.'),
                     'risk': server_log['risk'],
                 },
             )

@@ -1,11 +1,11 @@
-/**
- * log_collect.js - ML 매크로 탐지를 위한 통합 로그 수집 모듈
+﻿/**
+ * log_collect.js - ML 留ㅽ겕濡??먯?瑜??꾪븳 ?듯빀 濡쒓렇 ?섏쭛 紐⑤뱢
  * 
- * 이 파일은 사이트의 비즈니스 로직과 분리되어 있으며, 
- * 사용자 행위(마우스, 클릭) 및 환경 정보를 독립적으로 수집합니다.
+ * ???뚯씪? ?ъ씠?몄쓽 鍮꾩쫰?덉뒪 濡쒖쭅怨?遺꾨━?섏뼱 ?덉쑝硫? 
+ * ?ъ슜???됱쐞(留덉슦?? ?대┃) 諛??섍꼍 ?뺣낫瑜??낅┰?곸쑝濡??섏쭛?⑸땲??
  */
 
-// --- 1. 전역 상태 및 유틸리티 ---
+// --- 1. ?꾩뿭 ?곹깭 諛??좏떥由ы떚 ---
 let logData = null;
 let currentStage = null;
 let stageStartTime = null;
@@ -13,14 +13,14 @@ let mouseTrajectory = [];
 let lastMouseMoveTime = 0;
 let lastMouseDownTime = 0;
 
-// 독립적인 타임스탬프 및 ID 생성 함수 (KST)
+// ?낅┰?곸씤 ??꾩뒪?ы봽 諛?ID ?앹꽦 ?⑥닔 (KST)
 const getCollectTimestamp = () => {
   const now = new Date();
-  // KST로 변환 (UTC+9)
-  const kstOffset = 9 * 60; // 9시간을 분으로
+  // KST濡?蹂??(UTC+9)
+  const kstOffset = 9 * 60; // 9?쒓컙??遺꾩쑝濡?
   const kstTime = new Date(now.getTime() + (kstOffset * 60 * 1000));
 
-  // ISO 8601 형식으로 반환 (YYYY-MM-DDTHH:mm:ss.sss+09:00)
+  // ISO 8601 ?뺤떇?쇰줈 諛섑솚 (YYYY-MM-DDTHH:mm:ss.sss+09:00)
   const year = kstTime.getUTCFullYear();
   const month = String(kstTime.getUTCMonth() + 1).padStart(2, '0');
   const day = String(kstTime.getUTCDate()).padStart(2, '0');
@@ -33,7 +33,7 @@ const getCollectTimestamp = () => {
 };
 const generateCollectId = (prefix, len) => prefix + Math.random().toString(36).substr(2, len);
 
-// --- 2. 환경 정보 수집기 (Collector) ---
+// --- 2. ?섍꼍 ?뺣낫 ?섏쭛湲?(Collector) ---
 async function collectEnvironmentInfo() {
   let ip = '0.0.0.0';
   try {
@@ -60,12 +60,12 @@ async function collectEnvironmentInfo() {
   };
 }
 
-// --- 3. 핵심 로거 (Logger) ---
+// --- 3. ?듭떖 濡쒓굅 (Logger) ---
 async function initLogCollector(perfId = '', perfTitle = '') {
   const env = await collectEnvironmentInfo();
   const now = getCollectTimestamp();
 
-  // 세션 정보 확인 (기존 auth.js 의존성 제거를 위해 직접 접근)
+  // ?몄뀡 ?뺣낫 ?뺤씤 (湲곗〈 auth.js ?섏〈???쒓굅瑜??꾪빐 吏곸젒 ?묎렐)
   const userSession = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
   const botType = sessionStorage.getItem('bot_type') || '';
 
@@ -103,7 +103,7 @@ function loadLogState() {
   return false;
 }
 
-// 예매 시작 시점에 flow_id를 확정 (예매당 1개 로그 보장용)
+// ?덈ℓ ?쒖옉 ?쒖젏??flow_id瑜??뺤젙 (?덈ℓ??1媛?濡쒓렇 蹂댁옣??
 function startBookingFlow(perfId = '', perfTitle = '') {
   if (!logData && !loadLogState()) return;
   if (!logData.metadata) logData.metadata = {};
@@ -119,7 +119,7 @@ function startBookingFlow(perfId = '', perfTitle = '') {
   saveLogState();
 }
 
-// --- 4. 단계 및 행동 추적 (Tracker) ---
+// --- 4. ?④퀎 諛??됰룞 異붿쟻 (Tracker) ---
 function recordStageEntry(stageName) {
   if (!logData && !loadLogState()) return;
 
@@ -156,11 +156,11 @@ function updateMetadata(data) {
   saveLogState();
 }
 
-// 마우스 및 클릭 이벤트 리스너
+// 留덉슦??諛??대┃ ?대깽??由ъ뒪??
 function setupEventListeners() {
   document.addEventListener('pointermove', (e) => {
     const now = Date.now();
-    if (now - lastMouseMoveTime < 100) return; // 100ms 샘플링
+    if (now - lastMouseMoveTime < 100) return; // 100ms ?섑뵆留?
     lastMouseMoveTime = now;
 
     const relTime = stageStartTime ? now - stageStartTime : 0;
@@ -196,7 +196,7 @@ function setupEventListeners() {
   });
 }
 
-// --- 5. 서버 전송 및 초기화 ---
+// --- 5. ?쒕쾭 ?꾩넚 諛?珥덇린??---
 async function uploadLog(isSuccess = true, bookingId = '') {
   if (!logData && !loadLogState()) return;
 
@@ -206,7 +206,7 @@ async function uploadLog(isSuccess = true, bookingId = '') {
   logData.metadata.is_completed = isSuccess;
   logData.metadata.booking_id = bookingId;
 
-  // ✅ completion_status 추가 (예매 완료 페이지에서만 success)
+  // ??completion_status 異붽? (?덈ℓ ?꾨즺 ?섏씠吏?먯꽌留?success)
   logData.metadata.completion_status = isSuccess ? "success" : "failed";
 
   try {
@@ -216,33 +216,39 @@ async function uploadLog(isSuccess = true, bookingId = '') {
       body: JSON.stringify(logData)
     });
     const result = await response.json();
+    const decision = String(result?.decision || result?.risk?.decision || '').toLowerCase();
+    if (response.status === 403 && decision === 'block') {
+      alert('비정상적인 접근으로 일시적으로 서비스 접속이 제한되었습니다');
+      return result;
+    }
     if (result.success) {
-      console.log('[Collect] 로그 전송 완료:', result.filename);
+      console.log('[Collect] 濡쒓렇 ?꾩넚 ?꾨즺:', result.filename);
       sessionStorage.removeItem('bookingLog');
     }
   } catch (error) {
-    console.error('[Collect] 전송 실패:', error);
+    console.error('[Collect] ?꾩넚 ?ㅽ뙣:', error);
   }
 }
 
-// --- 6. 페이지 이탈 시 자동 로그 전송 (실패 처리) ---
+// --- 6. ?섏씠吏 ?댄깉 ???먮룞 濡쒓렇 ?꾩넚 (?ㅽ뙣 泥섎━) ---
 window.addEventListener('beforeunload', () => {
-  // booking_complete.html이 아닌 경우에만 실패로 전송
+  // booking_complete.html???꾨땶 寃쎌슦?먮쭔 ?ㅽ뙣濡??꾩넚
   if (!window.location.pathname.includes('booking_complete.html')) {
     const currentLog = loadLogState();
     if (currentLog && !currentLog.metadata.completion_status) {
-      // 동기 방식으로 전송 (페이지 언로드 전에 전송)
+      // ?숆린 諛⑹떇?쇰줈 ?꾩넚 (?섏씠吏 ?몃줈???꾩뿉 ?꾩넚)
       const flowStart = new Date(currentLog.metadata.flow_start_time);
       currentLog.metadata.flow_end_time = getCollectTimestamp();
       currentLog.metadata.total_duration_ms = Date.now() - flowStart.getTime();
       currentLog.metadata.is_completed = false;
       currentLog.metadata.completion_status = "abandoned";
 
-      // sendBeacon 사용 (페이지 언로드 시에도 전송 보장)
+      // sendBeacon ?ъ슜 (?섏씠吏 ?몃줈???쒖뿉???꾩넚 蹂댁옣)
       navigator.sendBeacon('/api/logs', JSON.stringify(currentLog));
     }
   }
 });
 
-// 초기화 실행
+// 珥덇린???ㅽ뻾
 setupEventListeners();
+

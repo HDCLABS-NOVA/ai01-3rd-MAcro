@@ -20,6 +20,7 @@ let queueJumpCount = 0;
 let positionUpdates = [];
 let pollIntervals = [];
 let lastPollEpochMs = 0;
+const REALTIME_BLOCK_POPUP_MESSAGE = "비정상적인 접근으로 일시적으로 서비스 접속이 제한되었습니다.";
 
 function getLogMeta() {
   try {
@@ -84,6 +85,11 @@ async function apiJson(url, options = {}) {
     body = await res.json();
   } catch (e) {
     body = {};
+  }
+  const decision = String(body?.decision || body?.risk?.decision || '').toLowerCase();
+  if (res.status === 403 && decision === 'block') {
+    alert(REALTIME_BLOCK_POPUP_MESSAGE);
+    body.message = REALTIME_BLOCK_POPUP_MESSAGE;
   }
   return { ok: res.ok, status: res.status, body };
 }

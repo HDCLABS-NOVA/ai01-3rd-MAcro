@@ -41,10 +41,10 @@ def evaluate_rules(server_log: Dict[str, Any], browser_log: Dict[str, Any] | Non
     hard_rules: List[str] = []
     hard_action = "none"
 
-    # ---- Hard Rules (immediate gate) ----
-    # Policy:
-    # 1) Boolean/explicit violation -> block
-    # 2) Threshold-based spikes are handled as soft score only.
+    # ---- 하드 룰(즉시 게이트) ----
+    # 정책:
+    # 1) 불리언/명시적 위반은 즉시 block
+    # 2) 임계값 기반 급증은 soft score로만 반영
     if bool(security.get("blocked")):
         hard_action = _promote_action(hard_action, "block")
         hard_rules.append("security.blocked=true")
@@ -59,8 +59,8 @@ def evaluate_rules(server_log: Dict[str, Any], browser_log: Dict[str, Any] | Non
 
     untrusted_clicks = _count_untrusted_clicks(browser_log or {})
 
-    # ---- Soft Rules (for rule_score) ----
-    # Keep only session/request behavior signals. Account-history style signals are excluded.
+    # ---- 소프트 룰(rule_score 계산용) ----
+    # 세션/요청 행동 신호만 사용하고 계정 이력 성격의 신호는 제외
     if same_device >= 3:
         soft_score += 0.35
         soft_rules.append("concurrent_sessions_same_device>=3")
@@ -119,6 +119,6 @@ def evaluate_rules(server_log: Dict[str, Any], browser_log: Dict[str, Any] | Non
 
 
 def score_rules(server_log: Dict[str, Any]) -> Tuple[float, List[str]]:
-    # Backward-compatible helper used by existing scripts.
+    # 기존 스크립트 호환을 위한 헬퍼 함수
     result = evaluate_rules(server_log, browser_log=None)
     return float(result.get("soft_score", 0.0)), list(result.get("soft_rules_triggered", []))

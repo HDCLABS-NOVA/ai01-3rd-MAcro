@@ -1,4 +1,4 @@
-// 로깅 시스템 - 사용자 행동 추적 및 로그 생성
+﻿// 濡쒓퉭 ?쒖뒪??- ?ъ슜???됰룞 異붿쟻 諛?濡쒓렇 ?앹꽦
 
 let logData = null;
 let currentStage = null;
@@ -7,7 +7,7 @@ let mouseTrajectory = [];
 let lastMouseMoveTime = 0;
 
 /**
- * 로거 초기화
+ * 濡쒓굅 珥덇린??
  */
 async function initLogger(performanceId = '', performanceTitle = '') {
     const currentUser = getCurrentUser();
@@ -23,7 +23,7 @@ async function initLogger(performanceId = '', performanceTitle = '') {
         metadata: {
             flow_id: flowId,
             session_id: sessionId,
-            bot_type: botType, // 🏷️ Persist bot type
+            bot_type: botType, // ?뤇截?Persist bot type
             user_id: currentUser?.userId || '',
             user_email: currentUser?.email || '',
             user_ip: userIP,
@@ -44,14 +44,14 @@ async function initLogger(performanceId = '', performanceTitle = '') {
         stages: {}
     };
 
-    // sessionStorage에 저장
+    // sessionStorage?????
     saveLogToSession();
 
     return flowId;
 }
 
 /**
- * 로그 데이터를 sessionStorage에 저장
+ * 濡쒓렇 ?곗씠?곕? sessionStorage?????
  */
 function saveLogToSession() {
     if (logData) {
@@ -60,7 +60,7 @@ function saveLogToSession() {
 }
 
 /**
- * sessionStorage에서 로그 데이터 불러오기
+ * sessionStorage?먯꽌 濡쒓렇 ?곗씠??遺덈윭?ㅺ린
  */
 function loadLogFromSession() {
     const saved = sessionStorage.getItem('bookingLog');
@@ -72,7 +72,7 @@ function loadLogFromSession() {
 }
 
 /**
- * 단계 진입 기록
+ * ?④퀎 吏꾩엯 湲곕줉
  */
 function logStageEntry(stageName) {
     if (!logData) {
@@ -80,9 +80,9 @@ function logStageEntry(stageName) {
     }
 
     if (!logData) {
-        // 예매 완료 페이지이거나 이미 전송된 경우 에러 무시
+        // ?덈ℓ ?꾨즺 ?섏씠吏?닿굅???대? ?꾩넚??寃쎌슦 ?먮윭 臾댁떆
         if (window.location.pathname.includes('booking_complete.html')) return;
-        console.warn('로그 데이터가 아직 초기화되지 않았습니다.');
+        console.warn('濡쒓렇 ?곗씠?곌? ?꾩쭅 珥덇린?붾릺吏 ?딆븯?듬땲??');
         return;
     }
 
@@ -108,7 +108,7 @@ function logStageEntry(stageName) {
 }
 
 /**
- * 단계 종료 기록
+ * ?④퀎 醫낅즺 湲곕줉
  */
 function logStageExit(stageName, additionalData = {}) {
     if (!logData || !logData.stages[stageName]) return;
@@ -121,7 +121,7 @@ function logStageExit(stageName, additionalData = {}) {
     logData.stages[stageName].duration_ms = duration;
     logData.stages[stageName].mouse_trajectory = mouseTrajectory;
 
-    // 추가 데이터 병합
+    // 異붽? ?곗씠??蹂묓빀
     Object.assign(logData.stages[stageName], additionalData);
 
     currentStage = null;
@@ -131,12 +131,12 @@ function logStageExit(stageName, additionalData = {}) {
 }
 
 /**
- * 마우스 이동 추적
+ * 留덉슦???대룞 異붿쟻
  */
 function trackMouseMove(event) {
     const now = Date.now();
 
-    // 샘플링: 100ms마다 기록 (사람다움을 측정하기 좋은 간격)
+    // ?섑뵆留? 100ms留덈떎 湲곕줉 (?щ엺?ㅼ???痢≪젙?섍린 醫뗭? 媛꾧꺽)
     if (now - lastMouseMoveTime < 100) return;
 
     lastMouseMoveTime = now;
@@ -154,7 +154,7 @@ function trackMouseMove(event) {
 }
 
 /**
- * 호버(머무름) 이벤트 추적
+ * ?몃쾭(癒몃Т由? ?대깽??異붿쟻
  */
 function trackHover(event, targetInfo = {}) {
     if (!logData || !currentStage) return;
@@ -175,18 +175,18 @@ function trackHover(event, targetInfo = {}) {
     saveLogToSession();
 }
 
-// 클릭 지속 시간 측정을 위한 변수
+// ?대┃ 吏???쒓컙 痢≪젙???꾪븳 蹂??
 let lastMouseDownTime = 0;
 
 /**
- * mousedown 시점 기록
+ * mousedown ?쒖젏 湲곕줉
  */
 function handleMouseDown(event) {
     lastMouseDownTime = Date.now();
 }
 
 /**
- * 클릭 이벤트 추적 (mouseup 시 호출되거나 click 시 호출)
+ * ?대┃ ?대깽??異붿쟻 (mouseup ???몄텧?섍굅??click ???몄텧)
  */
 function trackClick(event, targetInfo = {}) {
     if (!logData || !currentStage) return;
@@ -201,7 +201,7 @@ function trackClick(event, targetInfo = {}) {
         timestamp: stageStartTime ? Date.now() - stageStartTime : 0,
         is_trusted: event.isTrusted,
         duration: clickDuration,
-        button: event.button, // 0: 좌클릭, 2: 우클릭
+        button: event.button, // 0: 醫뚰겢由? 2: ?고겢由?
         ...targetInfo
     };
 
@@ -210,14 +210,14 @@ function trackClick(event, targetInfo = {}) {
     }
 
     logData.stages[currentStage].clicks.push(clickData);
-    lastMouseDownTime = 0; // 초기화
+    lastMouseDownTime = 0; // 珥덇린??
     saveLogToSession();
 }
 
 
 
 /**
- * 메타데이터 업데이트
+ * 硫뷀??곗씠???낅뜲?댄듃
  */
 function updateMetadata(updates) {
     if (!logData) {
@@ -231,7 +231,7 @@ function updateMetadata(updates) {
 }
 
 /**
- * 최종 로그 완료 처리 및 서버 전송
+ * 理쒖쥌 濡쒓렇 ?꾨즺 泥섎━ 諛??쒕쾭 ?꾩넚
  */
 async function finalizeLog(isSuccess = true, bookingId = '') {
     if (!logData) {
@@ -240,7 +240,7 @@ async function finalizeLog(isSuccess = true, bookingId = '') {
 
     if (!logData) {
         if (window.location.pathname.includes('booking_complete.html')) return;
-        console.warn('전송할 로그 데이터가 없습니다.');
+        console.warn('?꾩넚??濡쒓렇 ?곗씠?곌? ?놁뒿?덈떎.');
         return;
     }
 
@@ -254,12 +254,12 @@ async function finalizeLog(isSuccess = true, bookingId = '') {
     logData.metadata.completion_status = isSuccess ? 'success' : 'abandoned';
     logData.metadata.booking_id = bookingId;
 
-    // 서버로 전송
+    // ?쒕쾭濡??꾩넚
     await sendLogToServer();
 }
 
 /**
- * 서버로 로그 전송
+ * ?쒕쾭濡?濡쒓렇 ?꾩넚
  */
 async function sendLogToServer() {
     try {
@@ -272,25 +272,30 @@ async function sendLogToServer() {
         });
 
         const result = await response.json();
+        const decision = String(result?.decision || result?.risk?.decision || '').toLowerCase();
+        if (response.status === 403 && decision === 'block') {
+            alert('비정상적인 접근으로 일시적으로 서비스 접속이 제한되었습니다');
+            return result;
+        }
 
         if (result.success) {
-            console.log('로그 저장 성공:', result.filename);
-            // 로그 전송 후 세션 스토리지 정리
+            console.log('濡쒓렇 ????깃났:', result.filename);
+            // 濡쒓렇 ?꾩넚 ???몄뀡 ?ㅽ넗由ъ? ?뺣━
             sessionStorage.removeItem('bookingLog');
         } else {
-            console.error('로그 저장 실패:', result);
+            console.error('濡쒓렇 ????ㅽ뙣:', result);
         }
 
         return result;
     } catch (error) {
-        console.error('로그 전송 에러:', error);
-        // 실패 시 로컬에 복사본 저장
+        console.error('濡쒓렇 ?꾩넚 ?먮윭:', error);
+        // ?ㅽ뙣 ??濡쒖뺄??蹂듭궗蹂????
         localStorage.setItem('failedLog_' + Date.now(), JSON.stringify(logData));
     }
 }
 
 /**
- * 페이지 마우스 추적 활성화
+ * ?섏씠吏 留덉슦??異붿쟻 ?쒖꽦??
  */
 function enableMouseTracking() {
     document.addEventListener('pointermove', trackMouseMove);
@@ -298,9 +303,10 @@ function enableMouseTracking() {
 }
 
 /**
- * 페이지 마우스 추적 비활성화
+ * ?섏씠吏 留덉슦??異붿쟻 鍮꾪솢?깊솕
  */
 function disableMouseTracking() {
     document.removeEventListener('pointermove', trackMouseMove);
     document.removeEventListener('pointerdown', handleMouseDown);
 }
+
