@@ -2,7 +2,7 @@
 
 // 초기화
 loadLogState();
-recordStageEntry('seat');
+recordStageEntry('captcha');
 
 // 보안문자 관련 변수 (전역 접근을 위해 window에 할당)
 window.currentCaptcha = '';
@@ -94,7 +94,9 @@ function verifyCaptcha() {
         document.getElementById('captcha-overlay').classList.add('captcha-hidden');
         showAlert('인증되었습니다! 좌석을 선택해주세요.', 'success');
 
-        // 자동 수집에 맡깁니다.
+        // [v2] 캡차 단계 종료 및 좌석 선택 단계 시작
+        recordStageExit('captcha', { status: 'verified' });
+        recordStageEntry('seat');
     } else {
         showAlert('문자가 일치하지 않습니다. 다시 시도해주세요.', 'error');
         generateCaptcha();

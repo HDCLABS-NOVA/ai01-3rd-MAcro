@@ -1,0 +1,35 @@
+[
+  {
+    "browser_log": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\data\\raw\\browser\\real_human\\20260215_perf001_flow_20260215_pml9ds_success.json",
+    "flow_id": "flow_20260215_pml9ds",
+    "session_id": "sess_gy833sc",
+    "browser_summary": {
+      "performance_id": "perf001",
+      "performance_title": "아이유 콘서트 <The Golden Hour>",
+      "selected_date": "2026-02-15",
+      "selected_time": "18:00",
+      "booking_id": "M55076056",
+      "completion_status": "success",
+      "total_duration_ms": 24399,
+      "bot_type": ""
+    },
+    "server_logs": [
+      "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\data\\raw\\server\\20260215\\20260215_req_c69643e9b5cf480997bdca9441b331d1.json"
+    ],
+    "server_summaries": [
+      {
+        "request_id": "req_c69643e9b5cf480997bdca9441b331d1",
+        "received_epoch_ms": 1771147967646,
+        "endpoint": "/api/logs",
+        "method": "POST",
+        "status_code": 200,
+        "latency_ms": 9,
+        "body_size_bytes": 5658,
+        "ip_hash": "12ca17b49af2289436f303e0166030a21e525d266e209267433801a8fd4071a0",
+        "ip_raw": "127.0.0.1",
+        "user_agent_hash": "816147bedd84317a66534e444e60842858f0f2a3b3fa43710b4ef836da4252d2",
+        "referer": "http://localhost:8000/booking_complete.html?id=M55076056"
+      }
+    ]
+  }
+]

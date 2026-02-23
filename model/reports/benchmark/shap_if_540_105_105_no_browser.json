@@ -1,0 +1,564 @@
+{
+  "generated_from": "model\\artifacts\\active\\human_model_params_if_540_105_105_no_browser.json",
+  "selection_from": "model\\reports\\benchmark\\model_selection_if_540_105_105_no_browser.json",
+  "threshold": 0.5686158747387483,
+  "feature_count": 99,
+  "has_browser_prefixed_features": false,
+  "browser_prefixed_features_found": [],
+  "validation": {
+    "stats": {
+      "count": 210,
+      "tn": 104,
+      "fp": 1,
+      "fn": 64,
+      "tp": 41,
+      "human_fpr": 0.009523809523809525,
+      "macro_recall": 0.3904761904761905
+    },
+    "top_shap_tp_macro": [
+      {
+        "feature": "seat_details_count",
+        "sum_contribution": 43.572711489417706,
+        "avg_contribution": 1.0893177872354427,
+        "count": 40
+      },
+      {
+        "feature": "selected_seat_count",
+        "sum_contribution": 38.65227243690633,
+        "avg_contribution": 0.9663068109226582,
+        "count": 40
+      },
+      {
+        "feature": "perf_avg_mouse_speed",
+        "sum_contribution": 22.978139273288125,
+        "avg_contribution": 0.5744534818322031,
+        "count": 40
+      },
+      {
+        "feature": "perf_avg_click_duration",
+        "sum_contribution": 12.609421616985935,
+        "avg_contribution": 0.307546868706974,
+        "count": 41
+      },
+      {
+        "feature": "seat_avg_click_duration",
+        "sum_contribution": 12.387708771903982,
+        "avg_contribution": 0.30213923833912154,
+        "count": 41
+      },
+      {
+        "feature": "queue_mouse_points",
+        "sum_contribution": 10.80518840951277,
+        "avg_contribution": 0.26354118071982363,
+        "count": 41
+      },
+      {
+        "feature": "perf_avg_straightness",
+        "sum_contribution": 10.63281654601958,
+        "avg_contribution": 0.2658204136504895,
+        "count": 40
+      },
+      {
+        "feature": "seat_avg_mouse_speed",
+        "sum_contribution": 5.781233224166952,
+        "avg_contribution": 0.3042754328508922,
+        "count": 19
+      },
+      {
+        "feature": "seat_click_count",
+        "sum_contribution": 5.177931594741654,
+        "avg_contribution": 0.30458421145539144,
+        "count": 17
+      },
+      {
+        "feature": "perf_mouse_points",
+        "sum_contribution": 4.5213578302616515,
+        "avg_contribution": 0.12219886027734193,
+        "count": 37
+      },
+      {
+        "feature": "queue_avg_straightness",
+        "sum_contribution": 4.45416581972666,
+        "avg_contribution": 0.11420937999299127,
+        "count": 39
+      },
+      {
+        "feature": "seat_std_mouse_speed",
+        "sum_contribution": 3.669386507437405,
+        "avg_contribution": 0.33358059158521863,
+        "count": 11
+      },
+      {
+        "feature": "queue_duration_ms",
+        "sum_contribution": 3.147718206534599,
+        "avg_contribution": 0.22483701475247136,
+        "count": 14
+      },
+      {
+        "feature": "perf_std_mouse_speed",
+        "sum_contribution": 2.7560844287113087,
+        "avg_contribution": 0.2120064945162545,
+        "count": 13
+      },
+      {
+        "feature": "seat_avg_straightness",
+        "sum_contribution": 2.2214839607650743,
+        "avg_contribution": 0.2776854950956343,
+        "count": 8
+      }
+    ],
+    "top_shap_fn_macro": [
+      {
+        "feature": "perf_avg_mouse_speed",
+        "sum_contribution": 31.97834217846114,
+        "avg_contribution": 0.4996615965384553,
+        "count": 64
+      },
+      {
+        "feature": "seat_details_count",
+        "sum_contribution": 24.518293553531006,
+        "avg_contribution": 0.721126280986206,
+        "count": 34
+      },
+      {
+        "feature": "seat_avg_click_duration",
+        "sum_contribution": 23.08949472470416,
+        "avg_contribution": 0.3607733550735025,
+        "count": 64
+      },
+      {
+        "feature": "selected_seat_count",
+        "sum_contribution": 22.44664264024851,
+        "avg_contribution": 0.6601953717720149,
+        "count": 34
+      },
+      {
+        "feature": "seat_avg_mouse_speed",
+        "sum_contribution": 18.866141093638547,
+        "avg_contribution": 0.43874746729391967,
+        "count": 43
+      },
+      {
+        "feature": "perf_avg_click_duration",
+        "sum_contribution": 18.787771905013777,
+        "avg_contribution": 0.29355893601584027,
+        "count": 64
+      },
+      {
+        "feature": "queue_mouse_points",
+        "sum_contribution": 18.137467753085083,
+        "avg_contribution": 0.2833979336419544,
+        "count": 64
+      },
+      {
+        "feature": "perf_avg_straightness",
+        "sum_contribution": 13.129809148342895,
+        "avg_contribution": 0.23446087764898027,
+        "count": 56
+      },
+      {
+        "feature": "seat_avg_straightness",
+        "sum_contribution": 12.23389302034366,
+        "avg_contribution": 0.5097455425143191,
+        "count": 24
+      },
+      {
+        "feature": "perf_mouse_points",
+        "sum_contribution": 7.732060592324838,
+        "avg_contribution": 0.12273112051309266,
+        "count": 63
+      },
+      {
+        "feature": "seat_std_mouse_speed",
+        "sum_contribution": 6.495718100943547,
+        "avg_contribution": 0.2498353115747518,
+        "count": 26
+      },
+      {
+        "feature": "queue_avg_straightness",
+        "sum_contribution": 5.72097934646885,
+        "avg_contribution": 0.09696575163506525,
+        "count": 59
+      },
+      {
+        "feature": "queue_position_delta",
+        "sum_contribution": 3.5512305578766576,
+        "avg_contribution": 0.12245622613367785,
+        "count": 29
+      },
+      {
+        "feature": "perf_std_mouse_speed",
+        "sum_contribution": 3.309603110845034,
+        "avg_contribution": 0.14389578742804496,
+        "count": 23
+      },
+      {
+        "feature": "queue_duration_ms",
+        "sum_contribution": 2.709027105963807,
+        "avg_contribution": 0.24627519145125518,
+        "count": 11
+      }
+    ],
+    "top_shap_fp_human": [
+      {
+        "feature": "seat_details_count",
+        "sum_contribution": 0.9492376279590901,
+        "avg_contribution": 0.9492376279590901,
+        "count": 1
+      },
+      {
+        "feature": "selected_seat_count",
+        "sum_contribution": 0.8145470579548754,
+        "avg_contribution": 0.8145470579548754,
+        "count": 1
+      },
+      {
+        "feature": "queue_avg_mouse_speed",
+        "sum_contribution": 0.8115652209743565,
+        "avg_contribution": 0.8115652209743565,
+        "count": 1
+      },
+      {
+        "feature": "seat_std_mouse_speed",
+        "sum_contribution": 0.5528670543068155,
+        "avg_contribution": 0.5528670543068155,
+        "count": 1
+      },
+      {
+        "feature": "perf_mouse_points",
+        "sum_contribution": 0.5197158930642976,
+        "avg_contribution": 0.5197158930642976,
+        "count": 1
+      },
+      {
+        "feature": "queue_mouse_points",
+        "sum_contribution": 0.2289921842743368,
+        "avg_contribution": 0.2289921842743368,
+        "count": 1
+      },
+      {
+        "feature": "perf_avg_mouse_speed",
+        "sum_contribution": 0.19296099585373958,
+        "avg_contribution": 0.19296099585373958,
+        "count": 1
+      },
+      {
+        "feature": "perf_std_mouse_speed",
+        "sum_contribution": 0.18072920998450362,
+        "avg_contribution": 0.18072920998450362,
+        "count": 1
+      },
+      {
+        "feature": "queue_duration_ms",
+        "sum_contribution": 0.16956198937486328,
+        "avg_contribution": 0.16956198937486328,
+        "count": 1
+      },
+      {
+        "feature": "queue_position_delta",
+        "sum_contribution": 0.1622433924794032,
+        "avg_contribution": 0.1622433924794032,
+        "count": 1
+      },
+      {
+        "feature": "queue_avg_straightness",
+        "sum_contribution": 0.10460992473068148,
+        "avg_contribution": 0.10460992473068148,
+        "count": 1
+      },
+      {
+        "feature": "seat_avg_mouse_speed",
+        "sum_contribution": 0.09657176843993669,
+        "avg_contribution": 0.09657176843993669,
+        "count": 1
+      }
+    ]
+  },
+  "test": {
+    "stats": {
+      "count": 210,
+      "tn": 102,
+      "fp": 3,
+      "fn": 74,
+      "tp": 31,
+      "human_fpr": 0.02857142857142857,
+      "macro_recall": 0.29523809523809524
+    },
+    "top_shap_tp_macro": [
+      {
+        "feature": "seat_details_count",
+        "sum_contribution": 27.230505736289004,
+        "avg_contribution": 0.8784034108480324,
+        "count": 31
+      },
+      {
+        "feature": "selected_seat_count",
+        "sum_contribution": 25.02880316207813,
+        "avg_contribution": 0.8073807471638107,
+        "count": 31
+      },
+      {
+        "feature": "perf_avg_mouse_speed",
+        "sum_contribution": 19.26501053540286,
+        "avg_contribution": 0.6214519527549309,
+        "count": 31
+      },
+      {
+        "feature": "perf_avg_click_duration",
+        "sum_contribution": 9.72004902068828,
+        "avg_contribution": 0.3135499684092994,
+        "count": 31
+      },
+      {
+        "feature": "seat_avg_click_duration",
+        "sum_contribution": 9.587884865666345,
+        "avg_contribution": 0.3092866085698821,
+        "count": 31
+      },
+      {
+        "feature": "queue_mouse_points",
+        "sum_contribution": 8.407835104173323,
+        "avg_contribution": 0.2712204872313975,
+        "count": 31
+      },
+      {
+        "feature": "seat_avg_mouse_speed",
+        "sum_contribution": 7.829702513410466,
+        "avg_contribution": 0.3914851256705233,
+        "count": 20
+      },
+      {
+        "feature": "perf_avg_straightness",
+        "sum_contribution": 5.016732316514431,
+        "avg_contribution": 0.21811879637019266,
+        "count": 23
+      },
+      {
+        "feature": "queue_duration_ms",
+        "sum_contribution": 4.81030351004586,
+        "avg_contribution": 0.1551710809692213,
+        "count": 31
+      },
+      {
+        "feature": "perf_mouse_points",
+        "sum_contribution": 3.8492842580632205,
+        "avg_contribution": 0.1327339399332145,
+        "count": 29
+      },
+      {
+        "feature": "queue_position_delta",
+        "sum_contribution": 3.8019352642064277,
+        "avg_contribution": 0.1357834022930867,
+        "count": 28
+      },
+      {
+        "feature": "seat_std_mouse_speed",
+        "sum_contribution": 3.1541404364453305,
+        "avg_contribution": 0.2628450363704442,
+        "count": 12
+      },
+      {
+        "feature": "queue_avg_straightness",
+        "sum_contribution": 2.177532588382615,
+        "avg_contribution": 0.1146069783359271,
+        "count": 19
+      },
+      {
+        "feature": "perf_std_mouse_speed",
+        "sum_contribution": 1.8474157826649886,
+        "avg_contribution": 0.20526842029610984,
+        "count": 9
+      },
+      {
+        "feature": "seat_click_count",
+        "sum_contribution": 1.5674595689390374,
+        "avg_contribution": 0.26124326148983956,
+        "count": 6
+      }
+    ],
+    "top_shap_fn_macro": [
+      {
+        "feature": "perf_avg_mouse_speed",
+        "sum_contribution": 38.26018102343463,
+        "avg_contribution": 0.524112068814173,
+        "count": 73
+      },
+      {
+        "feature": "seat_avg_mouse_speed",
+        "sum_contribution": 27.748327351383573,
+        "avg_contribution": 0.4624721225230595,
+        "count": 60
+      },
+      {
+        "feature": "seat_avg_click_duration",
+        "sum_contribution": 27.35924622930671,
+        "avg_contribution": 0.36971954363927984,
+        "count": 74
+      },
+      {
+        "feature": "perf_avg_click_duration",
+        "sum_contribution": 22.70398031935967,
+        "avg_contribution": 0.30681054485621173,
+        "count": 74
+      },
+      {
+        "feature": "queue_mouse_points",
+        "sum_contribution": 20.95031567516039,
+        "avg_contribution": 0.2831123739886539,
+        "count": 74
+      },
+      {
+        "feature": "seat_details_count",
+        "sum_contribution": 14.367629320261555,
+        "avg_contribution": 0.43538270667459256,
+        "count": 33
+      },
+      {
+        "feature": "seat_avg_straightness",
+        "sum_contribution": 13.43339338857915,
+        "avg_contribution": 0.4797640495921125,
+        "count": 28
+      },
+      {
+        "feature": "queue_duration_ms",
+        "sum_contribution": 12.919835363249128,
+        "avg_contribution": 0.17459236977363685,
+        "count": 74
+      },
+      {
+        "feature": "selected_seat_count",
+        "sum_contribution": 12.67544389826559,
+        "avg_contribution": 0.3841043605535027,
+        "count": 33
+      },
+      {
+        "feature": "queue_position_delta",
+        "sum_contribution": 12.24536537216217,
+        "avg_contribution": 0.1654779104346239,
+        "count": 74
+      },
+      {
+        "feature": "seat_std_mouse_speed",
+        "sum_contribution": 10.120714325520318,
+        "avg_contribution": 0.2663345875136926,
+        "count": 38
+      },
+      {
+        "feature": "perf_mouse_points",
+        "sum_contribution": 9.321060502249782,
+        "avg_contribution": 0.1294591736423581,
+        "count": 72
+      },
+      {
+        "feature": "perf_avg_straightness",
+        "sum_contribution": 9.020569503009119,
+        "avg_contribution": 0.18792853131268997,
+        "count": 48
+      },
+      {
+        "feature": "queue_avg_straightness",
+        "sum_contribution": 5.034457006371069,
+        "avg_contribution": 0.08390761677285115,
+        "count": 60
+      },
+      {
+        "feature": "perf_std_mouse_speed",
+        "sum_contribution": 2.247482531244918,
+        "avg_contribution": 0.17288327163422446,
+        "count": 13
+      }
+    ],
+    "top_shap_fp_human": [
+      {
+        "feature": "seat_mouse_points",
+        "sum_contribution": 1.908488890493312,
+        "avg_contribution": 0.6361629634977707,
+        "count": 3
+      },
+      {
+        "feature": "seat_std_click_interval",
+        "sum_contribution": 1.7956575391461027,
+        "avg_contribution": 0.8978287695730514,
+        "count": 2
+      },
+      {
+        "feature": "seat_click_count",
+        "sum_contribution": 1.5389256465161605,
+        "avg_contribution": 0.7694628232580802,
+        "count": 2
+      },
+      {
+        "feature": "seat_duration_ms",
+        "sum_contribution": 1.3727550702290219,
+        "avg_contribution": 0.6863775351145109,
+        "count": 2
+      },
+      {
+        "feature": "seat_avg_click_interval",
+        "sum_contribution": 1.2280443347715742,
+        "avg_contribution": 0.6140221673857871,
+        "count": 2
+      },
+      {
+        "feature": "total_duration_ms",
+        "sum_contribution": 1.1300243891389155,
+        "avg_contribution": 0.5650121945694577,
+        "count": 2
+      },
+      {
+        "feature": "perf_std_click_duration",
+        "sum_contribution": 1.0359160767924684,
+        "avg_contribution": 1.0359160767924684,
+        "count": 1
+      },
+      {
+        "feature": "queue_std_mouse_speed",
+        "sum_contribution": 0.920705011005078,
+        "avg_contribution": 0.460352505502539,
+        "count": 2
+      },
+      {
+        "feature": "perf_avg_click_duration",
+        "sum_contribution": 0.7349288194141901,
+        "avg_contribution": 0.7349288194141901,
+        "count": 1
+      },
+      {
+        "feature": "queue_avg_mouse_speed",
+        "sum_contribution": 0.5352358058374551,
+        "avg_contribution": 0.26761790291872756,
+        "count": 2
+      },
+      {
+        "feature": "seat_std_click_duration",
+        "sum_contribution": 0.42979154334063385,
+        "avg_contribution": 0.21489577167031693,
+        "count": 2
+      },
+      {
+        "feature": "queue_duration_ms",
+        "sum_contribution": 0.3813991075622185,
+        "avg_contribution": 0.12713303585407285,
+        "count": 3
+      },
+      {
+        "feature": "seat_avg_straightness",
+        "sum_contribution": 0.35788946519868325,
+        "avg_contribution": 0.17894473259934163,
+        "count": 2
+      },
+      {
+        "feature": "seat_details_count",
+        "sum_contribution": 0.3045716520346391,
+        "avg_contribution": 0.3045716520346391,
+        "count": 1
+      },
+      {
+        "feature": "selected_seat_count",
+        "sum_contribution": 0.2681127347197048,
+        "avg_contribution": 0.2681127347197048,
+        "count": 1
+      }
+    ]
+  }
+}

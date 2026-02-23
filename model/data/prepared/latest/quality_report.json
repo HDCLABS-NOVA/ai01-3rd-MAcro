@@ -1,0 +1,10 @@
+{
+  "created_at_utc": "2026-02-21T05:19:38.186034+00:00",
+  "dataset_id": "latest",
+  "scanned_files": 993,
+  "loaded_json": 993,
+  "parsed_rows": 993,
+  "skipped_non_browser": 0,
+  "skipped_parse_error": 0,
+  "error_samples": []
+}

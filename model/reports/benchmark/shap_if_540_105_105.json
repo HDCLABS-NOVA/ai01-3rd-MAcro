@@ -1,0 +1,922 @@
+{
+  "model": "isolation_forest",
+  "threshold": 0.6729628848802824,
+  "validation": {
+    "split": "validation",
+    "threshold": 0.6729628848802824,
+    "metrics": {
+      "human_total": 105,
+      "macro_total": 105,
+      "human_fp": 1,
+      "macro_tp": 19,
+      "macro_fn": 86
+    },
+    "top_shap_tp_macro": [
+      {
+        "feature": "selected_seat_count",
+        "sum_contribution": 15.720867900109589,
+        "avg_contribution": 0.8733815500060883,
+        "appear_count": 18,
+        "p50_contribution": 0.9744869582843031
+      },
+      {
+        "feature": "browser_screen_w",
+        "sum_contribution": 12.637804571007628,
+        "avg_contribution": 0.6651476090004015,
+        "appear_count": 19,
+        "p50_contribution": 0.6572649953260576
+      },
+      {
+        "feature": "seat_details_count",
+        "sum_contribution": 12.235930985448721,
+        "avg_contribution": 0.67977394363604,
+        "appear_count": 18,
+        "p50_contribution": 0.6992864213157979
+      },
+      {
+        "feature": "perf_avg_mouse_speed",
+        "sum_contribution": 9.630080987836896,
+        "avg_contribution": 0.535004499324272,
+        "appear_count": 18,
+        "p50_contribution": 0.5595374776083809
+      },
+      {
+        "feature": "browser_screen_h",
+        "sum_contribution": 9.507373672493278,
+        "avg_contribution": 0.500388088025962,
+        "appear_count": 19,
+        "p50_contribution": 0.5060543932479662
+      },
+      {
+        "feature": "seat_avg_click_duration",
+        "sum_contribution": 3.619087687437661,
+        "avg_contribution": 0.2585062633884044,
+        "appear_count": 14,
+        "p50_contribution": 0.2596225659451409
+      },
+      {
+        "feature": "perf_avg_straightness",
+        "sum_contribution": 3.501791152313124,
+        "avg_contribution": 0.3501791152313124,
+        "appear_count": 10,
+        "p50_contribution": 0.36749704484744355
+      },
+      {
+        "feature": "seat_avg_mouse_speed",
+        "sum_contribution": 2.5522598109283026,
+        "avg_contribution": 0.36460854441832896,
+        "appear_count": 7,
+        "p50_contribution": 0.38954439300358945
+      },
+      {
+        "feature": "perf_std_mouse_speed",
+        "sum_contribution": 2.2898863245951393,
+        "avg_contribution": 0.32712661779930563,
+        "appear_count": 7,
+        "p50_contribution": 0.28803089343211297
+      },
+      {
+        "feature": "seat_std_mouse_speed",
+        "sum_contribution": 2.0437831074548463,
+        "avg_contribution": 0.40875662149096925,
+        "appear_count": 5,
+        "p50_contribution": 0.3739818922902326
+      },
+      {
+        "feature": "perf_avg_click_duration",
+        "sum_contribution": 1.7146599620472787,
+        "avg_contribution": 0.24495142314961124,
+        "appear_count": 7,
+        "p50_contribution": 0.2388188877081721
+      },
+      {
+        "feature": "seat_avg_straightness",
+        "sum_contribution": 1.4774160827518146,
+        "avg_contribution": 0.4924720275839382,
+        "appear_count": 3,
+        "p50_contribution": 0.5084874287620543
+      }
+    ],
+    "top_shap_fn_macro": [
+      {
+        "feature": "browser_screen_w",
+        "sum_contribution": 63.90784956896591,
+        "avg_contribution": 0.7431145298716966,
+        "appear_count": 86,
+        "p50_contribution": 0.7504079631662685
+      },
+      {
+        "feature": "browser_screen_h",
+        "sum_contribution": 45.064955746859326,
+        "avg_contribution": 0.5240111133355736,
+        "appear_count": 86,
+        "p50_contribution": 0.5268161700496237
+      },
+      {
+        "feature": "selected_seat_count",
+        "sum_contribution": 35.53377186372642,
+        "avg_contribution": 0.6704485257306873,
+        "appear_count": 53,
+        "p50_contribution": 0.7385117035320263
+      },
+      {
+        "feature": "perf_avg_mouse_speed",
+        "sum_contribution": 34.554552005114346,
+        "avg_contribution": 0.4546651579620309,
+        "appear_count": 76,
+        "p50_contribution": 0.4414558397547908
+      },
+      {
+        "feature": "seat_details_count",
+        "sum_contribution": 26.962599526419115,
+        "avg_contribution": 0.6127863528731617,
+        "appear_count": 44,
+        "p50_contribution": 0.6536427173207725
+      },
+      {
+        "feature": "seat_avg_click_duration",
+        "sum_contribution": 24.49406166927082,
+        "avg_contribution": 0.28481467057291654,
+        "appear_count": 86,
+        "p50_contribution": 0.28354353239739105
+      },
+      {
+        "feature": "perf_avg_click_duration",
+        "sum_contribution": 22.455926628424827,
+        "avg_contribution": 0.2772336620793188,
+        "appear_count": 81,
+        "p50_contribution": 0.28278938092088124
+      },
+      {
+        "feature": "seat_avg_mouse_speed",
+        "sum_contribution": 17.42837667186434,
+        "avg_contribution": 0.4149613493301033,
+        "appear_count": 42,
+        "p50_contribution": 0.4589594674448799
+      },
+      {
+        "feature": "perf_avg_straightness",
+        "sum_contribution": 10.733543717866585,
+        "avg_contribution": 0.34624334573763177,
+        "appear_count": 31,
+        "p50_contribution": 0.38179286194467327
+      },
+      {
+        "feature": "seat_avg_straightness",
+        "sum_contribution": 10.297502940206003,
+        "avg_contribution": 0.5419738389582107,
+        "appear_count": 19,
+        "p50_contribution": 0.5525311932539896
+      },
+      {
+        "feature": "seat_mouse_points",
+        "sum_contribution": 7.368898865269453,
+        "avg_contribution": 0.22329996561422585,
+        "appear_count": 33,
+        "p50_contribution": 0.22154779385057077
+      },
+      {
+        "feature": "seat_click_count",
+        "sum_contribution": 5.115044366944174,
+        "avg_contribution": 0.393464951303398,
+        "appear_count": 13,
+        "p50_contribution": 0.44185338386360606
+      }
+    ],
+    "top_shap_fp_human": [
+      {
+        "feature": "selected_seat_count",
+        "sum_contribution": 0.7983131834804159,
+        "avg_contribution": 0.7983131834804159,
+        "appear_count": 1,
+        "p50_contribution": 0.7983131834804159
+      },
+      {
+        "feature": "seat_std_mouse_speed",
+        "sum_contribution": 0.7117118089569533,
+        "avg_contribution": 0.7117118089569533,
+        "appear_count": 1,
+        "p50_contribution": 0.7117118089569533
+      },
+      {
+        "feature": "queue_avg_mouse_speed",
+        "sum_contribution": 0.6943602507658304,
+        "avg_contribution": 0.6943602507658304,
+        "appear_count": 1,
+        "p50_contribution": 0.6943602507658304
+      },
+      {
+        "feature": "browser_screen_w",
+        "sum_contribution": 0.6465982368237637,
+        "avg_contribution": 0.6465982368237637,
+        "appear_count": 1,
+        "p50_contribution": 0.6465982368237637
+      },
+      {
+        "feature": "seat_details_count",
+        "sum_contribution": 0.616450364139497,
+        "avg_contribution": 0.616450364139497,
+        "appear_count": 1,
+        "p50_contribution": 0.616450364139497
+      },
+      {
+        "feature": "browser_screen_h",
+        "sum_contribution": 0.45366429929896823,
+        "avg_contribution": 0.45366429929896823,
+        "appear_count": 1,
+        "p50_contribution": 0.45366429929896823
+      },
+      {
+        "feature": "perf_mouse_points",
+        "sum_contribution": 0.43793290448039685,
+        "avg_contribution": 0.43793290448039685,
+        "appear_count": 1,
+        "p50_contribution": 0.43793290448039685
+      },
+      {
+        "feature": "queue_position_delta",
+        "sum_contribution": 0.18997946501779536,
+        "avg_contribution": 0.18997946501779536,
+        "appear_count": 1,
+        "p50_contribution": 0.18997946501779536
+      }
+    ],
+    "examples": {
+      "tp_macro_top3": [
+        {
+          "file": "20260213_perf001_flow_20260213_nav04c_success.json",
+          "score": 0.7519718480854735,
+          "top3": [
+            {
+              "feature": "selected_seat_count",
+              "value": 4.0,
+              "baseline": 1.2092592592592593,
+              "normal_mean": 1.2092592592592593,
+              "contribution": 1.001983325832337,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "seat_details_count",
+              "value": 4.0,
+              "baseline": 1.2092592592592593,
+              "normal_mean": 1.2092592592592593,
+              "contribution": 0.746376693048064,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "browser_screen_w",
+              "value": 800.0,
+              "baseline": 1915.3777777777777,
+              "normal_mean": 1915.3777777777777,
+              "contribution": 0.650008479418746,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        },
+        {
+          "file": "20260213_perf001_flow_20260213_wcjqt2_success.json",
+          "score": 0.7505940843810014,
+          "top3": [
+            {
+              "feature": "selected_seat_count",
+              "value": 3.0,
+              "baseline": 1.2092592592592593,
+              "normal_mean": 1.2092592592592593,
+              "contribution": 0.7035514179393216,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "seat_std_mouse_speed",
+              "value": 2.0612672951213167,
+              "baseline": 0.770684920160435,
+              "normal_mean": 0.770684920160435,
+              "contribution": 0.7033060130758575,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "browser_screen_w",
+              "value": 800.0,
+              "baseline": 1915.3777777777777,
+              "normal_mean": 1915.3777777777777,
+              "contribution": 0.649342731218833,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        },
+        {
+          "file": "20260213_perf001_flow_20260213_uefkp1_success.json",
+          "score": 0.7414237411329208,
+          "top3": [
+            {
+              "feature": "selected_seat_count",
+              "value": 4.0,
+              "baseline": 1.2092592592592593,
+              "normal_mean": 1.2092592592592593,
+              "contribution": 0.9707440527975226,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "seat_details_count",
+              "value": 4.0,
+              "baseline": 1.2092592592592593,
+              "normal_mean": 1.2092592592592593,
+              "contribution": 0.7221761964773371,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "browser_screen_w",
+              "value": 800.0,
+              "baseline": 1915.3777777777777,
+              "normal_mean": 1915.3777777777777,
+              "contribution": 0.6340905113512049,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        }
+      ],
+      "fn_macro_top3": [
+        {
+          "file": "20260213_perf001_flow_20260213_n4eetc_success.json",
+          "score": 0.4578987663835089,
+          "top3": [
+            {
+              "feature": "browser_screen_w",
+              "value": 800.0,
+              "baseline": 1915.3777777777777,
+              "normal_mean": 1915.3777777777777,
+              "contribution": 0.8742374615252355,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "browser_screen_h",
+              "value": 600.0,
+              "baseline": 1124.651851851852,
+              "normal_mean": 1124.651851851852,
+              "contribution": 0.5904647061950462,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "perf_avg_mouse_speed",
+              "value": 0.9844961225772663,
+              "baseline": 0.441497441673124,
+              "normal_mean": 0.441497441673124,
+              "contribution": 0.39145686647019545,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        },
+        {
+          "file": "20260213_perf001_flow_20260213_mwgsvj_success.json",
+          "score": 0.458743159917198,
+          "top3": [
+            {
+              "feature": "browser_screen_w",
+              "value": 800.0,
+              "baseline": 1915.3777777777777,
+              "normal_mean": 1915.3777777777777,
+              "contribution": 0.8237799257395393,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "browser_screen_h",
+              "value": 600.0,
+              "baseline": 1124.651851851852,
+              "normal_mean": 1124.651851851852,
+              "contribution": 0.5559034505601205,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "perf_avg_mouse_speed",
+              "value": 1.077884009805788,
+              "baseline": 0.441497441673124,
+              "normal_mean": 0.441497441673124,
+              "contribution": 0.5381876782972874,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        },
+        {
+          "file": "20260213_perf001_flow_20260213_59xvfi_success.json",
+          "score": 0.4639297469741945,
+          "top3": [
+            {
+              "feature": "browser_screen_w",
+              "value": 800.0,
+              "baseline": 1915.3777777777777,
+              "normal_mean": 1915.3777777777777,
+              "contribution": 0.8012922916087086,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "perf_avg_mouse_speed",
+              "value": 1.2262556805678972,
+              "baseline": 0.441497441673124,
+              "normal_mean": 0.441497441673124,
+              "contribution": 0.5882505632922943,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "browser_screen_h",
+              "value": 600.0,
+              "baseline": 1124.651851851852,
+              "normal_mean": 1124.651851851852,
+              "contribution": 0.5617689989811163,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        }
+      ],
+      "fp_human_top3": [
+        {
+          "file": "20260222_perf002_flow_20260222_jkjdqq_success.json",
+          "score": 0.7042089140764389,
+          "top3": [
+            {
+              "feature": "selected_seat_count",
+              "value": 3.0,
+              "baseline": 1.2092592592592593,
+              "normal_mean": 1.2092592592592593,
+              "contribution": 0.7983131834804159,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "seat_std_mouse_speed",
+              "value": 2.0491918322664073,
+              "baseline": 0.770684920160435,
+              "normal_mean": 0.770684920160435,
+              "contribution": 0.7117118089569533,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "queue_avg_mouse_speed",
+              "value": 1.7503918824401818,
+              "baseline": 0.29157194120348506,
+              "normal_mean": 0.29157194120348506,
+              "contribution": 0.6943602507658304,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "test": {
+    "split": "test",
+    "threshold": 0.6729628848802824,
+    "metrics": {
+      "human_total": 105,
+      "macro_total": 105,
+      "human_fp": 1,
+      "macro_tp": 14,
+      "macro_fn": 91
+    },
+    "top_shap_tp_macro": [
+      {
+        "feature": "browser_screen_w",
+        "sum_contribution": 9.548518047709297,
+        "avg_contribution": 0.6820370034078069,
+        "appear_count": 14,
+        "p50_contribution": 0.6762687880431903
+      },
+      {
+        "feature": "perf_avg_mouse_speed",
+        "sum_contribution": 8.23097376453842,
+        "avg_contribution": 0.5879266974670301,
+        "appear_count": 14,
+        "p50_contribution": 0.5844310660923822
+      },
+      {
+        "feature": "browser_screen_h",
+        "sum_contribution": 6.956967187104117,
+        "avg_contribution": 0.49692622765029404,
+        "appear_count": 14,
+        "p50_contribution": 0.48864995353043483
+      },
+      {
+        "feature": "selected_seat_count",
+        "sum_contribution": 6.497920248389266,
+        "avg_contribution": 0.6497920248389266,
+        "appear_count": 10,
+        "p50_contribution": 0.7140293163145767
+      },
+      {
+        "feature": "seat_details_count",
+        "sum_contribution": 4.794966330633208,
+        "avg_contribution": 0.599370791329151,
+        "appear_count": 8,
+        "p50_contribution": 0.5981316301925199
+      },
+      {
+        "feature": "seat_avg_mouse_speed",
+        "sum_contribution": 3.6283938076230524,
+        "avg_contribution": 0.36283938076230526,
+        "appear_count": 10,
+        "p50_contribution": 0.39464204211051235
+      },
+      {
+        "feature": "seat_avg_click_duration",
+        "sum_contribution": 3.2144290390825216,
+        "avg_contribution": 0.24726377223711704,
+        "appear_count": 13,
+        "p50_contribution": 0.25341689161585296
+      },
+      {
+        "feature": "perf_avg_click_duration",
+        "sum_contribution": 2.4588192801102533,
+        "avg_contribution": 0.24588192801102532,
+        "appear_count": 10,
+        "p50_contribution": 0.23496667825167533
+      },
+      {
+        "feature": "perf_avg_straightness",
+        "sum_contribution": 2.0792431979934487,
+        "avg_contribution": 0.34654053299890814,
+        "appear_count": 6,
+        "p50_contribution": 0.3892449027098027
+      },
+      {
+        "feature": "seat_std_mouse_speed",
+        "sum_contribution": 2.0610414145748397,
+        "avg_contribution": 0.4122082829149679,
+        "appear_count": 5,
+        "p50_contribution": 0.3094444082261627
+      },
+      {
+        "feature": "perf_std_mouse_speed",
+        "sum_contribution": 1.2099715949014191,
+        "avg_contribution": 0.3024928987253548,
+        "appear_count": 4,
+        "p50_contribution": 0.2950575798838368
+      },
+      {
+        "feature": "seat_avg_straightness",
+        "sum_contribution": 0.9823867177642419,
+        "avg_contribution": 0.49119335888212096,
+        "appear_count": 2,
+        "p50_contribution": 0.49119335888212096
+      }
+    ],
+    "top_shap_fn_macro": [
+      {
+        "feature": "browser_screen_w",
+        "sum_contribution": 67.84389895903433,
+        "avg_contribution": 0.7455373511981795,
+        "appear_count": 91,
+        "p50_contribution": 0.7353040302640577
+      },
+      {
+        "feature": "browser_screen_h",
+        "sum_contribution": 49.02152741543533,
+        "avg_contribution": 0.5386981034663223,
+        "appear_count": 91,
+        "p50_contribution": 0.53854462448999
+      },
+      {
+        "feature": "perf_avg_mouse_speed",
+        "sum_contribution": 41.133488287657386,
+        "avg_contribution": 0.5141686035957174,
+        "appear_count": 80,
+        "p50_contribution": 0.573187486987605
+      },
+      {
+        "feature": "seat_avg_mouse_speed",
+        "sum_contribution": 25.756330305946722,
+        "avg_contribution": 0.4222349230483069,
+        "appear_count": 61,
+        "p50_contribution": 0.46143365169592526
+      },
+      {
+        "feature": "seat_avg_click_duration",
+        "sum_contribution": 24.35931893870672,
+        "avg_contribution": 0.2676848235022717,
+        "appear_count": 91,
+        "p50_contribution": 0.26933412515172206
+      },
+      {
+        "feature": "perf_avg_click_duration",
+        "sum_contribution": 23.61532299859736,
+        "avg_contribution": 0.2683559431658791,
+        "appear_count": 88,
+        "p50_contribution": 0.2742956629475988
+      },
+      {
+        "feature": "selected_seat_count",
+        "sum_contribution": 20.822116980125276,
+        "avg_contribution": 0.45265471695924514,
+        "appear_count": 46,
+        "p50_contribution": 0.2518814695056807
+      },
+      {
+        "feature": "seat_details_count",
+        "sum_contribution": 12.394426762940437,
+        "avg_contribution": 0.5633830346791108,
+        "appear_count": 22,
+        "p50_contribution": 0.5991458136636648
+      },
+      {
+        "feature": "seat_avg_straightness",
+        "sum_contribution": 11.334055945804895,
+        "avg_contribution": 0.5397169498002331,
+        "appear_count": 21,
+        "p50_contribution": 0.5579021992283202
+      },
+      {
+        "feature": "queue_position_delta",
+        "sum_contribution": 10.851629578531641,
+        "avg_contribution": 0.21703259157063282,
+        "appear_count": 50,
+        "p50_contribution": 0.21620395531746472
+      },
+      {
+        "feature": "seat_mouse_points",
+        "sum_contribution": 6.921673619288726,
+        "avg_contribution": 0.22327979417060406,
+        "appear_count": 31,
+        "p50_contribution": 0.22363920909909604
+      },
+      {
+        "feature": "seat_std_mouse_speed",
+        "sum_contribution": 5.81097887179356,
+        "avg_contribution": 0.26413540326334367,
+        "appear_count": 22,
+        "p50_contribution": 0.23313684943056395
+      }
+    ],
+    "top_shap_fp_human": [
+      {
+        "feature": "seat_std_click_interval",
+        "sum_contribution": 1.2817795007488881,
+        "avg_contribution": 1.2817795007488881,
+        "appear_count": 1,
+        "p50_contribution": 1.2817795007488881
+      },
+      {
+        "feature": "seat_avg_click_interval",
+        "sum_contribution": 1.0980907477196509,
+        "avg_contribution": 1.0980907477196509,
+        "appear_count": 1,
+        "p50_contribution": 1.0980907477196509
+      },
+      {
+        "feature": "seat_duration_ms",
+        "sum_contribution": 0.7839717398142703,
+        "avg_contribution": 0.7839717398142703,
+        "appear_count": 1,
+        "p50_contribution": 0.7839717398142703
+      },
+      {
+        "feature": "total_duration_ms",
+        "sum_contribution": 0.7729375771411324,
+        "avg_contribution": 0.7729375771411324,
+        "appear_count": 1,
+        "p50_contribution": 0.7729375771411324
+      },
+      {
+        "feature": "seat_mouse_points",
+        "sum_contribution": 0.7419322513979353,
+        "avg_contribution": 0.7419322513979353,
+        "appear_count": 1,
+        "p50_contribution": 0.7419322513979353
+      },
+      {
+        "feature": "queue_avg_mouse_speed",
+        "sum_contribution": 0.29730246432076407,
+        "avg_contribution": 0.29730246432076407,
+        "appear_count": 1,
+        "p50_contribution": 0.29730246432076407
+      },
+      {
+        "feature": "perf_duration_ms",
+        "sum_contribution": 0.26500335375456124,
+        "avg_contribution": 0.26500335375456124,
+        "appear_count": 1,
+        "p50_contribution": 0.26500335375456124
+      },
+      {
+        "feature": "queue_std_mouse_speed",
+        "sum_contribution": 0.209158183814406,
+        "avg_contribution": 0.209158183814406,
+        "appear_count": 1,
+        "p50_contribution": 0.209158183814406
+      }
+    ],
+    "examples": {
+      "tp_macro_top3": [
+        {
+          "file": "20260221_perf001_flow_20260221_9zfnvr_success.json",
+          "score": 0.7429269240371049,
+          "top3": [
+            {
+              "feature": "selected_seat_count",
+              "value": 4.0,
+              "baseline": 1.2092592592592593,
+              "normal_mean": 1.2092592592592593,
+              "contribution": 1.0045300121665084,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "seat_details_count",
+              "value": 4.0,
+              "baseline": 1.2092592592592593,
+              "normal_mean": 1.2092592592592593,
+              "contribution": 0.6730213388728221,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "browser_screen_w",
+              "value": 800.0,
+              "baseline": 1915.3777777777777,
+              "normal_mean": 1915.3777777777777,
+              "contribution": 0.6519757353747171,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        },
+        {
+          "file": "20260221_perf001_flow_20260221_fyuy6o_success.json",
+          "score": 0.7268420766621325,
+          "top3": [
+            {
+              "feature": "selected_seat_count",
+              "value": 3.0,
+              "baseline": 1.2092592592592593,
+              "normal_mean": 1.2092592592592593,
+              "contribution": 0.695310947064804,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "browser_screen_w",
+              "value": 800.0,
+              "baseline": 1915.3777777777777,
+              "normal_mean": 1915.3777777777777,
+              "contribution": 0.6822308660935551,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "perf_avg_mouse_speed",
+              "value": 1.3072490290112995,
+              "baseline": 0.441497441673124,
+              "normal_mean": 0.441497441673124,
+              "contribution": 0.6137478221457979,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        },
+        {
+          "file": "20260221_perf001_flow_20260221_l5c7mz_success.json",
+          "score": 0.7197585260259043,
+          "top3": [
+            {
+              "feature": "selected_seat_count",
+              "value": 3.0,
+              "baseline": 1.2092592592592593,
+              "normal_mean": 1.2092592592592593,
+              "contribution": 0.6913355127221368,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "browser_screen_w",
+              "value": 800.0,
+              "baseline": 1915.3777777777777,
+              "normal_mean": 1915.3777777777777,
+              "contribution": 0.6694277601524982,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "perf_avg_mouse_speed",
+              "value": 1.5142481414838804,
+              "baseline": 0.441497441673124,
+              "normal_mean": 0.441497441673124,
+              "contribution": 0.6056134898451864,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        }
+      ],
+      "fn_macro_top3": [
+        {
+          "file": "20260221_perf001_flow_20260221_zd9vlf_success.json",
+          "score": 0.43187828082790236,
+          "top3": [
+            {
+              "feature": "browser_screen_w",
+              "value": 800.0,
+              "baseline": 1915.3777777777777,
+              "normal_mean": 1915.3777777777777,
+              "contribution": 0.8423928943662543,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "browser_screen_h",
+              "value": 600.0,
+              "baseline": 1124.651851851852,
+              "normal_mean": 1124.651851851852,
+              "contribution": 0.5823857733950104,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "perf_avg_mouse_speed",
+              "value": 0.8710840220732823,
+              "baseline": 0.441497441673124,
+              "normal_mean": 0.441497441673124,
+              "contribution": 0.34740997753276975,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        },
+        {
+          "file": "20260221_perf001_flow_20260221_rgllnr_success.json",
+          "score": 0.46444115091414884,
+          "top3": [
+            {
+              "feature": "browser_screen_w",
+              "value": 800.0,
+              "baseline": 1915.3777777777777,
+              "normal_mean": 1915.3777777777777,
+              "contribution": 0.8642837530229032,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "browser_screen_h",
+              "value": 600.0,
+              "baseline": 1124.651851851852,
+              "normal_mean": 1124.651851851852,
+              "contribution": 0.5968884076334589,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "perf_avg_mouse_speed",
+              "value": 0.8521154216343373,
+              "baseline": 0.441497441673124,
+              "normal_mean": 0.441497441673124,
+              "contribution": 0.33236783234498535,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        },
+        {
+          "file": "20260221_perf001_flow_20260221_g66lu0_success.json",
+          "score": 0.48371177812490473,
+          "top3": [
+            {
+              "feature": "browser_screen_w",
+              "value": 800.0,
+              "baseline": 1915.3777777777777,
+              "normal_mean": 1915.3777777777777,
+              "contribution": 0.8184478739718122,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "browser_screen_h",
+              "value": 600.0,
+              "baseline": 1124.651851851852,
+              "normal_mean": 1124.651851851852,
+              "contribution": 0.6035556730412653,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "perf_avg_mouse_speed",
+              "value": 0.9113826439564552,
+              "baseline": 0.441497441673124,
+              "normal_mean": 0.441497441673124,
+              "contribution": 0.43024520778502323,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        }
+      ],
+      "fp_human_top3": [
+        {
+          "file": "20260210_perf003_flow_20260210_8db12k_success.json",
+          "score": 0.7867717255632555,
+          "top3": [
+            {
+              "feature": "seat_std_click_interval",
+              "value": 77219.32319050717,
+              "baseline": 1359.7156432042584,
+              "normal_mean": 1359.7156432042584,
+              "contribution": 1.2817795007488881,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "seat_avg_click_interval",
+              "value": 63791.0,
+              "baseline": 1698.4711217259492,
+              "normal_mean": 1698.4711217259492,
+              "contribution": 1.0980907477196509,
+              "method": "shap_tree_explainer"
+            },
+            {
+              "feature": "seat_duration_ms",
+              "value": 214254.0,
+              "baseline": 11211.525925925926,
+              "normal_mean": 11211.525925925926,
+              "contribution": 0.7839717398142703,
+              "method": "shap_tree_explainer"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

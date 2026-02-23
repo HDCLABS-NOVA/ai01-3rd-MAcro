@@ -1,0 +1,33 @@
+[
+  {
+    "account_key": "b583484ee949120ba7b0db64f1c0b8e7b48dd95a56097ba99508b79c1bb4375d",
+    "session_count": 1,
+    "account_risk": 0.41698,
+    "confidence": 0.33,
+    "recommendation": "allow",
+    "summary": {
+      "avg_risk": 0.41698,
+      "max_risk": 0.41698,
+      "high_risk_count": 0,
+      "challenge_count": 1,
+      "block_count": 0
+    },
+    "top_rule_evidence": {
+      "soft": [],
+      "hard": []
+    },
+    "top_behavior_evidence": [
+      [
+        "seat_high_straightness",
+        1
+      ],
+      [
+        "perf_uniform_click_rhythm",
+        1
+      ]
+    ],
+    "recent_high_risk_flows": [
+      "flow_20260215_pml9ds"
+    ]
+  }
+]

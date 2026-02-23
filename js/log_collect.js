@@ -103,6 +103,22 @@ function loadLogState() {
   return false;
 }
 
+// 예매 시작 시점에 flow_id를 확정 (예매당 1개 로그 보장용)
+function startBookingFlow(perfId = '', perfTitle = '') {
+  if (!logData && !loadLogState()) return;
+  if (!logData.metadata) logData.metadata = {};
+  if (logData.metadata.booking_flow_started) return;
+
+  if (perfId) logData.metadata.performance_id = perfId;
+  if (perfTitle) logData.metadata.performance_title = perfTitle;
+
+  logData.metadata.flow_id = `flow_${new Date().toISOString().slice(0, 10).replace(/-/g, '')}_${generateCollectId('', 6)}`;
+  logData.metadata.session_id = `sess_${generateCollectId('', 7)}`;
+  logData.metadata.booking_flow_started = true;
+
+  saveLogState();
+}
+
 // --- 4. 단계 및 행동 추적 (Tracker) ---
 function recordStageEntry(stageName) {
   if (!logData && !loadLogState()) return;
@@ -171,8 +187,7 @@ function setupEventListeners() {
       timestamp: stageStartTime ? Date.now() - stageStartTime : 0,
       is_trusted: e.isTrusted,
       duration: clickDuration,
-      button: e.button,
-      is_integer: Number.isInteger(e.clientX) && Number.isInteger(e.clientY)
+      button: e.button
     };
 
     if (!logData.stages[currentStage].clicks) logData.stages[currentStage].clicks = [];

@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0.0",
+  "session_report": {
+    "account_key": "string",
+    "flow_id": "string",
+    "browser_log_path": "string",
+    "server_log_found": "boolean",
+    "decision": "string ('allow', 'challenge', 'block')",
+    "recommendation": "string ('allow', 'challenge', 'block')",
+    "confidence": "number (0~1)",
+    "risk_score": "number (0~1)",
+    "rule_score": "number (0~1)",
+    "model_score": "number (0~1)",
+    "rule_evidence": {
+      "hard_action": "string ('none', 'challenge', 'block')",
+      "hard_rules_triggered": [
+        "string"
+      ],
+      "soft_rules_triggered": [
+        "string"
+      ],
+      "rule_score": "number (0~1)",
+      "review_required": "boolean",
+      "block_recommended": "boolean"
+    },
+    "model_evidence": {
+      "model_type": "string",
+      "model_score": "number (0~1)",
+      "risk_allow_threshold": "number (0~1)",
+      "risk_challenge_threshold": "number (0~1)",
+      "model_ready": "boolean"
+    },
+    "behavior_evidence": [
+      {
+        "code": "string",
+        "description": "string",
+        "metric": "string",
+        "value": "number",
+        "severity": "string ('low', 'medium', 'high')"
+      }
+    ]
+  },
+  "account_report": {
+    "account_key": "string",
+    "session_count": "number",
+    "account_risk": "number (0~1)",
+    "confidence": "number (0~1)",
+    "recommendation": "string ('allow', 'challenge', 'block_review')",
+    "summary": {
+      "avg_risk": "number (0~1)",
+      "max_risk": "number (0~1)",
+      "high_risk_count": "number",
+      "challenge_count": "number",
+      "block_count": "number"
+    },
+    "top_rule_evidence": {
+      "soft": [
+        [
+          "string (rule_name)",
+          "number (count)"
+        ]
+      ],
+      "hard": [
+        [
+          "string (rule_name)",
+          "number (count)"
+        ]
+      ]
+    },
+    "top_behavior_evidence": [
+      [
+        "string (behavior_code)",
+        "number (count)"
+      ]
+    ],
+    "recent_high_risk_flows": [
+      "string"
+    ]
+  }
+}

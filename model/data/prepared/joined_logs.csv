@@ -1,0 +1,2 @@
+browser_log,flow_id,session_id,performance_id,booking_id,completion_status,total_duration_ms,server_request_id,server_status_code,server_latency_ms,server_body_size_bytes
+C:\Users\katie\Downloads\ai01-3rd-3team-1\model\data\raw\browser\real_human\20260215_perf001_flow_20260215_pml9ds_success.json,flow_20260215_pml9ds,sess_gy833sc,perf001,M55076056,success,24399,req_c69643e9b5cf480997bdca9441b331d1,200,9,5658

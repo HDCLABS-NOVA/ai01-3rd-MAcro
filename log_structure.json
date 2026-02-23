@@ -1,0 +1,359 @@
+﻿{
+  "schema_version": "2.0.0",
+  "notes": {
+    "time_standard": "All *_epoch_ms fields use Unix epoch milliseconds (UTC)",
+    "event_ordering": "event_seq must be strictly increasing within a flow_id",
+    "label_usage": "metadata.label.bot_type is training metadata only and must be excluded from model input features"
+  },
+  "metadata": {
+    "flow_id": "string (Unique flow ID, format: flow_YYYYMMDD_random)",
+    "session_id": "string (Session ID, format: sess_random)",
+    "created_at": "ISO8601 Timestamp",
+    "flow_start_epoch_ms": "number",
+    "flow_end_epoch_ms": "number",
+    "flow_start_time": "ISO8601 Timestamp",
+    "flow_end_time": "ISO8601 Timestamp",
+    "total_duration_ms": "number",
+    "is_completed": "boolean",
+    "completion_status": "string ('success', 'failed', 'abandoned')",
+
+    "performance_id": "string",
+    "performance_title": "string",
+    "ticket_open_expected_at": "ISO8601 Timestamp",
+    "ticket_open_detected_at": "ISO8601 Timestamp",
+    "open_detect_source": "string ('dom_mutation', 'api_response', 'websocket', 'manual_refresh')",
+    "open_to_first_action_ms": "number",
+
+    "selected_date": "string (YYYY-MM-DD)",
+    "selected_time": "string (HH:mm)",
+    "final_seats": [
+      "string (Seat ID)"
+    ],
+    "seat_grades": [
+      {
+        "seat": "string",
+        "grade": "string",
+        "price": "number"
+      }
+    ],
+    "booking_id": "string",
+
+    "privacy": {
+      "user_id_hash": "string (stable hash)",
+      "session_fingerprint_hash": "string",
+      "user_ip_hash": "string",
+      "user_email_hash": "string",
+      "booker_phone_hash": "string",
+      "booker_email_hash": "string",
+      "hash_salt_version": "string"
+    },
+
+    "browser_info": {
+      "userAgent": "string",
+      "platform": "string",
+      "language": "string",
+      "timezone_offset_min": "number",
+      "webdriver": "boolean",
+      "hardwareConcurrency": "number",
+      "deviceMemory": "number",
+      "maxTouchPoints": "number",
+      "screen": {
+        "w": "number",
+        "h": "number",
+        "ratio": "number"
+      }
+    },
+
+    "label": {
+      "bot_type": "string ('human', 'macro_v2', 'unknown')",
+      "label_source": "string ('manual', 'simulated', 'heuristic')",
+      "is_training_label": "boolean",
+      "exclude_from_features": "boolean (always true)"
+    }
+  },
+
+  "event_stream": [
+    {
+      "event_seq": "number",
+      "stage": "string ('perf', 'queue', 'captcha', 'seat', 'discount', 'order_info', 'payment', 'complete')",
+      "event_type": "string",
+      "target": "string",
+      "target_id": "string",
+      "event_time_epoch_ms": "number",
+      "event_time_iso": "ISO8601 Timestamp",
+      "relative_ms_from_flow_start": "number",
+      "client_server_offset_ms": "number",
+      "input_source": "string ('mouse', 'keyboard', 'touch', 'script')",
+      "is_trusted": "boolean",
+      "x": "number",
+      "y": "number",
+      "nx": "number (0~1)",
+      "ny": "number (0~1)",
+      "extra": "object"
+    }
+  ],
+
+  "network": {
+    "requests": [
+      {
+        "event_seq": "number",
+        "stage": "string",
+        "request_id": "string",
+        "endpoint": "string",
+        "method": "string",
+        "req_epoch_ms": "number",
+        "res_epoch_ms": "number",
+        "latency_ms": "number",
+        "status_code": "number",
+        "error_code": "string",
+        "retry_count": "number",
+        "response_size_bytes": "number",
+        "queue_position": "number",
+        "seat_id": "string",
+        "seat_grade": "string"
+      }
+    ]
+  },
+
+  "stages": {
+    "perf": {
+      "entry_time": "ISO8601 Timestamp",
+      "entry_epoch_ms": "number",
+      "mouse_trajectory": [
+        [
+          "number (x coordinate, browser native - int or float)",
+          "number (y coordinate, browser native - int or float)",
+          "number (relative timestamp in ms)",
+          "number (normalized x: 0~1)",
+          "number (normalized y: 0~1)"
+        ]
+      ],
+      "clicks": [
+        {
+          "event_seq": "number",
+          "x": "number (browser native - int or float)",
+          "y": "number (browser native - int or float)",
+          "nx": "number",
+          "ny": "number",
+          "timestamp": "number (relative timestamp)",
+          "event_time_epoch_ms": "number",
+          "is_trusted": "boolean",
+          "duration": "number (mousedown to mouseup duration in ms)",
+          "button": "number",
+          "is_integer": "boolean"
+        }
+      ],
+      "viewport": {
+        "w": "number",
+        "h": "number"
+      },
+      "exit_time": "ISO8601 Timestamp",
+      "exit_epoch_ms": "number",
+      "duration_ms": "number",
+      "actions": [
+        {
+          "event_seq": "number",
+          "action": "string (page_enter, ui_open_detected, card_click, date_select, time_select, booking_start)",
+          "target": "string",
+          "target_id": "string",
+          "event_time_epoch_ms": "number",
+          "event_time_iso": "ISO8601 Timestamp",
+          "relative_ms_from_entry": "number",
+          "reaction_ms_from_ui_open": "number",
+          "is_trusted": "boolean"
+        }
+      ]
+    },
+
+    "queue": {
+      "entry_time": "ISO8601 Timestamp",
+      "entry_epoch_ms": "number",
+      "mouse_trajectory": [],
+      "clicks": [],
+      "viewport": {
+        "w": "number",
+        "h": "number"
+      },
+      "exit_time": "ISO8601 Timestamp",
+      "exit_epoch_ms": "number",
+      "duration_ms": "number",
+      "initial_position": "number",
+      "final_position": "number",
+      "total_queue": "number",
+      "wait_duration_ms": "number",
+      "queue_entry_trigger": "string ('booking_start_click', 'api_redirect', 'auto')",
+      "request_polling_interval_ms_stats": {
+        "min": "number",
+        "p50": "number",
+        "p95": "number"
+      },
+      "queue_jump_count": "number",
+      "position_updates": [
+        {
+          "event_seq": "number",
+          "position": "number",
+          "status": "string",
+          "timestamp": "ISO8601 Timestamp",
+          "event_time_epoch_ms": "number"
+        }
+      ]
+    },
+
+    "captcha": {
+      "entry_time": "ISO8601 Timestamp",
+      "entry_epoch_ms": "number",
+      "mouse_trajectory": [],
+      "clicks": [],
+      "viewport": {
+        "w": "number",
+        "h": "number"
+      },
+      "exit_time": "ISO8601 Timestamp",
+      "exit_epoch_ms": "number",
+      "duration_ms": "number",
+      "challenge_type": "string",
+      "attempt_count": "number",
+      "status": "string (e.g., 'verified', 'failed', 'skipped')"
+    },
+
+    "seat": {
+      "entry_time": "ISO8601 Timestamp",
+      "entry_epoch_ms": "number",
+      "mouse_trajectory": [],
+      "clicks": [],
+      "viewport": {
+        "w": "number",
+        "h": "number"
+      },
+      "exit_time": "ISO8601 Timestamp",
+      "exit_epoch_ms": "number",
+      "duration_ms": "number",
+
+      "seat_map_snapshot": [
+        {
+          "captured_epoch_ms": "number",
+          "grade": "string",
+          "color": "string (hex or rgba)",
+          "available_count": "number",
+          "total_count": "number"
+        }
+      ],
+
+      "seat_attempts": [
+        {
+          "event_seq": "number",
+          "seat_id": "string",
+          "x": "number",
+          "y": "number",
+          "nx": "number",
+          "ny": "number",
+          "grade": "string",
+          "color": "string",
+          "availability_before": "string ('available', 'occupied', 'unknown')",
+          "click_epoch_ms": "number",
+          "result": "string ('selected', 'failed', 'already_taken', 'blocked')",
+          "response_latency_ms": "number"
+        }
+      ],
+
+      "range_selection": {
+        "strategy": "string ('manual', 'color_scan', 'id_pattern', 'section_filter')",
+        "filters": {
+          "min_price": "number",
+          "max_price": "number",
+          "preferred_grades": [
+            "string"
+          ],
+          "sections": [
+            "string"
+          ],
+          "rows": [
+            "string"
+          ]
+        },
+        "scan_duration_ms": "number",
+        "candidate_count": "number"
+      },
+
+      "selected_seats": [
+        "string"
+      ],
+      "seat_details": [
+        {
+          "id": "string",
+          "grade": "string",
+          "price": "number"
+        }
+      ],
+      "first_seat_click_to_confirm_ms": "number"
+    },
+
+    "discount": {
+      "entry_time": "ISO8601 Timestamp",
+      "entry_epoch_ms": "number",
+      "mouse_trajectory": [],
+      "clicks": [],
+      "viewport": {
+        "w": "number",
+        "h": "number"
+      },
+      "exit_time": "ISO8601 Timestamp",
+      "exit_epoch_ms": "number",
+      "duration_ms": "number",
+      "selected_discount": "string"
+    },
+
+    "order_info": {
+      "entry_time": "ISO8601 Timestamp",
+      "entry_epoch_ms": "number",
+      "mouse_trajectory": [],
+      "clicks": [],
+      "viewport": {
+        "w": "number",
+        "h": "number"
+      },
+      "exit_time": "ISO8601 Timestamp",
+      "exit_epoch_ms": "number",
+      "duration_ms": "number",
+      "delivery_type": "string",
+      "has_phone": "boolean",
+      "has_email": "boolean"
+    },
+
+    "payment": {
+      "entry_time": "ISO8601 Timestamp",
+      "entry_epoch_ms": "number",
+      "mouse_trajectory": [],
+      "clicks": [],
+      "viewport": {
+        "w": "number",
+        "h": "number"
+      },
+      "exit_time": "ISO8601 Timestamp",
+      "exit_epoch_ms": "number",
+      "duration_ms": "number",
+      "payment_type": "string",
+      "completed": "boolean",
+      "completed_time": "ISO8601 Timestamp",
+      "completed_epoch_ms": "number"
+    },
+
+    "complete": {
+      "entry_time": "ISO8601 Timestamp",
+      "entry_epoch_ms": "number",
+      "mouse_trajectory": [],
+      "clicks": [],
+      "viewport": {
+        "w": "number",
+        "h": "number"
+      },
+      "exit_time": "ISO8601 Timestamp",
+      "exit_epoch_ms": "number",
+      "duration_ms": "number",
+      "booking_id": "string",
+      "total_price": "number",
+      "completion_time": "ISO8601 Timestamp",
+      "completion_epoch_ms": "number"
+    }
+  }
+}

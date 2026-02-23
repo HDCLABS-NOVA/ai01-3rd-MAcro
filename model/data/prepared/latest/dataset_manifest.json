@@ -1,0 +1,38 @@
+{
+  "created_at_utc": "2026-02-21T05:19:38.187042+00:00",
+  "dataset_id": "latest",
+  "config_path": "model/configs/data_paths.yaml",
+  "input_roots": [
+    "model/data/raw/train",
+    "model/data/raw/validation",
+    "model/data/raw/test"
+  ],
+  "glob": "**/*.json",
+  "output_root": "model/data/prepared",
+  "dataset_dir": "model/data/prepared/latest",
+  "groups": {
+    "test/macro": {
+      "rows": 97,
+      "features_count": 113,
+      "jsonl": "model/data/prepared/latest/test/macro/features.jsonl",
+      "csv": "model/data/prepared/latest/test/macro/features.csv"
+    },
+    "train/human": {
+      "rows": 624,
+      "features_count": 113,
+      "jsonl": "model/data/prepared/latest/train/human/features.jsonl",
+      "csv": "model/data/prepared/latest/train/human/features.csv"
+    },
+    "validation/macro": {
+      "rows": 272,
+      "features_count": 113,
+      "jsonl": "model/data/prepared/latest/validation/macro/features.jsonl",
+      "csv": "model/data/prepared/latest/validation/macro/features.csv"
+    }
+  },
+  "totals": {
+    "groups": 3,
+    "rows": 993,
+    "feature_count": 113
+  }
+}

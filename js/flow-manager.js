@@ -1,7 +1,7 @@
-// 예매 플로우 관리 모듈
+﻿// ?덈ℓ ?뚮줈??愿由?紐⑤뱢
 
 /**
- * 플로우 데이터 초기화
+ * ?뚮줈???곗씠??珥덇린??
  */
 function initFlow(performanceData) {
     const flowData = {
@@ -26,7 +26,7 @@ function initFlow(performanceData) {
 }
 
 /**
- * 플로우 데이터 가져오기
+ * ?뚮줈???곗씠??媛?몄삤湲?
  */
 function getFlowData() {
     const data = sessionStorage.getItem('bookingFlow');
@@ -34,7 +34,7 @@ function getFlowData() {
 }
 
 /**
- * 플로우 데이터 업데이트
+ * ?뚮줈???곗씠???낅뜲?댄듃
  */
 function updateFlowData(updates) {
     const flowData = getFlowData();
@@ -46,53 +46,46 @@ function updateFlowData(updates) {
 }
 
 /**
- * 플로우 데이터 삭제
+ * ?뚮줈???곗씠????젣
  */
-function clearFlowData() {
-    console.log('🧹 [Flow] 모든 예매 데이터 및 가상 타이머를 초기화합니다.');
+function clearFlowData(options = {}) {
+    const keepUser = options.keepUser !== false;
+    const keepBotType = options.keepBotType !== false;
 
-    // 1. 기본 플로우 데이터 제거
-    sessionStorage.removeItem('bookingFlow');
-    sessionStorage.removeItem('captchaVerified');
-    sessionStorage.removeItem('bookingLog');
+    const preserved = {};
+    if (keepUser) preserved.currentUser = sessionStorage.getItem('currentUser');
+    if (keepBotType) preserved.bot_type = sessionStorage.getItem('bot_type');
 
-    // 2. 🕒 가상 오픈 시간 데이터 일괄 제거 (vperf_ 로 시작하는 모든 항목)
-    const toRemove = [];
-    for (let i = 0; i < sessionStorage.length; i++) {
-        const key = sessionStorage.key(i);
-        if (key && key.indexOf('vperf_') === 0) {
-            toRemove.push(key);
-        }
-    }
-    toRemove.forEach(key => {
-        console.log(`🗑️ 가상 타이머 삭제: ${key}`);
-        sessionStorage.removeItem(key);
-    });
+    // 결제 완료 후 재진입 시 카운트다운/토큰 상태가 남지 않도록 전체 세션 정리
+    sessionStorage.clear();
+
+    if (preserved.currentUser) sessionStorage.setItem('currentUser', preserved.currentUser);
+    if (preserved.bot_type) sessionStorage.setItem('bot_type', preserved.bot_type);
 }
 
 /**
- * 예매 단계 순서 정의
+ * ?덈ℓ ?④퀎 ?쒖꽌 ?뺤쓽
  */
 const BOOKING_STEPS = [
-    'performance',      // 공연 선택
-    'performance_detail', // 날짜/시간 선택
-    'queue',            // 대기열
-    'seat_select',      // 좌석 선택 (보안문자 팝업 포함)
-    'discount',         // 할인
-    'order_info',       // 배송 정보
-    'payment',          // 결제
-    'complete'          // 완료
+    'performance',      // 怨듭뿰 ?좏깮
+    'performance_detail', // ?좎쭨/?쒓컙 ?좏깮
+    'queue',            // ?湲곗뿴
+    'seat_select',      // 醫뚯꽍 ?좏깮 (蹂댁븞臾몄옄 ?앹뾽 ?ы븿)
+    'discount',         // ?좎씤
+    'order_info',       // 諛곗넚 ?뺣낫
+    'payment',          // 寃곗젣
+    'complete'          // ?꾨즺
 ];
 
 /**
- * 현재 단계 인덱스 가져오기
+ * ?꾩옱 ?④퀎 ?몃뜳??媛?몄삤湲?
  */
 function getCurrentStepIndex(currentPage) {
     return BOOKING_STEPS.indexOf(currentPage);
 }
 
 /**
- * 다음 단계로 이동
+ * ?ㅼ쓬 ?④퀎濡??대룞
  */
 function goToNextStep(currentPage) {
     const currentIndex = getCurrentStepIndex(currentPage);
@@ -114,7 +107,7 @@ function goToNextStep(currentPage) {
 }
 
 /**
- * 플로우 검증
+ * ?뚮줈??寃利?
  */
 function validateFlow(requiredFields) {
     const flowData = getFlowData();
@@ -130,7 +123,7 @@ function validateFlow(requiredFields) {
 }
 
 /**
- * 좌석 선택 정보 클리어 (뒤로가기 시 보류 없음)
+ * 醫뚯꽍 ?좏깮 ?뺣낫 ?대━??(?ㅻ줈媛湲???蹂대쪟 ?놁쓬)
  */
 function clearSeatSelections() {
     const flowData = getFlowData();
@@ -144,7 +137,7 @@ function clearSeatSelections() {
 }
 
 /**
- * 총 가격 계산
+ * 珥?媛寃?怨꾩궛
  */
 function calculateTotalPrice() {
     const flowData = getFlowData();
@@ -158,3 +151,4 @@ function calculateTotalPrice() {
 
     return totalPrice;
 }
+

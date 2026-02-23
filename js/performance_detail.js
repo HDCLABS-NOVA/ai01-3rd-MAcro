@@ -1,438 +1,464 @@
 // performance_detail.js - 공연 상세 페이지
 
 let currentPerformance = null;
+let selectedDate = "";
+let selectedTime = "";
+const DETAIL_OPEN_DELAY_MS = 5000;
 
-async function loadPerformance() {
-  const perfId = getQueryParam('id');
-  if (!perfId) {
-    navigateTo('index.html');
-    return;
-  }
-
-  try {
-    const response = await fetch('data/performances.json', {
-      cache: 'no-cache' // Prevent cache issues
-    });
-    const data = await response.json();
-    currentPerformance = data.performances.find(p => p.id === perfId);
-
-    if (!currentPerformance) {
-      throw new Error('공연을 찾을 수 없습니다.');
-    }
-
-    // 🕒 Virtual Auto-reset for the current session (5 seconds wait)
-    // This avoids race conditions on the server file and is much faster/reliable
-    const sessionOpenTimeKey = `vperf_${perfId}_opentime`;
-    let virtualOpenTime = sessionStorage.getItem(sessionOpenTimeKey);
-
-    if (!virtualOpenTime) {
-      // First time in this session: set a virtual open time 5 seconds in future
-      virtualOpenTime = new Date(Date.now() + 5000).toISOString();
-      sessionStorage.setItem(sessionOpenTimeKey, virtualOpenTime);
-
-      const botType = sessionStorage.getItem('bot_type') || 'REAL USER';
-      console.log(`[${botType}] 🕒 Virtual Reset for ${perfId}: 5s countdown started.`);
-    }
-
-    // Override the performance's open time with our virtual one for this session
-    currentPerformance.open_time = virtualOpenTime;
-
-    displayPerformance();
-
-    // ✅ 카드 클릭 시점 기록 (페이지 진입 시점)
-    if (typeof cardClickTimestamp === 'undefined') {
-      cardClickTimestamp = new Date().toISOString();
-    }
-
-    // 로그 초기화
-    await initLogCollector(currentPerformance.id, currentPerformance.title);
-    recordStageEntry('perf');
-  } catch (error) {
-    console.error(error);
-    showAlert('공연 정보를 불러오는데 실패했습니다.', 'error');
-    setTimeout(() => navigateTo('index.html'), 2000);
-  }
-}
-
-function displayPerformance() {
-  const detailDiv = document.getElementById('perf-detail');
-
-  // ✅ 추가: 오픈 시간 체크
-  const openTime = currentPerformance.open_time ? new Date(currentPerformance.open_time) : null;
-  const now = new Date();
-  const isOpen = !openTime || openTime <= now;
-
-  // 오픈 시간 안내 메시지
-  const openTimeAlert = !isOpen ? `
-        <div class="alert alert-warning" style="margin-bottom: var(--spacing-lg);">
-            <h3 style="margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: 8px;">
-                🔒 티켓 오픈 예정
-            </h3>
-            <p style="margin-bottom: var(--spacing-sm);">
-                <strong>오픈 시간:</strong> ${formatOpenTimeDisplay(openTime)}
-            </p>
-            <div class="countdown-timer-detail" id="countdown-detail" data-open-time="${openTime.toISOString()}"></div>
-            <p style="margin-top: var(--spacing-sm); font-size: 14px; opacity: 0.9;">
-                오픈 시간 이후에 날짜와 시간을 선택할 수 있습니다.
-            </p>
-        </div>
-    ` : '';
-
-  detailDiv.innerHTML = `
-        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
-          <div class="card">
-            <div style="width: 100%; height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 80px;">
-              ${getCategoryIcon(currentPerformance.category)}
-            </div>
-          </div>
-          
-          <div>
-            <h1 class="page-title">${currentPerformance.title}</h1>
-            <p class="page-subtitle">${currentPerformance.description}</p>
-            
-            ${openTimeAlert}
-            
-            <div class="card mt-lg">
-              <div style="margin-bottom: var(--spacing-md);">
-                <strong>📍 장소:</strong> ${currentPerformance.venue}
-              </div>
-              <div style="margin-bottom: var(--spacing-md);">
-                <strong>🎭 카테고리:</strong> ${getCategoryName(currentPerformance.category)}
-              </div>
-              <div>
-                <strong>💰 가격:</strong> ${formatPrice(currentPerformance.grades[currentPerformance.grades.length - 1].price)} ~ ${formatPrice(currentPerformance.grades[0].price)}
-              </div>
-            </div>
-
-
-            <div class="card mt-lg">
-              <h3 style="margin-bottom: var(--spacing-md);">날짜 선택</h3>
-              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--spacing-sm);" id="date-selection">
-                ${currentPerformance.dates.map(date => `
-                  <button class="btn btn-outline date-btn" data-date="${date}" ${!isOpen ? 'disabled' : ''}>
-                    ${formatDateKorean(date)}<br>
-                    <small>(${getDayOfWeek(date)})</small>
-                  </button>
-                `).join('')}
-              </div>
-            </div>
-
-
-            <div class="card mt-lg" id="time-selection-section" style="display: none;">
-              <h3 style="margin-bottom: var(--spacing-md);">시간 선택</h3>
-              <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;" id="time-selection">
-                ${currentPerformance.times.map(time => `
-                  <button class="btn btn-outline time-btn" data-time="${time}" ${!isOpen ? 'disabled' : ''}>
-                    ${time}
-                  </button>
-                `).join('')}
-              </div>
-            </div>
-
-            ${getBookingButton(isOpen, openTime)}
-          </div>
-        </div>
-      `;
-
-  // ✅ 추가: 오픈 후에만 이벤트 리스너 추가
-  if (isOpen) {
-    attachEventListeners();
-  }
-
-  // ✅ 추가: 오픈 전이면 카운트다운 시작
-  if (!isOpen) {
-    startDetailCountdown();
-  }
-}
-
-// ✅ 추가: 예매 버튼 생성 함수
-function getBookingButton(isOpen, openTime) {
-  if (!isOpen && openTime) {
-    // 오픈 전: 항상 표시하되 비활성화 + 오픈 시간 표시 + onclick 없음
-    const year = openTime.getFullYear();
-    const month = openTime.getMonth() + 1;
-    const day = openTime.getDate();
-    const hours = openTime.getHours();
-    const minutes = String(openTime.getMinutes()).padStart(2, '0');
-    const ampm = hours >= 12 ? '오후' : '오전';
-    const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
-
-    return `
-      <button id="start-booking-btn" class="btn btn-primary btn-lg btn-block mt-xl" disabled style="cursor: not-allowed; opacity: 0.7;">
-        🔒 티켓 오픈: ${year}.${month}.${day} ${ampm} ${displayHours}:${minutes}
-      </button>
-    `;
-  } else {
-    // 오픈 후: 날짜/시간 선택 후 표시 + onclick 없음 (이벤트 리스너 사용)
-    return `
-      <button id="start-booking-btn" class="btn btn-primary btn-lg btn-block mt-xl" style="display: none;">
-        예매 시작
-      </button>
-    `;
-  }
-}
-
-// ✅ 추가: 이벤트 리스너 등록 함수 (오픈 후에만 호출)
-function attachEventListeners() {
-  // 날짜 버튼 이벤트 리스너
-  document.querySelectorAll('.date-btn').forEach(btn => {
-    btn.addEventListener('click', function (e) {
-      const date = this.dataset.date;
-      selectDate(date, this);
-    });
-  });
-
-  // 시간 버튼 이벤트 리스너
-  document.querySelectorAll('.time-btn').forEach(btn => {
-    btn.addEventListener('click', function (e) {
-      const time = this.dataset.time;
-      selectTime(time, this);
-    });
-  });
-
-  // 예매 시작 버튼 이벤트 리스너
-  const bookingBtn = document.getElementById('start-booking-btn');
-  if (bookingBtn) {
-    bookingBtn.addEventListener('click', startBooking);
-  }
-}
-
-
-let selectedDate = '';
-let selectedTime = '';
-
-// Action timestamps (실제 발생 시점 기록)
 let cardClickTimestamp = null;
 let dateSelectTimestamp = null;
 let timeSelectTimestamp = null;
 
+function getLogMetadata() {
+  try {
+    const raw = sessionStorage.getItem("bookingLog");
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed?.metadata || {};
+  } catch (e) {
+    return {};
+  }
+}
+
+async function issueBookingStartToken(performanceId) {
+  const meta = getLogMetadata();
+  const flowId = String(meta.flow_id || "").trim();
+  const sessionId = String(meta.session_id || "").trim();
+
+  if (!flowId || !sessionId) {
+    return { ok: false, message: "flow_id/session_id가 없어 대기열 입장 토큰을 발급할 수 없습니다." };
+  }
+
+  const payload = {
+    performance_id: performanceId,
+    flow_id: flowId,
+    session_id: sessionId,
+    user_email: String(meta.user_email || ""),
+    bot_type: String(meta.bot_type || ""),
+  };
+
+  try {
+    const res = await fetch("/api/booking/start-token", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body?.success) {
+      return { ok: false, message: body?.detail || body?.message || "토큰 발급 실패" };
+    }
+
+    const token = String(body.start_token || "");
+    if (!token) {
+      return { ok: false, message: "토큰 값이 비어 있습니다." };
+    }
+
+    sessionStorage.setItem("booking_start_token", token);
+    sessionStorage.setItem("booking_start_token_expires_epoch_ms", String(body.expires_epoch_ms || 0));
+    return { ok: true, token };
+  } catch (e) {
+    return { ok: false, message: e?.message || "토큰 발급 요청 실패" };
+  }
+}
+
+async function loadPerformance() {
+  const perfId = getQueryParam("id");
+  if (!perfId) {
+    navigateTo("index.html");
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/performances/${encodeURIComponent(perfId)}`, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error("공연 데이터 요청 실패");
+    }
+
+    const payload = await response.json();
+    currentPerformance = payload?.performance || null;
+    if (!currentPerformance) {
+      throw new Error("공연을 찾을 수 없습니다.");
+    }
+
+    // 요구사항: 상세 페이지 진입 시마다 항상 5초 후 오픈으로 재설정
+    currentPerformance.open_time = new Date(Date.now() + DETAIL_OPEN_DELAY_MS).toISOString();
+    currentPerformance.status = "upcoming";
+
+    displayPerformance();
+
+    cardClickTimestamp = getCollectTimestamp();
+    await initLogCollector(currentPerformance.id, currentPerformance.title);
+    recordStageEntry("perf");
+  } catch (error) {
+    console.error(error);
+    showAlert("공연 정보를 불러오는 데 실패했습니다.", "error");
+    setTimeout(() => navigateTo("index.html"), 1500);
+  }
+}
+
+function displayPerformance() {
+  const detailDiv = document.getElementById("perf-detail");
+  if (!detailDiv || !currentPerformance) return;
+
+  const openTime = currentPerformance.open_time ? new Date(currentPerformance.open_time) : null;
+  const now = new Date();
+  const isOpen = !openTime || openTime <= now;
+
+  const openTimeAlert = !isOpen && openTime
+    ? `
+      <div class="alert alert-warning" style="margin-bottom: var(--spacing-lg);">
+        <h3 style="margin-bottom: var(--spacing-sm);">예매 오픈 예정</h3>
+        <p style="margin-bottom: var(--spacing-sm);">
+          <strong>오픈 시간:</strong> ${formatOpenTimeDisplay(openTime)}
+        </p>
+        <div class="countdown-timer-detail" id="countdown-detail" data-open-time="${openTime.toISOString()}"></div>
+        <p style="margin-top: var(--spacing-sm); font-size: 14px; opacity: 0.9;">
+          오픈 시간 이후 날짜와 회차를 선택할 수 있습니다.
+        </p>
+      </div>
+    `
+    : "";
+
+  detailDiv.innerHTML = `
+    <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
+      <div class="card">
+        <div style="width: 100%; height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 72px;">
+          ${getCategoryIcon(currentPerformance.category)}
+        </div>
+      </div>
+
+      <div>
+        <h1 class="page-title">${currentPerformance.title}</h1>
+        <p class="page-subtitle">${currentPerformance.description || ""}</p>
+
+        ${openTimeAlert}
+
+        <div class="card mt-lg">
+          <div style="margin-bottom: var(--spacing-md);">
+            <strong>장소:</strong> ${currentPerformance.venue || "-"}
+          </div>
+          <div style="margin-bottom: var(--spacing-md);">
+            <strong>카테고리:</strong> ${getCategoryName(currentPerformance.category)}
+          </div>
+          <div>
+            <strong>가격:</strong> ${getPriceRangeText(currentPerformance)}
+          </div>
+        </div>
+
+        <div class="card mt-lg">
+          <h3 style="margin-bottom: var(--spacing-md);">날짜 선택</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--spacing-sm);" id="date-selection">
+            ${(currentPerformance.dates || []).map((date) => `
+              <button class="btn btn-outline date-btn" data-date="${date}" ${!isOpen ? "disabled" : ""}>
+                ${formatDateKorean(date)}<br>
+                <small>(${getDayOfWeek(date)})</small>
+              </button>
+            `).join("")}
+          </div>
+        </div>
+
+        <div class="card mt-lg" id="time-selection-section" style="display: none;">
+          <h3 style="margin-bottom: var(--spacing-md);">회차 선택</h3>
+          <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;" id="time-selection">
+            ${(currentPerformance.times || []).map((time) => `
+              <button class="btn btn-outline time-btn" data-time="${time}" ${!isOpen ? "disabled" : ""}>
+                ${time}
+              </button>
+            `).join("")}
+          </div>
+        </div>
+
+        ${getBookingButton(isOpen, openTime)}
+      </div>
+    </div>
+  `;
+
+  if (isOpen) {
+    attachEventListeners();
+  } else {
+    startDetailCountdown();
+  }
+}
+
+function getPriceRangeText(performance) {
+  const grades = performance?.grades || [];
+  if (!grades.length) return "-";
+
+  const sorted = [...grades].sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+  const min = sorted[0]?.price ?? 0;
+  const max = sorted[sorted.length - 1]?.price ?? 0;
+  return `${formatPrice(min)} ~ ${formatPrice(max)}`;
+}
+
+function getBookingButton(isOpen, openTime) {
+  if (!isOpen && openTime) {
+    return `
+      <button id="start-booking-btn" class="btn btn-primary btn-lg btn-block mt-xl" disabled style="cursor: not-allowed; opacity: 0.7;">
+        오픈 대기 중 (${formatOpenTimeDisplay(openTime)})
+      </button>
+    `;
+  }
+
+  return `
+    <button id="start-booking-btn" class="btn btn-primary btn-lg btn-block mt-xl" style="display: none;">
+      예매 시작
+    </button>
+  `;
+}
+
+function attachEventListeners() {
+  document.querySelectorAll(".date-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      selectDate(btn.dataset.date, btn);
+    });
+  });
+
+  document.querySelectorAll(".time-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      selectTime(btn.dataset.time, btn);
+    });
+  });
+
+  const bookingBtn = document.getElementById("start-booking-btn");
+  if (bookingBtn) {
+    bookingBtn.addEventListener("click", startBooking);
+  }
+}
 
 function selectDate(date, btnElement) {
-  // ✅ 추가: 오픈 시간 체크
   if (!isCurrentlyOpen()) {
-    showAlert('티켓 오픈 시간 이후에 선택 가능합니다.', 'warning');
+    showAlert("오픈 시간 이후에만 선택할 수 있습니다.", "warning");
     return;
   }
 
   selectedDate = date;
 
-  // 날짜 버튼 스타일 업데이트
-  document.querySelectorAll('.date-btn').forEach(btn => {
-    btn.classList.remove('btn-primary');
-    btn.classList.add('btn-outline');
+  document.querySelectorAll(".date-btn").forEach((btn) => {
+    btn.classList.remove("btn-primary");
+    btn.classList.add("btn-outline");
   });
 
   const targetBtn = btnElement || document.querySelector(`.date-btn[data-date="${date}"]`);
   if (targetBtn) {
-    targetBtn.classList.remove('btn-outline');
-    targetBtn.classList.add('btn-primary');
+    targetBtn.classList.remove("btn-outline");
+    targetBtn.classList.add("btn-primary");
   }
 
-  // 시간 선택 섹션 표시
-  document.getElementById('time-selection-section').style.display = 'block';
+  const timeSection = document.getElementById("time-selection-section");
+  if (timeSection) {
+    timeSection.style.display = "block";
+  }
 
-  // ✅ 실제 발생 시점 기록
   dateSelectTimestamp = getCollectTimestamp();
-
-  // 로그 기록
-  // trackClick은 log_collect.js에서 자동 처리되지만 메타데이터 성격이 강하면 별도로 남길 수 있습니다.
-  // 여기서는 기존 호환성을 위해 직접 남기지 않고 자동 수집에 맡깁니다.
 }
 
 function selectTime(time, btnElement) {
-  // ✅ 추가: 오픈 시간 체크
   if (!isCurrentlyOpen()) {
-    showAlert('티켓 오픈 시간 이후에 선택 가능합니다.', 'warning');
+    showAlert("오픈 시간 이후에만 선택할 수 있습니다.", "warning");
     return;
   }
 
   selectedTime = time;
 
-  // 시간 버튼 스타일 업데이트
-  document.querySelectorAll('.time-btn').forEach(btn => {
-    btn.classList.remove('btn-primary');
-    btn.classList.add('btn-outline');
+  document.querySelectorAll(".time-btn").forEach((btn) => {
+    btn.classList.remove("btn-primary");
+    btn.classList.add("btn-outline");
   });
 
   const targetBtn = btnElement || document.querySelector(`.time-btn[data-time="${time}"]`);
   if (targetBtn) {
-    targetBtn.classList.remove('btn-outline');
-    targetBtn.classList.add('btn-primary');
+    targetBtn.classList.remove("btn-outline");
+    targetBtn.classList.add("btn-primary");
   }
 
-  // 예매 시작 버튼 표시
-  document.getElementById('start-booking-btn').style.display = 'block';
+  const bookingBtn = document.getElementById("start-booking-btn");
+  if (bookingBtn) {
+    bookingBtn.style.display = "block";
+  }
 
-  // ✅ 실제 발생 시점 기록
   timeSelectTimestamp = getCollectTimestamp();
-
-  // 로그 기록
-  // 자동 수집에 맡깁니다.
 }
 
-function startBooking() {
+async function startBooking() {
   if (!requireLogin()) return;
 
-  // ✅ 추가: 오픈 시간 체크
   if (!isCurrentlyOpen()) {
-    showAlert('티켓 오픈 시간 이후에 예매 가능합니다.', 'warning');
+    showAlert("오픈 시간 이후에만 예매할 수 있습니다.", "warning");
     return;
   }
 
   if (!selectedDate || !selectedTime) {
-    showAlert('날짜와 시간을 선택해주세요.', 'warning');
+    showAlert("날짜와 회차를 먼저 선택해 주세요.", "warning");
     return;
   }
 
-  // 플로우  데이터 초기화
+  startBookingFlow(currentPerformance.id, currentPerformance.title);
+
   initFlow(currentPerformance);
   updateFlowData({
-    selectedDate: selectedDate,
-    selectedTime: selectedTime
+    selectedDate,
+    selectedTime,
   });
 
-  // 메타데이터 업데이트
   updateMetadata({
     selected_date: selectedDate,
-    selected_time: selectedTime
+    selected_time: selectedTime,
   });
 
-  // 로그 단계 종료
+  const tokenResult = await issueBookingStartToken(currentPerformance.id);
+  if (!tokenResult.ok) {
+    showAlert(tokenResult.message || "대기열 토큰 발급에 실패했습니다.", "error");
+    return;
+  }
+
   const bookingStartTimestamp = getCollectTimestamp();
 
-  recordStageExit('perf', {
-    card_clicks: [{
-      performance_id: currentPerformance.id,
-      performance_title: currentPerformance.title,
-      timestamp: cardClickTimestamp || bookingStartTimestamp
-    }],
-    date_selections: [{ date: selectedDate, timestamp: dateSelectTimestamp || bookingStartTimestamp }],
-    time_selections: [{ time: selectedTime, timestamp: timeSelectTimestamp || bookingStartTimestamp }],
+  recordStageExit("perf", {
+    card_clicks: [
+      {
+        performance_id: currentPerformance.id,
+        performance_title: currentPerformance.title,
+        timestamp: cardClickTimestamp || bookingStartTimestamp,
+      },
+    ],
+    date_selections: [
+      {
+        date: selectedDate,
+        timestamp: dateSelectTimestamp || bookingStartTimestamp,
+      },
+    ],
+    time_selections: [
+      {
+        time: selectedTime,
+        timestamp: timeSelectTimestamp || bookingStartTimestamp,
+      },
+    ],
     actions: [
-      { action: 'card_click', target: currentPerformance.id, timestamp: cardClickTimestamp || bookingStartTimestamp },
-      { action: 'date_select', target: selectedDate, timestamp: dateSelectTimestamp || bookingStartTimestamp },
-      { action: 'time_select', target: selectedTime, timestamp: timeSelectTimestamp || bookingStartTimestamp },
-      { action: 'booking_start', target: currentPerformance.id, date: selectedDate, time: selectedTime, timestamp: bookingStartTimestamp }
-    ]
+      {
+        action: "card_click",
+        target: currentPerformance.id,
+        timestamp: cardClickTimestamp || bookingStartTimestamp,
+      },
+      {
+        action: "date_select",
+        target: selectedDate,
+        timestamp: dateSelectTimestamp || bookingStartTimestamp,
+      },
+      {
+        action: "time_select",
+        target: selectedTime,
+        timestamp: timeSelectTimestamp || bookingStartTimestamp,
+      },
+      {
+        action: "booking_start",
+        target: currentPerformance.id,
+        date: selectedDate,
+        time: selectedTime,
+        timestamp: bookingStartTimestamp,
+      },
+    ],
   });
-  navigateTo('queue.html');
+
+  navigateTo("queue.html");
 }
 
 function getCategoryIcon(category) {
-  const icons = { concert: '🎤', musical: '🎭', sports: '⚽', exhibition: '🖼️' };
-  return icons[category] || '🎫';
+  const icons = {
+    concert: "콘",
+    musical: "뮤",
+    sports: "스",
+    exhibition: "전",
+  };
+  return icons[category] || "공";
 }
 
 function getCategoryName(category) {
-  const names = { concert: '콘서트', musical: '뮤지컬', sports: '스포츠', exhibition: '전시' };
-  return names[category] || '공연';
+  const names = {
+    concert: "콘서트",
+    musical: "뮤지컬",
+    sports: "스포츠",
+    exhibition: "전시",
+  };
+  return names[category] || "공연";
 }
 
-// ✅ 추가: 현재 오픈 여부 체크 함수
 function isCurrentlyOpen() {
-  if (!currentPerformance || !currentPerformance.open_time) {
-    return true; // open_time이 없으면 항상 오픈
-  }
-
+  if (!currentPerformance || !currentPerformance.open_time) return true;
   const openTime = new Date(currentPerformance.open_time);
-  const now = new Date();
-
-  return now >= openTime;
+  return new Date() >= openTime;
 }
 
-// ✅ 추가: 오픈 시간 포맷 함수
 function formatOpenTimeDisplay(date) {
   const year = date.getFullYear();
   const month = date.getMonth() + 1;
   const day = date.getDate();
   const hours = date.getHours();
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const ampm = hours >= 12 ? '오후' : '오전';
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "오후" : "오전";
   const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
-  const dayOfWeek = getDayOfWeek(`${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
-
-  return `${year}년 ${month}월 ${day}일 (${dayOfWeek}) ${ampm} ${displayHours}:${minutes}`;
+  const dayOfWeek = getDayOfWeek(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`);
+  return `${year}.${month}.${day} (${dayOfWeek}) ${ampm} ${displayHours}:${minutes}`;
 }
 
-// ✅ 추가: 상세 페이지 카운트다운 타이머
 function startDetailCountdown() {
-  const countdownEl = document.getElementById('countdown-detail');
+  const countdownEl = document.getElementById("countdown-detail");
   if (!countdownEl) return;
 
   const updateCountdown = () => {
     const openTime = new Date(countdownEl.dataset.openTime);
     const now = new Date();
     const diff = openTime - now;
+    const totalSec = Math.max(0, Math.ceil(diff / 1000));
 
-    if (diff <= 0) {
-      // ✅ 변경: 새로고침 대신 동적 UI 업데이트
-      countdownEl.textContent = '🎉 판매 시작!';
-      countdownEl.style.background = 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
+    if (totalSec <= 0) {
+      countdownEl.textContent = "예매 시작!";
+      countdownEl.style.background = "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)";
       clearInterval(window.detailCountdownInterval);
 
-      // ✅ 동적으로 페이지 활성화
       setTimeout(() => {
         activateBookingPage();
-      }, 1000);
-    } else {
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-      let text = '⏰ 오픈까지: ';
-      if (days > 0) text += `${days}일 `;
-      text += `${hours}시간 ${minutes}분 ${seconds}초`;
-
-      countdownEl.textContent = text;
-
-      // 1시간 미만이면 색상 변경
-      if (diff < 3600000) {
-        countdownEl.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
-        countdownEl.style.animation = 'pulse 2s infinite';
-      }
+      }, 600);
+      return;
     }
+
+    const days = Math.floor(totalSec / (60 * 60 * 24));
+    const hours = Math.floor((totalSec % (60 * 60 * 24)) / (60 * 60));
+    const minutes = Math.floor((totalSec % (60 * 60)) / 60);
+    const seconds = Math.floor(totalSec % 60);
+
+    let text = "오픈까지 ";
+    if (days > 0) text += `${days}일 `;
+    text += `${hours}시간 ${minutes}분 ${seconds}초`;
+    countdownEl.textContent = text;
   };
 
-  updateCountdown(); // 즉시 실행
+  updateCountdown();
   window.detailCountdownInterval = setInterval(updateCountdown, 1000);
 }
 
-// ✅ 추가: 오픈 시 페이지 동적 활성화 함수
 function activateBookingPage() {
-  // 1. 안내 메시지 제거
-  const alertBox = document.querySelector('.alert-warning');
+  const alertBox = document.querySelector(".alert-warning");
   if (alertBox) {
-    alertBox.style.transition = 'opacity 0.5s';
-    alertBox.style.opacity = '0';
-    setTimeout(() => alertBox.remove(), 500);
+    alertBox.style.transition = "opacity 0.4s";
+    alertBox.style.opacity = "0";
+    setTimeout(() => alertBox.remove(), 400);
   }
 
-  // 2. 날짜 버튼 활성화
-  document.querySelectorAll('.date-btn').forEach(btn => {
-    btn.removeAttribute('disabled');
-  });
+  document.querySelectorAll(".date-btn").forEach((btn) => btn.removeAttribute("disabled"));
+  document.querySelectorAll(".time-btn").forEach((btn) => btn.removeAttribute("disabled"));
 
-  // 3. 시간 버튼 활성화
-  document.querySelectorAll('.time-btn').forEach(btn => {
-    btn.removeAttribute('disabled');
-  });
-
-  // 4. 예매 버튼 변경
-  const bookingBtn = document.getElementById('start-booking-btn');
+  const bookingBtn = document.getElementById("start-booking-btn");
   if (bookingBtn) {
-    bookingBtn.removeAttribute('disabled');
-    bookingBtn.style.cursor = 'pointer';
-    bookingBtn.style.opacity = '1';
-    bookingBtn.textContent = '예매 시작';
-    bookingBtn.style.display = 'none'; // 날짜/시간 선택 후 표시되도록
+    bookingBtn.removeAttribute("disabled");
+    bookingBtn.style.cursor = "pointer";
+    bookingBtn.style.opacity = "1";
+    bookingBtn.textContent = "예매 시작";
+    bookingBtn.style.display = "none";
   }
 
-  // 5. 이벤트 리스너 추가
   attachEventListeners();
-
-  // 6. 성공 메시지 표시
-  showAlert('🎉 티켓 판매가 시작되었습니다! 날짜와 시간을 선택해 주세요.', 'success');
+  showAlert("예매가 시작되었습니다. 날짜와 회차를 선택해 주세요.", "success");
 }
 
 loadPerformance();

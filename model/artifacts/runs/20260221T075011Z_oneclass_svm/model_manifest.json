@@ -1,0 +1,9 @@
+{
+  "active": true,
+  "selected_model": "oneclass_svm",
+  "params_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\artifacts\\active\\human_model_params_with_deepsvdd.json",
+  "thresholds_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\artifacts\\active\\human_model_thresholds_with_deepsvdd.json",
+  "selection_report_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\reports\\benchmark\\model_selection_with_deepsvdd.json",
+  "benchmark_report_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\reports\\benchmark\\model_benchmark_results_with_deepsvdd.csv",
+  "created_at_utc": "2026-02-21T07:50:11.466364+00:00"
+}

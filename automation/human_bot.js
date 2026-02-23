@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 
 // Configuration
 const BASE_URL = 'http://localhost:8000/';
-const LOOP_COUNT = 180; // 🔄 Set this to the number of times you want to run
+const LOOP_COUNT = 200; // 🔄 Set this to the number of times you want to run
 const HEADLESS_MODE = true; // Set true for background execution
 
 // Utils

@@ -1,0 +1,9 @@
+﻿models:
+  candidates:
+    - zscore
+    - isolation_forest
+    - oneclass_svm
+    - deep_svdd
+  selection_metric:
+    primary: macro_recall
+    constraint: human_fpr <= 0.01

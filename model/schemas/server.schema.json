@@ -1,0 +1,139 @@
+﻿{
+  "schema_version": "1.0.0",
+  "notes": {
+    "purpose": "Server-side telemetry for macro detection. Complements client logs.",
+    "pii_policy": "Store hashes, not raw identifiers. Keep raw IP only if legally allowed.",
+    "time_standard": "All *_epoch_ms fields use Unix epoch milliseconds (UTC)."
+  },
+  "metadata": {
+    "event_id": "string (unique per server log event)",
+    "request_id": "string (trace id / correlation id)",
+    "flow_id": "string (join with client flow_id if available)",
+    "session_id": "string",
+    "received_epoch_ms": "number",
+    "server_region": "string",
+    "environment": "string (prod, staging)"
+  },
+  "identity": {
+    "user_id_hash": "string",
+    "account_id_hash": "string",
+    "device_id_hash": "string",
+    "session_fingerprint_hash": "string",
+    "ip_hash": "string",
+    "ip_raw": "string (optional)",
+    "ip_subnet": "string (e.g., /24 or /56)",
+    "asn": "string",
+    "geo": {
+      "country": "string",
+      "region": "string",
+      "city": "string"
+    }
+  },
+  "client_fingerprint": {
+    "user_agent_hash": "string",
+    "tls_fingerprint": "string",
+    "accept_language": "string",
+    "timezone_offset_min": "number",
+    "screen": {
+      "w": "number",
+      "h": "number",
+      "ratio": "number"
+    }
+  },
+  "request": {
+    "endpoint": "string",
+    "route": "string",
+    "method": "string",
+    "query_size_bytes": "number",
+    "body_size_bytes": "number",
+    "content_type": "string",
+    "headers_whitelist": {
+      "referer": "string",
+      "origin": "string",
+      "x_forwarded_for": "string",
+      "sec_ch_ua": "string"
+    }
+  },
+  "response": {
+    "status_code": "number",
+    "latency_ms": "number",
+    "response_size_bytes": "number",
+    "error_code": "string",
+    "retry_after_ms": "number"
+  },
+  "session": {
+    "session_created_epoch_ms": "number",
+    "last_activity_epoch_ms": "number",
+    "session_age_ms": "number",
+    "login_state": "string ('guest', 'logged_in')",
+    "account_age_days": "number",
+    "payment_token_hash": "string"
+  },
+  "queue": {
+    "queue_id": "string",
+    "join_epoch_ms": "number",
+    "enter_trigger": "string ('booking_start_click', 'api_redirect', 'auto')",
+    "position": "number",
+    "poll_interval_ms_stats": {
+      "min": "number",
+      "p50": "number",
+      "p95": "number"
+    },
+    "jump_count": "number"
+  },
+  "seat": {
+    "seat_query_count": "number",
+    "reserve_attempt_count": "number",
+    "reserve_fail_codes": [
+      "string"
+    ],
+    "seat_hold_ms": "number",
+    "seat_release_ms": "number"
+  },
+  "behavior": {
+    "requests_last_1s": "number",
+    "requests_last_10s": "number",
+    "requests_last_60s": "number",
+    "unique_endpoints_last_60s": "number",
+    "login_attempts_last_10m": "number",
+    "login_fail_count_last_10m": "number",
+    "login_success_count_last_10m": "number",
+    "login_unique_accounts_last_10m": "number",
+    "retry_count_last_5m": "number",
+    "concurrent_sessions_same_device": "number",
+    "concurrent_sessions_same_ip": "number"
+  },
+  "security": {
+    "captcha_required": "boolean",
+    "captcha_passed": "boolean",
+    "rate_limited": "boolean",
+    "blocked": "boolean",
+    "block_reason": "string"
+  },
+  "risk": {
+    "risk_score": "number (0~1)",
+    "decision": "string ('allow', 'challenge', 'block')",
+    "soft_rules_triggered": [
+      "string"
+    ],
+    "hard_rules_triggered": [
+      "string"
+    ],
+    "hard_action": "string ('none', 'challenge', 'block')",
+    "rules_triggered": [
+      "string"
+    ],
+    "rule_score": "number (0~1)",
+    "model_score": "number (0~1)",
+    "model_type": "string",
+    "model_ready": "boolean",
+    "runtime_error": "string",
+    "threshold_allow": "number (0~1)",
+    "threshold_challenge": "number (0~1)",
+    "review_required": "boolean",
+    "block_recommended": "boolean",
+    "alert_message": "string",
+    "realtime_report_path": "string",
+    "realtime_report_error": "string"
+  }
+}

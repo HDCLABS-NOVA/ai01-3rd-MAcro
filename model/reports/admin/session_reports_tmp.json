@@ -1,0 +1,229 @@
+[
+  {
+    "account_key": "b583484ee949120ba7b0db64f1c0b8e7b48dd95a56097ba99508b79c1bb4375d",
+    "user_id": "test_kim@email.com",
+    "booking_id": "M80801492",
+    "flow_id": "flow_20260219_pves0v",
+    "browser_log_path": "model\\data\\raw\\browser\\real_human\\20260219_perf002_flow_20260219_pves0v_success.json",
+    "server_log_found": true,
+    "decision": "challenge",
+    "recommendation": "challenge",
+    "confidence": 0.48,
+    "risk_score": 0.420134,
+    "rule_score": 0.3,
+    "model_score": 0.500223,
+    "account_age_days": 0,
+    "is_verified": false,
+    "past_successful_orders": 0,
+    "device_change_count": 0,
+    "rule_evidence": {
+      "hard_action": "none",
+      "hard_rules_triggered": [],
+      "soft_rules_triggered": [
+        "captcha_failed"
+      ],
+      "rule_score": 0.3,
+      "review_required": false,
+      "block_recommended": false
+    },
+    "model_evidence": {
+      "model_type": "isolation_forest",
+      "model_score": 0.500223,
+      "top_features": [
+        "seat_std_mouse_speed",
+        "browser_screen_w",
+        "browser_screen_h"
+      ],
+      "top_feature_contributions": [
+        {
+          "feature": "seat_std_mouse_speed",
+          "value": 2.077064810597224,
+          "baseline": 0.7598378162186312,
+          "contribution": 0.028105846347740437
+        },
+        {
+          "feature": "browser_screen_w",
+          "value": 1440.0,
+          "baseline": 1914.4615384615386,
+          "contribution": 0.024329675150097763
+        },
+        {
+          "feature": "browser_screen_h",
+          "value": 900.0,
+          "baseline": 1118.0641025641025,
+          "contribution": 0.0182025549715899
+        },
+        {
+          "feature": "perf_std_click_duration",
+          "value": 62.948868139149255,
+          "baseline": 17.67445178583377,
+          "contribution": 0.014453490060842011
+        },
+        {
+          "feature": "seat_avg_mouse_speed",
+          "value": 1.0628139225815607,
+          "baseline": 0.5281293593798164,
+          "contribution": 0.014113050651932302
+        }
+      ],
+      "risk_allow_threshold": 0.3,
+      "risk_challenge_threshold": 0.7,
+      "model_ready": true
+    },
+    "behavior_evidence": []
+  },
+  {
+    "account_key": "b583484ee949120ba7b0db64f1c0b8e7b48dd95a56097ba99508b79c1bb4375d",
+    "user_id": "test_kim@email.com",
+    "booking_id": "M85516877",
+    "flow_id": "flow_20260220_med5v6",
+    "browser_log_path": "model\\data\\raw\\browser\\real_human\\20260220_perf001_flow_20260220_med5v6_success.json",
+    "server_log_found": true,
+    "decision": "challenge",
+    "recommendation": "challenge",
+    "confidence": 0.48,
+    "risk_score": 0.387129,
+    "rule_score": 0.3,
+    "model_score": 0.445216,
+    "account_age_days": 0,
+    "is_verified": false,
+    "past_successful_orders": 0,
+    "device_change_count": 0,
+    "rule_evidence": {
+      "hard_action": "none",
+      "hard_rules_triggered": [],
+      "soft_rules_triggered": [
+        "captcha_failed"
+      ],
+      "rule_score": 0.3,
+      "review_required": false,
+      "block_recommended": false
+    },
+    "model_evidence": {
+      "model_type": "isolation_forest",
+      "model_score": 0.445216,
+      "top_features": [
+        "perf_avg_click_duration",
+        "browser_screen_w",
+        "browser_screen_h"
+      ],
+      "top_feature_contributions": [
+        {
+          "feature": "perf_avg_click_duration",
+          "value": 225.5,
+          "baseline": 104.71862168075448,
+          "contribution": 0.02543344719090418
+        },
+        {
+          "feature": "browser_screen_w",
+          "value": 1440.0,
+          "baseline": 1914.4615384615386,
+          "contribution": 0.020772725109236723
+        },
+        {
+          "feature": "browser_screen_h",
+          "value": 900.0,
+          "baseline": 1118.0641025641025,
+          "contribution": 0.020493142531995745
+        },
+        {
+          "feature": "perf_mouse_points",
+          "value": 44.0,
+          "baseline": 22.371794871794872,
+          "contribution": 0.007844392751651053
+        },
+        {
+          "feature": "seat_std_mouse_speed",
+          "value": 1.5376957466909782,
+          "baseline": 0.7598378162186312,
+          "contribution": 0.006839256211743694
+        }
+      ],
+      "risk_allow_threshold": 0.3,
+      "risk_challenge_threshold": 0.7,
+      "model_ready": true
+    },
+    "behavior_evidence": []
+  },
+  {
+    "account_key": "b583484ee949120ba7b0db64f1c0b8e7b48dd95a56097ba99508b79c1bb4375d",
+    "user_id": "test_kim@email.com",
+    "booking_id": "M54130973",
+    "flow_id": "flow_20260220_yld0k4",
+    "browser_log_path": "model\\data\\raw\\browser\\real_human\\20260220_perf002_flow_20260220_yld0k4_success.json",
+    "server_log_found": true,
+    "decision": "challenge",
+    "recommendation": "challenge",
+    "confidence": 0.59,
+    "risk_score": 0.527899,
+    "rule_score": 0.3,
+    "model_score": 0.679831,
+    "account_age_days": 0,
+    "is_verified": false,
+    "past_successful_orders": 0,
+    "device_change_count": 0,
+    "rule_evidence": {
+      "hard_action": "none",
+      "hard_rules_triggered": [],
+      "soft_rules_triggered": [
+        "captcha_failed"
+      ],
+      "rule_score": 0.3,
+      "review_required": false,
+      "block_recommended": false
+    },
+    "model_evidence": {
+      "model_type": "isolation_forest",
+      "model_score": 0.679831,
+      "top_features": [
+        "queue_avg_mouse_speed",
+        "perf_std_mouse_speed",
+        "seat_avg_straightness"
+      ],
+      "top_feature_contributions": [
+        {
+          "feature": "queue_avg_mouse_speed",
+          "value": 1.527883466678726,
+          "baseline": 0.3046613604919911,
+          "contribution": 0.021892222899994707
+        },
+        {
+          "feature": "perf_std_mouse_speed",
+          "value": 1.875723028648848,
+          "baseline": 0.5017539208101051,
+          "contribution": 0.02101867001884683
+        },
+        {
+          "feature": "seat_avg_straightness",
+          "value": 1.0,
+          "baseline": 0.3714104179501058,
+          "contribution": 0.01926467344054761
+        },
+        {
+          "feature": "browser_screen_w",
+          "value": 1440.0,
+          "baseline": 1914.4615384615386,
+          "contribution": 0.018556179475863743
+        },
+        {
+          "feature": "perf_avg_mouse_speed",
+          "value": 1.1023218361464073,
+          "baseline": 0.4452897929965042,
+          "contribution": 0.016983251761447105
+        }
+      ],
+      "risk_allow_threshold": 0.3,
+      "risk_challenge_threshold": 0.7,
+      "model_ready": true
+    },
+    "behavior_evidence": [
+      {
+        "code": "seat_high_straightness",
+        "description": "좌석 단계 마우스 궤적이 지나치게 직선적입니다.",
+        "metric": "seat_avg_straightness",
+        "value": 1.0,
+        "severity": "high"
+      }
+    ]
+  }
+]

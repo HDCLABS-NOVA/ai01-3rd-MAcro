@@ -1,0 +1,36 @@
+[
+  {
+    "account_key": "b583484ee949120ba7b0db64f1c0b8e7b48dd95a56097ba99508b79c1bb4375d",
+    "session_count": 3,
+    "account_risk": 0.494761,
+    "confidence": 0.49,
+    "recommendation": "challenge",
+    "summary": {
+      "avg_risk": 0.445054,
+      "max_risk": 0.527899,
+      "high_risk_count": 0,
+      "challenge_count": 3,
+      "block_count": 0
+    },
+    "top_rule_evidence": {
+      "soft": [
+        [
+          "captcha_failed",
+          3
+        ]
+      ],
+      "hard": []
+    },
+    "top_behavior_evidence": [
+      [
+        "seat_high_straightness",
+        1
+      ]
+    ],
+    "recent_high_risk_flows": [
+      "flow_20260220_yld0k4",
+      "flow_20260219_pves0v",
+      "flow_20260220_med5v6"
+    ]
+  }
+]

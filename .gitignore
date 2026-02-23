@@ -23,3 +23,7 @@ Thumbs.db
 
 # Environment variables
 .env
+
+3rd
+logs
+model/data/raw/*

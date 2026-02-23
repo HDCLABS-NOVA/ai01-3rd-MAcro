@@ -1,0 +1,6 @@
+﻿risk_policy:
+  weight_rule: 0.2
+  weight_model: 0.8
+  weight_context: 0.0
+  allow_threshold: 0.30
+  challenge_threshold: 0.70

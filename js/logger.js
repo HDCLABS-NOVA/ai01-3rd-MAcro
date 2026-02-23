@@ -202,7 +202,6 @@ function trackClick(event, targetInfo = {}) {
         is_trusted: event.isTrusted,
         duration: clickDuration,
         button: event.button, // 0: 좌클릭, 2: 우클릭
-        is_integer: Number.isInteger(event.clientX) && Number.isInteger(event.clientY),
         ...targetInfo
     };
 

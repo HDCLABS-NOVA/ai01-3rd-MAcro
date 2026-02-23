@@ -1,0 +1,13 @@
+paths:
+  human_logs: logs/real_human
+  macro_logs: logs/macro_v2
+  browser_raw: model/data/raw/browser
+  server_raw: model/data/raw/server
+  etl_input_roots:
+    - model/data/raw/train
+    - model/data/raw/validation
+    - model/data/raw/test
+  etl_input_glob: "**/*.json"
+  etl_output_root: model/data/prepared
+  prepared_joined_json: model/data/prepared/joined_logs.json
+  prepared_joined_csv: model/data/prepared/joined_logs.csv
