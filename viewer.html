@@ -90,6 +90,77 @@
             margin-top: var(--spacing-lg);
         }
 
+        /* 검색 박스 */
+        .search-container {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-xl);
+            align-items: center;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input-wrapper .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            color: var(--text-secondary);
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        .search-filter-select {
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            font-size: 15px;
+            cursor: pointer;
+            min-width: 140px;
+            transition: all 0.3s;
+        }
+
+        .search-filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .search-result-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: -12px;
+            margin-bottom: var(--spacing-md);
+            padding-left: 4px;
+        }
+
         canvas {
             border: 1px solid #333;
             border-radius: var(--border-radius);
@@ -183,6 +254,286 @@
             border-color: var(--primary-color);
             color: white;
         }
+
+        /* 상위 네비게이션 (admin 스타일) */
+        .viewer-nav-header {
+            background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .viewer-nav-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .viewer-nav-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .viewer-nav-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .nav-btn.active {
+            background: white;
+            color: #4f46e5;
+        }
+
+        .nav-btn:not(.active) {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .nav-btn-home {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .top-section {
+            display: none;
+        }
+
+        .top-section.active {
+            display: block;
+        }
+
+        /* 리포트 플레이스홀더 */
+        .report-placeholder {
+            text-align: center;
+            padding: 80px 20px;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            border: 2px dashed var(--border-color);
+        }
+
+        .report-placeholder .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .report-placeholder h3 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .report-placeholder p {
+            font-size: 15px;
+            color: var(--text-secondary);
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* 관리 패널 스타일 */
+        .admin-panel {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            margin-top: var(--spacing-lg);
+            border-left: 4px solid #4f46e5;
+        }
+
+        .admin-panel h4 {
+            margin-bottom: var(--spacing-md);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .restriction-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .restriction-badge.none {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .restriction-badge.level-1 {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .restriction-badge.level-2 {
+            background: #fce4ec;
+            color: #c62828;
+        }
+
+        .restriction-badge.level-3 {
+            background: #f3e5f5;
+            color: #6a1b9a;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .admin-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .admin-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .admin-btn.restrict {
+            background: #ef4444;
+            color: white;
+        }
+
+        .admin-btn.cancel-booking {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .admin-btn.unrestrict {
+            background: #10b981;
+            color: white;
+        }
+
+        .admin-user-info {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 4px 16px;
+            font-size: 14px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .admin-user-info dt {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .admin-user-info dd {
+            margin: 0;
+        }
+
+        /* 모달 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-box h3 {
+            margin-bottom: 20px;
+        }
+
+        .modal-box label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #374151;
+        }
+
+        .modal-box select,
+        .modal-box textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            font-family: inherit;
+        }
+
+        .modal-box textarea {
+            height: 80px;
+            resize: vertical;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .modal-btn-cancel {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .modal-btn-confirm {
+            background: #ef4444;
+            color: white;
+        }
+
+        .modal-btn-confirm.booking {
+            background: #f59e0b;
+        }
     </style>
 </head>
 
@@ -196,113 +547,227 @@
 
     <main class="page-wrapper">
         <div class="container">
-            <h1 class="page-title">📊 로그 뷰어</h1>
-            <p class="page-subtitle">마우스 트래킹 분석 및 봇 탐지</p>
-
-            <div class="tab-container">
-                <button class="tab-btn active" onclick="switchTab('performance')">🎭 공연창</button>
-                <button class="tab-btn" onclick="switchTab('booking')">🎫 예매창</button>
+            <!-- 상위 네비게이션 (admin 스타일) -->
+            <div class="viewer-nav-header">
+                <h1>📊 로그 분석 시스템</h1>
+                <p>마우스 트래킹 분석 및 봇 의심자 리포트</p>
+                <div class="viewer-nav-actions">
+                    <button class="nav-btn active" id="nav-viewer-btn" onclick="switchTopSection('viewer')">📊
+                        로그뷰어</button>
+                    <button class="nav-btn" id="nav-report-btn" onclick="switchTopSection('report')">📋 모델링 리포트</button>
+                    <button class="nav-btn" id="nav-restrict-btn" onclick="switchTopSection('restrict')">🚫 예매 제한
+                        내역</button>
+                    <button class="nav-btn" id="nav-cancel-btn" onclick="switchTopSection('cancel')">❌ 예매 취소 내역</button>
+                    <button class="nav-btn nav-btn-home" onclick="window.location.href='/'">🏠 메인으로</button>
+                </div>
             </div>
 
-            <!-- 공연창 탭 -->
-            <div id="performance-tab" class="tab-content active">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="perf-total">0</div>
-                        <div class="stat-label">총 로그 수</div>
+            <!-- ===== 로그뷰어 섹션 ===== -->
+            <div id="section-viewer" class="top-section active">
+
+                <!-- 검색 박스 -->
+                <div class="search-container">
+                    <div class="search-input-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="search-input" class="search-input" placeholder="아이디, 예매번호, 예매자명으로 검색..."
+                            oninput="handleSearch()">
                     </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%);">
-                        <div class="stat-number" id="perf-avg-duration">-</div>
-                        <div class="stat-label">평균 소요시간</div>
-                    </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);">
-                        <div class="stat-number" id="perf-avg-movements">-</div>
-                        <div class="stat-label">평균 마우스 이동</div>
-                    </div>
+                    <select id="search-filter" class="search-filter-select" onchange="handleSearch()">
+                        <option value="all">전체</option>
+                        <option value="email">아이디</option>
+                        <option value="booking_id">예매번호</option>
+                        <option value="booker_name">예매자명</option>
+                    </select>
+                </div>
+                <div id="search-result-info" class="search-result-info" style="display:none;"></div>
+
+                <div class="tab-container">
+                    <button class="tab-btn active" onclick="switchTab('performance')">🎭 공연창</button>
+                    <button class="tab-btn" onclick="switchTab('booking')">🎫 예매창</button>
                 </div>
 
-                <div class="card">
-                    <h3 style="margin-bottom: var(--spacing-md);">로그 목록</h3>
-                    <div id="perf-logs-list">
-                        <p style="text-align: center; color: var(--text-secondary);">로그를 불러오는 중...</p>
-                    </div>
-                </div>
-
-                <div id="perf-analysis" style="display: none;">
-                    <h3 style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-md);">🔍 마우스 트래킹 분석</h3>
-                    <div class="card">
-                        <div class="canvas-container" style="position: relative;">
-                            <canvas id="perf-canvas" class="main-canvas" width="1920" height="1080"></canvas>
-                            <div id="perf-tooltip" class="canvas-tooltip"></div>
+                <!-- 공연창 탭 -->
+                <div id="performance-tab" class="tab-content active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="perf-total">0</div>
+                            <div class="stat-label">총 로그 수</div>
                         </div>
-                        <div id="perf-tremor" style="display: none;">
-                            <h4 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">🔬 호버 영역 미세 떨림
-                                분석 (10배 확대)</h4>
-                            <div id="perf-hover-buttons" style="margin-bottom: var(--spacing-sm);"></div>
-                            <div class="tremor-view">
-                                <canvas id="perf-tremor-canvas" width="800" height="800"></canvas>
-                                <div id="perf-tremor-tooltip" class="canvas-tooltip"></div>
-                                <div id="perf-tremor-stats"></div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%);">
+                            <div class="stat-number" id="perf-avg-duration">-</div>
+                            <div class="stat-label">평균 소요시간</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);">
+                            <div class="stat-number" id="perf-avg-movements">-</div>
+                            <div class="stat-label">평균 마우스 이동</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: var(--spacing-md);">로그 목록</h3>
+                        <div id="perf-logs-list">
+                            <p style="text-align: center; color: var(--text-secondary);">로그를 불러오는 중...</p>
+                        </div>
+                    </div>
+
+                    <div id="perf-analysis" style="display: none;">
+                        <h3 style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-md);">🔍 마우스 트래킹 분석</h3>
+                        <div class="card">
+                            <div class="canvas-container" style="position: relative;">
+                                <canvas id="perf-canvas" class="main-canvas" width="1920" height="1080"></canvas>
+                                <div id="perf-tooltip" class="canvas-tooltip"></div>
+                            </div>
+                            <div id="perf-tremor" style="display: none;">
+                                <h4 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">🔬 호버 영역 미세
+                                    떨림
+                                    분석 (10배 확대)</h4>
+                                <div id="perf-hover-buttons" style="margin-bottom: var(--spacing-sm);"></div>
+                                <div class="tremor-view">
+                                    <canvas id="perf-tremor-canvas" width="800" height="800"></canvas>
+                                    <div id="perf-tremor-tooltip" class="canvas-tooltip"></div>
+                                    <div id="perf-tremor-stats"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="card" style="margin-top: var(--spacing-lg);">
-                        <h4 style="margin-bottom: var(--spacing-md);">🤖 봇 탐지 분석</h4>
-                        <div id="perf-bot-analysis"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 예매창 탭 -->
-            <div id="booking-tab" class="tab-content">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="book-total">0</div>
-                        <div class="stat-label">총 로그 수</div>
-                    </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%);">
-                        <div class="stat-number" id="book-avg-duration">-</div>
-                        <div class="stat-label">평균 소요시간</div>
-                    </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);">
-                        <div class="stat-number" id="book-completion">-</div>
-                        <div class="stat-label">완료율</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3 style="margin-bottom: var(--spacing-md);">로그 목록</h3>
-                    <div id="book-logs-list">
-                        <p style="text-align: center; color: var(--text-secondary);">로그를 불러오는 중...</p>
-                    </div>
-                </div>
-
-                <div id="book-analysis" style="display: none;">
-                    <h3 style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-md);">🔍 마우스 트래킹 분석</h3>
-                    <div class="card">
-                        <h4 style="margin-bottom: var(--spacing-md);">단계별 분석</h4>
-                        <div id="book-stage-selector"></div>
-                        <div class="canvas-container" style="position: relative;">
-                            <canvas id="book-canvas" class="main-canvas" width="1920" height="1080"></canvas>
-                            <div id="book-tooltip" class="canvas-tooltip"></div>
+                        <div class="card" style="margin-top: var(--spacing-lg);">
+                            <h4 style="margin-bottom: var(--spacing-md);">🤖 봇 탐지 분석</h4>
+                            <div id="perf-bot-analysis"></div>
                         </div>
-                        <div id="book-tremor" style="display: none;">
-                            <h4 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">🔬 호버 영역 미세 떨림
-                                분석 (10배 확대)</h4>
-                            <div id="book-hover-buttons" style="margin-bottom: var(--spacing-sm);"></div>
-                            <div class="tremor-view">
-                                <canvas id="book-tremor-canvas" width="800" height="800"></canvas>
-                                <div id="book-tremor-tooltip" class="canvas-tooltip"></div>
-                                <div id="book-tremor-stats"></div>
+                    </div>
+                </div>
+
+                <!-- 예매창 탭 -->
+                <div id="booking-tab" class="tab-content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="book-total">0</div>
+                            <div class="stat-label">총 로그 수</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%);">
+                            <div class="stat-number" id="book-avg-duration">-</div>
+                            <div class="stat-label">평균 소요시간</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #4CAF50 0%, #388E3C 100%);">
+                            <div class="stat-number" id="book-completion">-</div>
+                            <div class="stat-label">완료율</div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3 style="margin-bottom: var(--spacing-md);">로그 목록</h3>
+                        <div id="book-logs-list">
+                            <p style="text-align: center; color: var(--text-secondary);">로그를 불러오는 중...</p>
+                        </div>
+                    </div>
+
+                    <div id="book-analysis" style="display: none;">
+                        <h3 style="margin-top: var(--spacing-xl); margin-bottom: var(--spacing-md);">🔍 마우스 트래킹 분석</h3>
+                        <div class="card">
+                            <h4 style="margin-bottom: var(--spacing-md);">단계별 분석</h4>
+                            <div id="book-stage-selector"></div>
+                            <div class="canvas-container" style="position: relative;">
+                                <canvas id="book-canvas" class="main-canvas" width="1920" height="1080"></canvas>
+                                <div id="book-tooltip" class="canvas-tooltip"></div>
+                            </div>
+                            <div id="book-tremor" style="display: none;">
+                                <h4 style="margin-top: var(--spacing-lg); margin-bottom: var(--spacing-md);">🔬 호버 영역 미세
+                                    떨림
+                                    분석 (10배 확대)</h4>
+                                <div id="book-hover-buttons" style="margin-bottom: var(--spacing-sm);"></div>
+                                <div class="tremor-view">
+                                    <canvas id="book-tremor-canvas" width="800" height="800"></canvas>
+                                    <div id="book-tremor-tooltip" class="canvas-tooltip"></div>
+                                    <div id="book-tremor-stats"></div>
+                                </div>
                             </div>
                         </div>
+                        <div class="card" style="margin-top: var(--spacing-lg);">
+                            <h4 style="margin-bottom: var(--spacing-md);">🤖 봇 탐지 분석</h4>
+                            <div id="book-bot-analysis"></div>
+                        </div>
                     </div>
-                    <div class="card" style="margin-top: var(--spacing-lg);">
-                        <h4 style="margin-bottom: var(--spacing-md);">🤖 봇 탐지 분석</h4>
-                        <div id="book-bot-analysis"></div>
+                </div>
+
+                <!-- 관리 패널 (공용) -->
+                <div id="admin-panel" class="admin-panel" style="display: none;">
+                    <h4>🛡️ 사용자 관리 <span id="admin-restriction-badge"></span></h4>
+                    <dl class="admin-user-info" id="admin-user-info"></dl>
+                    <div class="admin-actions">
+                        <button class="admin-btn restrict" onclick="showRestrictModal()">🚫 예매 제한</button>
+                        <button class="admin-btn cancel-booking" onclick="showCancelModal()">❌ 예매 취소</button>
+                        <button class="admin-btn unrestrict" id="btn-unrestrict" style="display:none;"
+                            onclick="unrestrictUser()">✅ 제한 해제</button>
+                    </div>
+                </div>
+
+            </div><!-- /section-viewer -->
+
+            <!-- 제한 모달 -->
+            <div id="restrict-modal" class="modal-overlay">
+                <div class="modal-box">
+                    <h3>🚫 예매 제한 부여</h3>
+                    <label>제한 단계</label>
+                    <select id="restrict-level">
+                        <option value="1">1차 - 3개월 제한</option>
+                        <option value="2">2차 - 6개월 제한</option>
+                        <option value="3">3차 - 영구 제한</option>
+                    </select>
+                    <label>사유</label>
+                    <textarea id="restrict-reason" placeholder="제한 사유를 입력하세요..."></textarea>
+                    <div class="modal-buttons">
+                        <button class="modal-btn-cancel" onclick="closeModal('restrict-modal')">취소</button>
+                        <button class="modal-btn-confirm" onclick="confirmRestrict()">제한 적용</button>
                     </div>
                 </div>
             </div>
+
+            <!-- 예매 취소 모달 -->
+            <div id="cancel-modal" class="modal-overlay">
+                <div class="modal-box">
+                    <h3>❌ 예매 취소</h3>
+                    <p id="cancel-info" style="margin-bottom: 16px; color: #6b7280;"></p>
+                    <label>취소 사유</label>
+                    <textarea id="cancel-reason" placeholder="취소 사유를 입력하세요..."></textarea>
+                    <div class="modal-buttons">
+                        <button class="modal-btn-cancel" onclick="closeModal('cancel-modal')">닫기</button>
+                        <button class="modal-btn-confirm booking" onclick="confirmCancel()">예매 취소</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== 모델링 리포트 섹션 ===== -->
+            <div id="section-report" class="top-section">
+                <div class="report-placeholder">
+                    <div class="icon">📋</div>
+                    <h3>모델링 리포트</h3>
+                    <p>봇 의심자 분류 리포트가 이 곳에 표시됩니다.<br>기준이 정해지면 추가될 예정입니다.</p>
+                </div>
+            </div><!-- /section-report -->
+
+            <!-- ===== 예매 제한 내역 섹션 ===== -->
+            <div id="section-restrict" class="top-section">
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 16px;">🚫 예매 제한 및 해제 이력</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">관리자 권한으로 처리된 제한/해제
+                        이력입니다. 카드를 클릭하면 상세 이력을 확인할 수 있습니다.</p>
+                    <div id="restrict-history-list">
+                        <p style="text-align: center; color: var(--text-secondary);">불러오는 중...</p>
+                    </div>
+                </div>
+            </div><!-- /section-restrict -->
+
+            <!-- ===== 예매 취소 내역 섹션 ===== -->
+            <div id="section-cancel" class="top-section">
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 16px;">❌ 예매 취소 내역</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">관리자 권한으로 취소된 예매
+                        내역입니다. 카드를 클릭하면 상세 정보를 확인할 수 있습니다.</p>
+                    <div id="cancel-history-list">
+                        <p style="text-align: center; color: var(--text-secondary);">불러오는 중...</p>
+                    </div>
+                </div>
+            </div><!-- /section-cancel -->
+
         </div>
     </main>
 
@@ -319,12 +784,17 @@
         var allLogs = [];
         var perfLogs = [];
         var bookLogs = [];
+        var filteredPerfLogs = [];
+        var filteredBookLogs = [];
         var currentTab = 'performance';
         var currentPerfLog = null;
         var currentBookLog = null;
         var currentBookStage = null;
         var perfHovers = [];
         var bookHovers = [];
+        var currentSelectedLog = null;
+        var currentFilename = null;
+        var allFilenames = [];
 
         const BOOKING_STAGES = ['seat', 'discount', 'order_info', 'payment'];
         const STAGE_NAMES = {
@@ -333,6 +803,115 @@
             'order_info': '배송 정보',
             'payment': '결제'
         };
+
+        function toggleHistoryDetail(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function switchTopSection(section) {
+            document.querySelectorAll('.top-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if (btn.classList.contains('nav-btn-home')) return;
+                btn.classList.remove('active');
+            });
+
+            document.getElementById('section-' + section).classList.add('active');
+            document.getElementById('nav-' + section + '-btn').classList.add('active');
+
+            if (section === 'restrict') loadRestrictionHistory();
+            if (section === 'cancel') loadCancelledBookings();
+        }
+
+        // ===== 예매 제한 내역 =====
+        async function loadRestrictionHistory() {
+            const container = document.getElementById('restrict-history-list');
+            try {
+                const res = await fetch('/api/admin/restriction-history');
+                const data = await res.json();
+                const users = data.users || [];
+                if (users.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:var(--text-secondary); padding:40px;">제한 이력이 없습니다.</p>';
+                    return;
+                }
+                const levelNames = { 1: '1차 (3개월)', 2: '2차 (6개월)', 3: '3차 (영구)' };
+                container.innerHTML = users.map((u, i) => {
+                    const statusBadge = u.currently_restricted
+                        ? `<span style="background:rgba(239,68,68,0.15); color:#f87171; padding:3px 10px; border-radius:10px; font-size:12px; font-weight:700;">🚫 제한중 (${levelNames[u.current_level] || '-'})</span>`
+                        : '<span style="background:rgba(16,185,129,0.15); color:#34d399; padding:3px 10px; border-radius:10px; font-size:12px; font-weight:700;">\u2705 정상</span>';
+                    const historyHtml = u.history.map(h => {
+                        const isRestrict = h.action === 'restrict';
+                        const icon = isRestrict ? '🚫' : '\u2705';
+                        const label = isRestrict ? `제한 ${levelNames[h.level] || ''}` : '해제';
+                        const color = isRestrict ? '#f87171' : '#34d399';
+                        const ts = new Date(h.timestamp).toLocaleString('ko-KR');
+                        return `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-left:3px solid ${color}; background:rgba(255,255,255,0.02); border-radius:0 8px 8px 0; margin-bottom:6px;">
+                            <div>
+                                <span style="font-weight:700; color:${color};">${icon} ${label}</span>
+                                <span style="font-size:13px; color:#9ca3af; margin-left:12px;">처리자: ${h.by || '-'}</span>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:13px; color:#e2e8f0;">사유: ${h.reason || '-'}</div>
+                                <div style="font-size:12px; color:#64748b;">${ts}</div>
+                            </div>
+                        </div>`;
+                    }).join('');
+                    return `<div class="log-item" style="cursor:pointer; margin-bottom:10px;" onclick="toggleHistoryDetail('rh-detail-${i}')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <span style="font-weight:700; color:#e2e8f0;">${u.name}</span>
+                                <span style="font-size:13px; color:#9ca3af; margin-left:10px;">${u.email}</span>
+                            </div>
+                            ${statusBadge}
+                        </div>
+                        <div id="rh-detail-${i}" class="booking-detail" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.08);">
+                            <h4 style="font-size:14px; color:#a78bfa; margin-bottom:10px;">📝 제한/해제 이력 (${u.history.length}건)</h4>
+                            ${historyHtml}
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                container.innerHTML = '<p style="text-align:center; color:#f87171; padding:40px;">데이터를 불러올 수 없습니다.</p>';
+            }
+        }
+
+        // ===== 예매 취소 내역 =====
+        async function loadCancelledBookings() {
+            const container = document.getElementById('cancel-history-list');
+            try {
+                const res = await fetch('/api/admin/cancelled-bookings');
+                const data = await res.json();
+                const bookings = data.bookings || [];
+                if (bookings.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color:var(--text-secondary); padding:40px;">취소된 예매가 없습니다.</p>';
+                    return;
+                }
+                container.innerHTML = bookings.map((b, i) => {
+                    const cancelledAt = b.cancelled_at ? new Date(b.cancelled_at).toLocaleString('ko-KR') : '-';
+                    return `<div class="log-item" style="cursor:pointer; margin-bottom:10px; border-left:3px solid #ef4444;" onclick="toggleHistoryDetail('ch-detail-${i}')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <span style="font-weight:700; color:#e2e8f0;">${b.name}</span>
+                                <span style="font-size:13px; color:#9ca3af; margin-left:10px;">${b.email}</span>
+                            </div>
+                            <span style="font-family:monospace; font-size:13px; color:#64748b;">${b.booking_id}</span>
+                        </div>
+                        <div id="ch-detail-${i}" class="booking-detail" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.08);">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:14px;">
+                                <div><span style="color:#64748b;">공연명:</span> <span style="color:#e2e8f0; font-weight:600;">${b.performance_title}</span></div>
+                                <div><span style="color:#64748b;">공연일시:</span> <span style="color:#e2e8f0;">${b.selected_date} ${b.selected_time}</span></div>
+                                <div><span style="color:#64748b;">취소 관리자:</span> <span style="color:#f87171; font-weight:600;">${b.cancelled_by}</span></div>
+                                <div><span style="color:#64748b;">취소 사유:</span> <span style="color:#e2e8f0;">${b.cancel_reason}</span></div>
+                                <div><span style="color:#64748b;">취소 일시:</span> <span style="color:#e2e8f0;">${cancelledAt}</span></div>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (e) {
+                container.innerHTML = '<p style="text-align:center; color:#f87171; padding:40px;">데이터를 불러올 수 없습니다.</p>';
+            }
+        }
 
         function switchTab(tab) {
             currentTab = tab;
@@ -347,6 +926,54 @@
                 document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
                 document.getElementById('booking-tab').classList.add('active');
             }
+        }
+
+        // 검색 기능
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.trim().toLowerCase();
+            const filter = document.getElementById('search-filter').value;
+            const infoEl = document.getElementById('search-result-info');
+
+            if (!query) {
+                filteredPerfLogs = perfLogs;
+                filteredBookLogs = bookLogs;
+                infoEl.style.display = 'none';
+                displayPerfLogs();
+                displayBookLogs();
+                return;
+            }
+
+            function matchLog(log) {
+                const meta = log.metadata || {};
+                const email = (meta.user_email || '').toLowerCase();
+                const bookingId = (meta.booking_id || '').toLowerCase();
+                const bookerEmail = (meta.booker_email || '').toLowerCase();
+                const bookerPhone = (meta.booker_phone || '').toLowerCase();
+                const flowId = (meta.flow_id || '').toLowerCase();
+
+                switch (filter) {
+                    case 'email':
+                        return email.includes(query);
+                    case 'booking_id':
+                        return bookingId.includes(query);
+                    case 'booker_name':
+                        return bookerEmail.includes(query) || bookerPhone.includes(query);
+                    default: // 'all'
+                        return email.includes(query) || bookingId.includes(query) ||
+                            bookerEmail.includes(query) || bookerPhone.includes(query) ||
+                            flowId.includes(query);
+                }
+            }
+
+            filteredPerfLogs = perfLogs.filter(matchLog);
+            filteredBookLogs = bookLogs.filter(matchLog);
+
+            const totalFound = filteredPerfLogs.length + filteredBookLogs.length;
+            infoEl.style.display = 'block';
+            infoEl.textContent = `🔍 "${query}" 검색 결과: 공연창 ${filteredPerfLogs.length}건, 예매창 ${filteredBookLogs.length}건 (총 ${totalFound}건)`;
+
+            displayPerfLogs();
+            displayBookLogs();
         }
 
         async function loadLogs() {
@@ -365,10 +992,16 @@
                 );
 
                 const logDetails = await Promise.all(logPromises);
-                allLogs = logDetails.map(log => log.data);
+                allFilenames = data.files;
+                allLogs = logDetails.map((log, i) => {
+                    log.data._filename = data.files[i];
+                    return log.data;
+                });
 
                 perfLogs = allLogs.filter(log => log.stages.perf);
                 bookLogs = allLogs.filter(log => log.stages.seat);
+                filteredPerfLogs = perfLogs;
+                filteredBookLogs = bookLogs;
 
                 updatePerfStats();
                 updateBookStats();
@@ -415,18 +1048,28 @@
         function displayPerfLogs() {
             const container = document.getElementById('perf-logs-list');
 
-            container.innerHTML = perfLogs.map((log, index) => {
+            if (filteredPerfLogs.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">검색 결과가 없습니다.</p>';
+                return;
+            }
+
+            container.innerHTML = filteredPerfLogs.map((log, index) => {
                 const perf = log.stages.perf;
                 const duration = (perf.duration_ms / 1000).toFixed(1);
                 const date = new Date(log.metadata.created_at).toLocaleString('ko-KR');
+                const realIndex = perfLogs.indexOf(log);
 
                 return `
-                    <div class="log-item" onclick="showPerfAnalysis(${index})">
+                    <div class="log-item" onclick="showPerfAnalysis(${realIndex})" style="${log.metadata.cancelled ? 'border-left: 3px solid #ef4444;' : ''}">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
-                            <span style="font-weight: 700; color: var(--primary-color);">${log.metadata.flow_id}</span>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span style="font-weight: 700; color: var(--primary-color);">${log.metadata.flow_id}</span>
+                                ${log.metadata.cancelled ? '<span style="background:#ef4444; color:white; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700;">취소됨</span>' : ''}
+                            </div>
                             <span style="color: var(--text-secondary); font-size: 14px;">${date}</span>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--spacing-sm); font-size: 14px;">
+                            <div><strong>아이디:</strong> ${log.metadata.user_email || '-'}</div>
                             <div><strong>공연:</strong> ${log.metadata.performance_title || '-'}</div>
                             <div><strong>소요시간:</strong> ${duration}초</div>
                             <div><strong>마우스:</strong> ${perf.mouse_trajectory?.length || 0}개</div>
@@ -440,9 +1083,15 @@
         function displayBookLogs() {
             const container = document.getElementById('book-logs-list');
 
-            container.innerHTML = bookLogs.map((log, index) => {
+            if (filteredBookLogs.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">검색 결과가 없습니다.</p>';
+                return;
+            }
+
+            container.innerHTML = filteredBookLogs.map((log, index) => {
                 const completed = log.stages.payment && log.stages.payment.completed;
-                const status = completed ? '✅ 완료' : '❌ 미완료';
+                const cancelled = log.metadata.cancelled;
+                const status = cancelled ? '🚫 취소' : (completed ? '✅ 완료' : '❌ 미완료');
 
                 var totalDuration = 0;
                 BOOKING_STAGES.forEach(stage => {
@@ -451,9 +1100,10 @@
 
                 const date = new Date(log.metadata.created_at).toLocaleString('ko-KR');
                 const seats = log.metadata.final_seats?.join(', ') || '-';
+                const realIndex = bookLogs.indexOf(log);
 
                 return `
-                    <div class="log-item" onclick="showBookAnalysis(${index})">
+                    <div class="log-item" onclick="showBookAnalysis(${realIndex})" style="${cancelled ? 'border-left: 3px solid #ef4444;' : ''}">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
                             <div style=" display: flex; gap: var(--spacing-md); align-items: center;">
                                 <span style="font-size: 20px;">${status}</span>
@@ -462,6 +1112,8 @@
                             <span style="color: var(--text-secondary); font-size: 14px;">${date}</span>
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--spacing-sm); font-size: 14px;">
+                            <div><strong>아이디:</strong> ${log.metadata.user_email || '-'}</div>
+                            <div><strong>예매번호:</strong> ${log.metadata.booking_id || '-'}</div>
                             <div><strong>공연:</strong> ${log.metadata.performance_title || '-'}</div>
                             <div><strong>좌석:</strong> ${seats}</div>
                             <div><strong>소요시간:</strong> ${(totalDuration / 1000).toFixed(1)}초</div>
@@ -473,20 +1125,26 @@
 
         function showPerfAnalysis(index) {
             currentPerfLog = perfLogs[index];
+            currentSelectedLog = currentPerfLog;
+            currentFilename = currentPerfLog._filename;
             document.getElementById('perf-analysis').style.display = 'block';
 
             drawCanvas('perf', currentPerfLog.stages.perf, 'perf-canvas', 'perf-tremor', 'perf-tremor-canvas', 'perf-tremor-stats');
             analyzeBotBehavior('perf', currentPerfLog.stages.perf, 'perf-bot-analysis');
+            updateAdminPanel(currentPerfLog);
 
             document.getElementById('perf-analysis').scrollIntoView({ behavior: 'smooth' });
         }
 
         function showBookAnalysis(index) {
             currentBookLog = bookLogs[index];
+            currentSelectedLog = currentBookLog;
+            currentFilename = currentBookLog._filename;
             document.getElementById('book-analysis').style.display = 'block';
 
             createBookStageSelector();
             selectBookStage('seat');
+            updateAdminPanel(currentBookLog);
 
             document.getElementById('book-analysis').scrollIntoView({ behavior: 'smooth' });
         }
@@ -560,8 +1218,9 @@
             }
 
             // 원본 viewport 크기 (로그된 화면 크기)
-            const srcWidth = stageData.viewport_width || 1920;
-            const srcHeight = stageData.viewport_height || 1080;
+            // 로그 형식에 따라 viewport.w/h 또는 viewport_width/height
+            const srcWidth = stageData.viewport_width || (stageData.viewport && stageData.viewport.w) || 1920;
+            const srcHeight = stageData.viewport_height || (stageData.viewport && stageData.viewport.h) || 1080;
 
             // 좌표 정규화 및 스케일링 함수
             // 좌표 정규화 및 스케일링 함수
@@ -573,9 +1232,9 @@
                 const newPoint = [...point];
 
                 if (point.length >= 5 && typeof point[3] === 'number' && typeof point[4] === 'number') {
-                    // 예전 로그 형식: [x, y, time, nx, ny]
-                    nx = point[3];
-                    ny = point[4];
+                    // 이미 정규화된 좌표가 있는 경우
+                    nx = parseFloat(point[3]);
+                    ny = parseFloat(point[4]);
                 } else {
                     // 픽셀 좌표를 정규화
                     nx = point[0] / srcWidth;
@@ -613,6 +1272,7 @@
 
             // 호버 구간 찾기 (속도가 느린 구간)
             var currentHover = [];
+            let tempHovers = [];
             for (var i = 1; i < trajectory.length; i++) {
                 const prev = trajectory[i - 1];
                 const curr = trajectory[i];
@@ -625,7 +1285,7 @@
                     currentHover.push(curr);
                 } else {
                     if (currentHover.length >= 3) {  // 3개 이상이면 호버로 인정
-                        hovers.push([].concat(currentHover));
+                        tempHovers.push([].concat(currentHover));
                     }
                     currentHover = [];
                 }
@@ -635,14 +1295,14 @@
             if (currentHover.length > 5) {
                 const hasTarget = currentHover.some(p => p.length > 3 && typeof p[3] === 'string' && isNaN(Number(p[3])));
                 if (hasTarget) {
-                    hovers.push([].concat(currentHover));
+                    tempHovers.push([].concat(currentHover));
                 }
             }
 
             // [추가] 중요: 호버 구간 병합 및 필터링 (노이즈 제거)
-            if (hovers.length > 0) {
+            if (tempHovers.length > 0) {
                 const mergedSegments = [];
-                let currentGroup = hovers[0];
+                let currentGroup = tempHovers[0];
 
                 // 타겟 추출 헬퍼 함수
                 const getTarget = (seg) => {
@@ -660,8 +1320,8 @@
 
                 let currentTarget = getTarget(currentGroup);
 
-                for (let i = 1; i < hovers.length; i++) {
-                    const nextSeg = hovers[i];
+                for (let i = 1; i < tempHovers.length; i++) {
+                    const nextSeg = tempHovers[i];
                     const nextTarget = getTarget(nextSeg);
 
                     // 같은 타겟이고, 시간 차이가 1초 이내라면 병합
@@ -678,11 +1338,14 @@
                 mergedSegments.push(currentGroup);
 
                 // 0.3초(300ms) 이상인 것만 남김
-                hovers = mergedSegments.filter(seg => {
+                tempHovers = mergedSegments.filter(seg => {
                     const duration = seg[seg.length - 1][2] - seg[0][2];
                     return duration >= 300;
                 });
             }
+
+            // 최종 결과를 전역 배열에 추가
+            hovers.push(...tempHovers);
 
             // [추가] 중요: 클릭이 발생한 지점은 빨라도 강제로 호버 구간으로 포함
             normalizedClicks.forEach(click => {
@@ -709,10 +1372,31 @@
                 // 인위적인 호버 포인트를 생성하여 추가
                 if (clickSegment.length === 0) {
                     clickSegment = [];
-                    // 클릭 위치에 5개의 인위적 포인트 생성 (약 250ms 분량처럼 보이게)
-                    for (let k = 0; k < 5; k++) {
-                        const timeOffset = (k - 2) * 50; // -100ms ~ +100ms
-                        clickSegment.push([click.x, click.y, clickTime + timeOffset, click.target || null]);
+                    // trajectory에서 clickTime 바로 이전 포인트 찾기
+                    let prevPoint = null;
+                    for (let m = trajectory.length - 1; m >= 0; m--) {
+                        if (trajectory[m][2] < clickTime) {
+                            prevPoint = trajectory[m];
+                            break;
+                        }
+                    }
+
+                    if (prevPoint) {
+                        // 이전 포인트에서 클릭 위치까지 보간 (Interpolation)
+                        for (let k = 0; k < 5; k++) {
+                            const ratio = (k + 1) / 5; // 0.2, 0.4, 0.6, 0.8, 1.0
+                            const interpX = prevPoint[0] + (click.displayX - prevPoint[0]) * ratio;
+                            const interpY = prevPoint[1] + (click.displayY - prevPoint[1]) * ratio;
+                            const interpTime = prevPoint[2] + (clickTime - prevPoint[2]) * ratio;
+
+                            clickSegment.push([interpX, interpY, interpTime, click.target || null]);
+                        }
+                    } else {
+                        // 이전 포인트가 없으면 클릭 위치에 고정 포인트 생성
+                        for (let k = 0; k < 5; k++) {
+                            const timeOffset = (k - 2) * 50;
+                            clickSegment.push([click.displayX, click.displayY, clickTime + timeOffset, click.target || null]);
+                        }
                     }
                 }
 
@@ -1148,8 +1832,8 @@
 
             // 2. 직접 로깅된 게 없다면, 기존 클릭 매칭 로직 사용 (하위 호환성)
             if (!relevantClickTarget && stageData && stageData.clicks && stageData.clicks.length > 0) {
-                const startTime = segment[0][2];
-                const endTime = segment[segment.length - 1][2];
+                let startTime = segment[0][2];
+                let endTime = segment[segment.length - 1][2];
 
                 // 1. 시간 필터 대폭 완화 (±30초) - 사실상 같은 페이지 내 활동이면 잡히도록
                 let candidates = stageData.clicks.filter(c =>
@@ -1307,116 +1991,315 @@
         }
 
         function analyzeBotBehavior(type, stageData, containerId) {
-            const trajectory = stageData.mouse_trajectory || [];
-            const clicks = stageData.clicks || [];
-            const hovers = type === 'perf' ? perfHovers : bookHovers;
+            try {
+                const trajectory = stageData.mouse_trajectory || [];
+                const clicks = stageData.clicks || [];
+                const hovers = type === 'perf' ? perfHovers : bookHovers;
 
-            if (trajectory.length < 3) {
-                document.getElementById(containerId).innerHTML = '<p style="text-align: center; color: var(--text-secondary);">분석할 데이터가 부족합니다</p>';
-                return;
-            }
-
-            var speeds = [];
-            var angles = [];
-
-            for (var i = 1; i < trajectory.length; i++) {
-                const prev = trajectory[i - 1];
-                const curr = trajectory[i];
-                const timeDiff = (curr[2] - prev[2]) / 1000;
-
-                if (timeDiff > 0) {
-                    const distance = Math.sqrt(Math.pow(curr[0] - prev[0], 2) + Math.pow(curr[1] - prev[1], 2));
-                    speeds.push(distance / timeDiff);
+                if (trajectory.length < 3) {
+                    document.getElementById(containerId).innerHTML = '<p style="text-align: center; color: var(--text-secondary);">분석할 데이터가 부족합니다</p>';
+                    return;
                 }
 
-                if (i < trajectory.length - 1) {
-                    const next = trajectory[i + 1];
-                    const angle1 = Math.atan2(curr[1] - prev[1], curr[0] - prev[0]);
-                    const angle2 = Math.atan2(next[1] - curr[1], next[0] - curr[0]);
-                    angles.push(Math.abs(angle2 - angle1));
+                var speeds = [];
+                var angles = [];
+
+                for (var i = 1; i < trajectory.length; i++) {
+                    const prev = trajectory[i - 1];
+                    const curr = trajectory[i];
+                    const timeDiff = (curr[2] - prev[2]) / 1000;
+
+                    if (timeDiff > 0) {
+                        const distance = Math.sqrt(Math.pow(curr[0] - prev[0], 2) + Math.pow(curr[1] - prev[1], 2));
+                        speeds.push(distance / timeDiff);
+                    }
+
+                    if (i < trajectory.length - 1) {
+                        const next = trajectory[i + 1];
+                        const angle1 = Math.atan2(curr[1] - prev[1], curr[0] - prev[0]);
+                        const angle2 = Math.atan2(next[1] - curr[1], next[0] - curr[0]);
+                        angles.push(Math.abs(angle2 - angle1));
+                    }
                 }
-            }
 
-            var avgSpeed = speeds.reduce((a, b) => a + b, 0) / speeds.length;
-            var speedVariance = speeds.reduce((sum, s) => sum + Math.pow(s - avgSpeed, 2), 0) / speeds.length;
-            var speedStdDev = Math.sqrt(speedVariance);
-            var avgAngle = angles.reduce((a, b) => a + b, 0) / angles.length;
+                var avgSpeed = speeds.length > 0 ? speeds.reduce((a, b) => a + b, 0) / speeds.length : 0;
+                var speedVariance = speeds.length > 0 ? speeds.reduce((sum, s) => sum + Math.pow(s - avgSpeed, 2), 0) / speeds.length : 0;
+                var speedStdDev = Math.sqrt(speedVariance);
+                var avgAngle = angles.length > 0 ? angles.reduce((a, b) => a + b, 0) / angles.length : 0;
 
-            var botScore = 0;
-            var reasons = [];
+                var botScore = 0;
+                var reasons = [];
 
-            var speedCV = speedStdDev / avgSpeed;
-            if (speedCV < 0.3) {
-                botScore += 30;
-                reasons.push('속도가 매우 일정함');
-            }
+                var speedCV = avgSpeed > 0 ? speedStdDev / avgSpeed : 0;
+                if (speedCV < 0.3 && speeds.length > 10) {
+                    botScore += 30;
+                    reasons.push('속도가 매우 일정함');
+                }
 
-            if (avgAngle < 0.2) {
-                botScore += 25;
-                reasons.push('경로가 거의 직선');
-            }
+                if (avgAngle < 0.2 && angles.length > 10) {
+                    botScore += 25;
+                    reasons.push('경로가 거의 직선');
+                }
 
-            if (avgSpeed > 5000) {
-                botScore += 20;
-                reasons.push('비정상적으로 빠른 속도');
-            }
+                if (avgSpeed > 5000) {
+                    botScore += 20;
+                    reasons.push('비정상적으로 빠른 속도');
+                }
 
-            var integerClicks = clicks.filter(function (c) { return c.is_integer; }).length;
-            if (integerClicks > clicks.length * 0.8) {
-                botScore += 15;
-                reasons.push('클릭 좌표가 정수값');
-            }
+                var integerClicks = clicks.filter(function (c) { return c.is_integer; }).length;
+                if (clicks.length > 0 && integerClicks > clicks.length * 0.8) {
+                    botScore += 15;
+                    reasons.push('클릭 좌표가 정수값');
+                }
 
-            if (hovers.length === 0) {
-                botScore += 10;
-                reasons.push('호버 구간 없음');
-            }
+                if (hovers.length === 0) {
+                    botScore += 10;
+                    reasons.push('호버 구간 없음');
+                }
 
-            var scoreClass = 'human';
-            var verdict = '✅ 정상 사용자';
-            if (botScore > 60) {
-                scoreClass = 'bot';
-                verdict = '🤖 봇 의심';
-            } else if (botScore > 30) {
-                scoreClass = 'suspicious';
-                verdict = '⚠️ 의심스러움';
-            }
+                var scoreClass = 'human';
+                var verdict = '✅ 정상 사용자';
+                if (botScore > 60) {
+                    scoreClass = 'bot';
+                    verdict = '🤖 봇 의심';
+                } else if (botScore > 30) {
+                    scoreClass = 'suspicious';
+                    verdict = '⚠️ 의심스러움';
+                }
 
-            document.getElementById(containerId).innerHTML = `
-                <div class="bot-score ${scoreClass}">${verdict}</div>
-                <div class="analysis-grid">
-                    <div class="analysis-card">
-                        <h5 style="color: var(--primary-color);">봇 점수</h5>
-                        <p style="font-size: 24px; font-weight: 700;">${botScore.toFixed(1)} / 100</p>
+                document.getElementById(containerId).innerHTML = `
+                    <div class="bot-score ${scoreClass}">${verdict}</div>
+                    <div class="analysis-grid">
+                        <div class="analysis-card">
+                            <h5 style="color: var(--primary-color);">봇 점수</h5>
+                            <p style="font-size: 24px; font-weight: 700;">${botScore.toFixed(1)} / 100</p>
+                        </div>
+                        <div class="analysis-card">
+                            <h5 style="color: var(--primary-color);">속도 변동성</h5>
+                            <p style="font-size: 20px; font-weight: 700;">${(speedCV * 100).toFixed(1)}%</p>
+                            <small>${speedCV < 0.3 ? '⚠️ 낮음' : '✅ 정상'}</small>
+                        </div>
+                        <div class="analysis-card">
+                            <h5 style="color: var(--primary-color);">경로 곡선성</h5>
+                            <p style="font-size: 20px; font-weight: 700;">${avgAngle.toFixed(2)} rad</p>
+                            <small>${avgAngle < 0.2 ? '⚠️ 직선적' : '✅ 자연스러움'}</small>
+                        </div>
+                        <div class="analysis-card">
+                            <h5 style="color: var(--primary-color);">호버 구간</h5>
+                            <p style="font-size: 20px; font-weight: 700;">${hovers.length}개</p>
+                            <small>${hovers.length === 0 ? '⚠️ 없음' : '✅ 발견'}</small>
+                        </div>
                     </div>
-                    <div class="analysis-card">
-                        <h5 style="color: var(--primary-color);">속도 변동성</h5>
-                        <p style="font-size: 20px; font-weight: 700;">${(speedCV * 100).toFixed(1)}%</p>
-                        <small>${speedCV < 0.3 ? '⚠️ 낮음' : '✅ 정상'}</small>
-                    </div>
-                    <div class="analysis-card">
-                        <h5 style="color: var(--primary-color);">경로 곡선성</h5>
-                        <p style="font-size: 20px; font-weight: 700;">${avgAngle.toFixed(2)} rad</p>
-                        <small>${avgAngle < 0.2 ? '⚠️ 직선적' : '✅ 자연스러움'}</small>
-                    </div>
-                    <div class="analysis-card">
-                        <h5 style="color: var(--primary-color);">호버 구간</h5>
-                        <p style="font-size: 20px; font-weight: 700;">${hovers.length}개</p>
-                        <small>${hovers.length === 0 ? '⚠️ 없음' : '✅ 발견'}</small>
-                    </div>
-                </div>
-                ${reasons.length > 0 ? `
-                    <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: rgba(255, 152, 0, 0.1); border-left: 4px solid #FF9800; border-radius: var(--border-radius);">
-                        <h5>⚠️ 의심 요인:</h5>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            ${reasons.map(function (r) { return `<li>${r}</li>`; }).join('')}
-                        </ul>
-                    </div>
-                ` : ''}
-            `;
+                    ${reasons.length > 0 ? `
+                        <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: rgba(255, 152, 0, 0.1); border-left: 4px solid #FF9800; border-radius: var(--border-radius);">
+                            <h5>⚠️ 의심 요인:</h5>
+                            <ul style="margin: 0; padding-left: 20px;">
+                                ${reasons.map(function (r) { return `<li>${r}</li>`; }).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                `;
+            } catch (e) {
+                console.error('Bot Analysis Error:', e);
+                document.getElementById(containerId).innerHTML = `<div style="color:red; padding:10px; border:1px solid red;">분석 중 오류 발생: ${e.message}</div>`;
+            }
         }
 
         loadLogs();
+    </script>
+
+    <div id="error-console"
+        style="display:none; position:fixed; bottom:0; left:0; right:0; height:150px; background:rgba(0,0,0,0.8); color:red; overflow-y:scroll; z-index:99999; padding:10px; font-family:monospace; font-size:12px;">
+    </div>
+    <script>
+        window.onerror = function (msg, url, lineNo, columnNo, error) {
+            const consoleDiv = document.getElementById('error-console');
+            consoleDiv.style.display = 'block';
+            consoleDiv.innerHTML += `<div>[JS Error] ${msg} (${url}:${lineNo}:${columnNo})</div>`;
+            return false;
+        };
+
+        window.addEventListener('unhandledrejection', function (event) {
+            const consoleDiv = document.getElementById('error-console');
+            consoleDiv.style.display = 'block';
+            consoleDiv.innerHTML += `<div>[Promise Error] ${event.reason}</div>`;
+        });
+
+        // ============================================
+        // 관리 패널 기능
+        // ============================================
+
+        async function updateAdminPanel(log) {
+            const panel = document.getElementById('admin-panel');
+            const userInfo = document.getElementById('admin-user-info');
+            const badge = document.getElementById('admin-restriction-badge');
+            const unrestrictBtn = document.getElementById('btn-unrestrict');
+
+            const meta = log.metadata || {};
+            const email = meta.user_email || '-';
+            const bookingId = meta.booking_id || '-';
+            const perfTitle = meta.performance_title || '-';
+            const cancelled = meta.cancelled
+                ? `취소됨 [${meta.cancelled_by || '관리자'}, ${meta.cancel_reason || '-'}]`
+                : '';
+
+            userInfo.innerHTML = `
+                <dt>아이디</dt><dd>${email}</dd>
+                <dt>예매번호</dt><dd>${bookingId}</dd>
+                <dt>공연</dt><dd>${perfTitle}</dd>
+                <dt>파일</dt><dd style="font-size:12px; color:#9ca3af;">${currentFilename || '-'}</dd>
+                ${cancelled ? `<dt>상태</dt><dd style="color:#ef4444; font-weight:700;">${cancelled}</dd>` : ''}
+            `;
+
+            // 제한 상태 확인
+            if (email && email !== '-') {
+                try {
+                    const res = await fetch(`/api/admin/check-restriction/${encodeURIComponent(email)}`);
+                    const data = await res.json();
+
+                    if (data.restricted) {
+                        const levelNames = { 1: '1차 (3개월)', 2: '2차 (6개월)', 3: '3차 (영구)' };
+                        const expires = data.expires_at
+                            ? new Date(data.expires_at).toLocaleDateString('ko-KR')
+                            : '영구';
+                        badge.innerHTML = `<span class="restriction-badge level-${data.level}">🚫 ${levelNames[data.level]} 제한 중 (만료: ${expires})</span>`;
+                        unrestrictBtn.style.display = 'inline-flex';
+                    } else {
+                        badge.innerHTML = `<span class="restriction-badge none">✅ 제한 없음</span>`;
+                        unrestrictBtn.style.display = 'none';
+                    }
+                } catch (e) {
+                    badge.innerHTML = `<span class="restriction-badge none">✅ 제한 없음</span>`;
+                    unrestrictBtn.style.display = 'none';
+                }
+            } else {
+                badge.innerHTML = '';
+                unrestrictBtn.style.display = 'none';
+            }
+
+            panel.style.display = 'block';
+        }
+
+        function showRestrictModal() {
+            if (!currentSelectedLog || !currentSelectedLog.metadata.user_email) {
+                alert('사용자 정보가 없습니다.');
+                return;
+            }
+            document.getElementById('restrict-reason').value = '';
+            document.getElementById('restrict-modal').classList.add('show');
+        }
+
+        async function confirmRestrict() {
+            const level = parseInt(document.getElementById('restrict-level').value);
+            const reason = document.getElementById('restrict-reason').value.trim();
+
+            if (!reason) {
+                alert('사유를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/restrict-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentSelectedLog.metadata.user_email,
+                        level: level,
+                        reason: reason
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    closeModal('restrict-modal');
+                    updateAdminPanel(currentSelectedLog);
+                } else {
+                    alert('제한 적용 실패: ' + (data.detail || '알 수 없는 오류'));
+                }
+            } catch (e) {
+                alert('오류 발생: ' + e.message);
+            }
+        }
+
+        async function unrestrictUser() {
+            if (!currentSelectedLog || !currentSelectedLog.metadata.user_email) return;
+
+            const reason = prompt(`${currentSelectedLog.metadata.user_email}의 예매 제한 해제 사유를 입력해주세요:`);
+            if (!reason) return;
+
+            try {
+                const adminEmail = JSON.parse(sessionStorage.getItem('currentUser') || '{}').email || 'admin';
+                const res = await fetch('/api/admin/unrestrict-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentSelectedLog.metadata.user_email,
+                        reason: reason,
+                        unrestricted_by: adminEmail
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    updateAdminPanel(currentSelectedLog);
+                } else {
+                    alert('해제 실패: ' + (data.detail || '알 수 없는 오류'));
+                }
+            } catch (e) {
+                alert('오류 발생: ' + e.message);
+            }
+        }
+
+        function showCancelModal() {
+            if (!currentFilename) {
+                alert('로그 파일 정보가 없습니다.');
+                return;
+            }
+            document.getElementById('cancel-info').textContent =
+                `파일: ${currentFilename}\n예매번호: ${currentSelectedLog?.metadata?.booking_id || '-'}`;
+            document.getElementById('cancel-reason').value = '';
+            document.getElementById('cancel-modal').classList.add('show');
+        }
+
+        async function confirmCancel() {
+            const reason = document.getElementById('cancel-reason').value.trim();
+            if (!reason) {
+                alert('취소 사유를 입력해주세요.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/admin/cancel-booking', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: currentFilename,
+                        reason: reason,
+                        cancelled_by: JSON.parse(sessionStorage.getItem('currentUser') || '{}').email || 'admin'
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    closeModal('cancel-modal');
+                    currentSelectedLog.metadata.cancelled = true;
+                    currentSelectedLog.metadata.cancel_reason = reason;
+                    currentSelectedLog.metadata.cancelled_by = JSON.parse(sessionStorage.getItem('currentUser') || '{}').email || 'admin';
+                    updateAdminPanel(currentSelectedLog);
+                } else {
+                    alert('예매 취소 실패: ' + (data.detail || '알 수 없는 오류'));
+                }
+            } catch (e) {
+                alert('오류 발생: ' + e.message);
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
     </script>
 </body>
 

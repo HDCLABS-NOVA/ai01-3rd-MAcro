@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 - 예매 내역</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .mypage-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .mypage-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .mypage-header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FF3D7F, #9C27B0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .mypage-header p {
+            color: #9ca3af;
+            margin-top: 6px;
+        }
+
+        .user-badge {
+            display: inline-block;
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .booking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .booking-card {
+            background: var(--card-bg, #1a1a2e);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .booking-card:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+
+        .booking-summary {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .booking-summary:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .booking-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: #e2e8f0;
+        }
+
+        .booking-date {
+            font-size: 13px;
+            color: #9ca3af;
+        }
+
+        .booking-id {
+            font-size: 13px;
+            color: #64748b;
+            font-family: monospace;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-ok {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
+        .status-cancel {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+        }
+
+        .booking-detail {
+            display: none;
+            padding: 0 20px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            animation: slideDown 0.25s ease;
+        }
+
+        .booking-detail.open {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            padding-top: 16px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        .delivery-section {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(139, 92, 246, 0.08);
+            border-radius: 10px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .delivery-section h4 {
+            font-size: 14px;
+            color: #a78bfa;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .delivery-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .delivery-row label {
+            font-size: 13px;
+            color: #9ca3af;
+            min-width: 70px;
+        }
+
+        .delivery-row span {
+            font-size: 14px;
+            color: #e2e8f0;
+        }
+
+        .delivery-input {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e2e8f0;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .delivery-input:focus {
+            border-color: #8b5cf6;
+        }
+
+        .btn-save {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+
+        .btn-save:hover {
+            transform: scale(1.03);
+        }
+
+        .delivery-status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .ds-preparing {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+        }
+
+        .ds-shipping {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+        }
+
+        .ds-delivered {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .restriction-banner {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: none;
+        }
+
+        .restriction-banner p {
+            color: #f87171;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <a href="index.html" class="logo">🎫 Ticket</a>
+            <nav>
+                <ul class="nav-menu">
+                    <li><a href="index.html">공연</a></li>
+                    <li><a href="mypage.html" style="color: var(--primary-color); font-weight: 700;">마이페이지</a></li>
+                </ul>
+            </nav>
+            <div class="user-menu"></div>
+        </div>
+    </header>
+
+    <main class="page-wrapper">
+        <div class="mypage-container">
+            <div class="mypage-header">
+                <h1>👤 마이페이지</h1>
+                <div class="user-badge" id="user-email-badge">-</div>
+                <p>나의 예매 내역을 확인하세요</p>
+            </div>
+
+            <div class="restriction-banner" id="restriction-banner">
+                <p>⚠️ 현재 예매 제한 상태입니다. 문의사항은 고객센터로 연락해주세요.</p>
+            </div>
+
+            <div class="booking-list" id="booking-list">
+                <div class="empty-state">
+                    <div class="icon">📋</div>
+                    <p>예매 내역을 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+        let bookings = [];
+
+        async function loadBookings() {
+            const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+            if (!user.email) {
+                document.getElementById('booking-list').innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">🔒</div>
+                        <p>로그인이 필요합니다</p>
+                        <button class="btn btn-primary" style="margin-top:16px;" onclick="location.href='index.html'">로그인하기</button>
+                    </div>`;
+                return;
+            }
+
+            document.getElementById('user-email-badge').textContent = user.email;
+
+            // 제한 상태 서버에서 실시간 확인
+            try {
+                const rRes = await fetch(`/api/admin/check-restriction/${encodeURIComponent(user.email)}`);
+                const rData = await rRes.json();
+                if (rData.restricted) {
+                    document.getElementById('restriction-banner').style.display = 'block';
+                }
+            } catch (e) { }
+
+            try {
+                const res = await fetch(`/api/mypage/bookings/${encodeURIComponent(user.email)}`);
+                const data = await res.json();
+                bookings = data.bookings || [];
+
+                if (bookings.length === 0) {
+                    document.getElementById('booking-list').innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">🎫</div>
+                            <p>예매 내역이 없습니다</p>
+                        </div>`;
+                    return;
+                }
+
+                renderBookings();
+            } catch (e) {
+                document.getElementById('booking-list').innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">⚠️</div>
+                        <p>예매 내역을 불러올 수 없습니다</p>
+                    </div>`;
+            }
+        }
+
+        function renderBookings() {
+            const container = document.getElementById('booking-list');
+            container.innerHTML = bookings.map((b, i) => {
+                const status = b.cancelled
+                    ? '<span class="status-badge status-cancel">🚫 취소</span>'
+                    : '<span class="status-badge status-ok">✅ 예매완료</span>';
+
+                const paymentNames = { card: '신용카드', bank: '계좌이체', phone: '휴대폰결제', kakao: '카카오페이' };
+                const discountNames = { disabled: '할인 없음', national_merit: '국가유공자', disabled_person: '장애인', senior: '경로우대', youth: '청소년' };
+                const deliveryTypeNames = { pickup: '현장수령', delivery: '배송' };
+                const seats = (b.final_seats || []).join(', ') || '-';
+
+                const dsClass = b.delivery_status === '배송중' ? 'ds-shipping' : b.delivery_status === '배송완료' ? 'ds-delivered' : 'ds-preparing';
+
+                let deliveryHtml = '';
+                if (b.delivery_type === 'delivery') {
+                    deliveryHtml = `
+                        <div class="delivery-section">
+                            <h4>📦 배송 정보</h4>
+                            <div class="delivery-row">
+                                <label>배송 상태</label>
+                                <span class="delivery-status-badge ${dsClass}">${b.delivery_status}</span>
+                            </div>
+                            <div class="delivery-row">
+                                <label>배송지</label>
+                                <input class="delivery-input" id="addr-${i}" value="${b.delivery_address || ''}" placeholder="배송지를 입력해주세요">
+                                <button class="btn-save" onclick="saveAddress(${i})">수정</button>
+                            </div>
+                        </div>`;
+                }
+
+                return `
+                    <div class="booking-card" id="card-${i}">
+                        <div class="booking-summary" onclick="toggleDetail(${i})">
+                            <div>
+                                <div class="booking-title">${b.performance_title}</div>
+                                <div class="booking-date">${b.selected_date} ${b.selected_time}</div>
+                            </div>
+                            <div class="booking-id">${b.booking_id}</div>
+                            ${status}
+                        </div>
+                        <div class="booking-detail" id="detail-${i}">
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">좌석</span>
+                                    <span class="detail-value">${seats}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">결제 수단</span>
+                                    <span class="detail-value">${paymentNames[b.payment_type] || b.payment_type}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">할인 권종</span>
+                                    <span class="detail-value">${discountNames[b.selected_discount] || b.selected_discount}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">수령 방법</span>
+                                    <span class="detail-value">${deliveryTypeNames[b.delivery_type] || b.delivery_type}</span>
+                                </div>
+                            </div>
+                            ${deliveryHtml}
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function toggleDetail(index) {
+            const detail = document.getElementById(`detail-${index}`);
+            detail.classList.toggle('open');
+        }
+
+        async function saveAddress(index) {
+            const addr = document.getElementById(`addr-${index}`).value.trim();
+            if (!addr) { alert('배송지를 입력해주세요.'); return; }
+
+            try {
+                const res = await fetch('/api/mypage/update-delivery', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        filename: bookings[index].filename,
+                        delivery_address: addr
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert('배송지가 수정되었습니다.');
+                    bookings[index].delivery_address = addr;
+                } else {
+                    alert('수정 실패: ' + (data.detail || ''));
+                }
+            } catch (e) {
+                alert('오류: ' + e.message);
+            }
+        }
+
+        loadBookings();
+    </script>
+</body>
+
+</html>

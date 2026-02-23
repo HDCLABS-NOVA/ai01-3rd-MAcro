@@ -84,11 +84,20 @@ async function login(email, password) {
         };
 
         sessionStorage.setItem('currentUser', JSON.stringify(session));
+        sessionStorage.setItem('user', JSON.stringify(data.user));
+
+        // 제한 상태 저장
+        if (data.restriction) {
+            sessionStorage.setItem('restriction', JSON.stringify(data.restriction));
+        } else {
+            sessionStorage.removeItem('restriction');
+        }
 
         return {
             success: true,
             message: data.message,
-            user: data.user
+            user: data.user,
+            restriction: data.restriction
         };
     } catch (error) {
         throw new Error(error.message || '로그인에 실패했습니다.');
@@ -180,8 +189,13 @@ function updateUserMenu() {
     const currentUser = getCurrentUser();
 
     if (currentUser) {
+        const adminBtn = isAdmin() ? '<a href="admin.html" class="btn btn-outline" style="margin-right:8px; text-decoration: none; border-color: var(--primary-color); color: var(--primary-color);">⚙️ 관리자</a>' : '';
+        const isViewer = window.location.pathname.includes('viewer');
+        const mypageBtn = isViewer ? '' : '<a href="mypage.html" class="btn btn-outline" style="margin-right:8px; text-decoration: none;">👤 마이페이지</a>';
         userMenuDiv.innerHTML = `
       <span>${currentUser.name}님</span>
+      ${adminBtn}
+      ${mypageBtn}
       <button class="btn btn-secondary" onclick="logout()">로그아웃</button>
     `;
     } else {

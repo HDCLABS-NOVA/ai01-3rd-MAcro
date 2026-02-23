@@ -73,11 +73,23 @@ DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
 USERS_FILE = os.path.join(DATA_DIR, "users.json")
+RESTRICTED_FILE = os.path.join(DATA_DIR, "restricted_users.json")
+HISTORY_FILE = os.path.join(DATA_DIR, "restriction_history.json")
 
 # 사용자 파일이 없으면 초기화
 if not os.path.exists(USERS_FILE):
     with open(USERS_FILE, 'w', encoding='utf-8') as f:
         json.dump({"users": []}, f, ensure_ascii=False, indent=2)
+
+# 제한 사용자 파일이 없으면 초기화
+if not os.path.exists(RESTRICTED_FILE):
+    with open(RESTRICTED_FILE, 'w', encoding='utf-8') as f:
+        json.dump({"restricted_users": []}, f, ensure_ascii=False, indent=2)
+
+# 제한 이력 파일이 없으면 초기화
+if not os.path.exists(HISTORY_FILE):
+    with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+        json.dump({"history": []}, f, ensure_ascii=False, indent=2)
 
 # 기본 관리자 계정 생성
 def init_admin_accounts():
@@ -1897,7 +1909,6 @@ class LogData(BaseModel):
     metadata: Dict[str, Any]
     stages: Dict[str, Any]
 
-
 class QueueJoinData(BaseModel):
     performance_id: str
     flow_id: str
@@ -1920,6 +1931,17 @@ class QueueEnterData(BaseModel):
     performance_id: Optional[str] = ""
     flow_id: Optional[str] = ""
     session_id: Optional[str] = ""
+
+class RestrictUser(BaseModel):
+    email: str
+    level: int  # 1, 2, 3
+    reason: str
+    restricted_by: str = "admin@ticket.com"
+
+class CancelBooking(BaseModel):
+    filename: str
+    reason: str = ""
+    cancelled_by: str = "admin@ticket.com"
 
 # API 엔드포인트
 
@@ -1989,6 +2011,39 @@ async def login(login_data: LoginData, request: Request):
 
         _record_login_attempt(ip_key, login_data.email, True, now_ms)
         
+        # 제한 상태 확인
+        restriction = None
+        try:
+            with open(RESTRICTED_FILE, 'r', encoding='utf-8') as f:
+                restricted_db = json.load(f)
+            restricted_user = next((r for r in restricted_db['restricted_users'] if r['email'] == user['email']), None)
+            if restricted_user:
+                # 만료 체크 (영구 제한은 expires_at이 null)
+                if restricted_user.get('expires_at'):
+                    expires_at = datetime.fromisoformat(restricted_user['expires_at'])
+                    if datetime.now().astimezone() > expires_at:
+                        # 만료됨 - 자동 해제
+                        restricted_db['restricted_users'] = [r for r in restricted_db['restricted_users'] if r['email'] != user['email']]
+                        with open(RESTRICTED_FILE, 'w', encoding='utf-8') as f:
+                            json.dump(restricted_db, f, ensure_ascii=False, indent=2)
+                    else:
+                        restriction = {
+                            "level": restricted_user['level'],
+                            "reason": restricted_user['reason'],
+                            "expires_at": restricted_user['expires_at'],
+                            "restricted_at": restricted_user['restricted_at']
+                        }
+                else:
+                    # 영구 제한
+                    restriction = {
+                        "level": restricted_user['level'],
+                        "reason": restricted_user['reason'],
+                        "expires_at": None,
+                        "restricted_at": restricted_user['restricted_at']
+                    }
+        except:
+            pass
+
         return {
             "success": True,
             "message": "로그인 성공",
@@ -1996,7 +2051,8 @@ async def login(login_data: LoginData, request: Request):
                 "email": user['email'],
                 "name": user['name'],
                 "phone": user['phone']
-            }
+            },
+            "restriction": restriction
         }
     except HTTPException:
         raise
@@ -2314,7 +2370,6 @@ async def get_logs():
                     rel = rel.replace('\\', '/')
                     log_files.append(rel)
         log_files.sort(reverse=True)
-
         return {
             "success": True,
             "count": len(log_files),
@@ -2576,6 +2631,373 @@ async def delete_performance(performance_id: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"공연 삭제 실패: {str(e)}")
+
+
+# ============================================
+# 예매 제한 관리 API
+# ============================================
+
+RESTRICTION_DURATIONS = {
+    1: timedelta(days=90),    # 1차: 3개월
+    2: timedelta(days=180),   # 2차: 6개월
+    3: None                   # 3차: 영구
+}
+
+@app.post("/api/admin/restrict-user")
+async def restrict_user(data: RestrictUser):
+    """사용자에게 예매 제한을 부여합니다."""
+    try:
+        if data.level not in [1, 2, 3]:
+            raise HTTPException(status_code=400, detail="제한 단계는 1, 2, 3 중 하나여야 합니다.")
+
+        with open(RESTRICTED_FILE, 'r', encoding='utf-8') as f:
+            restricted_db = json.load(f)
+
+        # 이미 제한된 사용자인지 확인
+        existing = next((r for r in restricted_db['restricted_users'] if r['email'] == data.email), None)
+        if existing:
+            # 단계 업데이트
+            existing['level'] = data.level
+            existing['reason'] = data.reason
+            existing['restricted_at'] = datetime.now().astimezone().isoformat()
+            existing['restricted_by'] = data.restricted_by
+            duration = RESTRICTION_DURATIONS.get(data.level)
+            existing['expires_at'] = (datetime.now().astimezone() + duration).isoformat() if duration else None
+        else:
+            # 새로 제한
+            now = datetime.now().astimezone()
+            duration = RESTRICTION_DURATIONS.get(data.level)
+            restricted_db['restricted_users'].append({
+                "email": data.email,
+                "level": data.level,
+                "reason": data.reason,
+                "restricted_at": now.isoformat(),
+                "expires_at": (now + duration).isoformat() if duration else None,
+                "restricted_by": data.restricted_by
+            })
+
+        with open(RESTRICTED_FILE, 'w', encoding='utf-8') as f:
+            json.dump(restricted_db, f, ensure_ascii=False, indent=2)
+
+        # 이력 기록
+        try:
+            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+                history_db = json.load(f)
+            history_db['history'].append({
+                "action": "restrict",
+                "email": data.email,
+                "level": data.level,
+                "reason": data.reason,
+                "by": data.restricted_by,
+                "timestamp": datetime.now().astimezone().isoformat()
+            })
+            with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+                json.dump(history_db, f, ensure_ascii=False, indent=2)
+        except:
+            pass
+
+        level_names = {1: "1차 (3개월)", 2: "2차 (6개월)", 3: "3차 (영구)"}
+        return {
+            "success": True,
+            "message": f"{data.email}에게 {level_names[data.level]} 예매 제한이 적용되었습니다."
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"제한 적용 실패: {str(e)}")
+
+
+@app.post("/api/admin/unrestrict-user")
+async def unrestrict_user(data: dict):
+    """사용자의 예매 제한을 해제합니다."""
+    try:
+        email = data.get('email')
+        reason = data.get('reason', '')
+        unrestricted_by = data.get('unrestricted_by', 'admin')
+        if not email:
+            raise HTTPException(status_code=400, detail="이메일이 필요합니다.")
+        if not reason:
+            raise HTTPException(status_code=400, detail="해제 사유를 입력해주세요.")
+
+        with open(RESTRICTED_FILE, 'r', encoding='utf-8') as f:
+            restricted_db = json.load(f)
+
+        original_len = len(restricted_db['restricted_users'])
+        restricted_db['restricted_users'] = [r for r in restricted_db['restricted_users'] if r['email'] != email]
+
+        if len(restricted_db['restricted_users']) == original_len:
+            raise HTTPException(status_code=404, detail="해당 사용자는 제한 목록에 없습니다.")
+
+        with open(RESTRICTED_FILE, 'w', encoding='utf-8') as f:
+            json.dump(restricted_db, f, ensure_ascii=False, indent=2)
+
+        # 해제 이력 기록
+        try:
+            with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+                history_db = json.load(f)
+            history_db['history'].append({
+                "action": "unrestrict",
+                "email": email,
+                "reason": reason,
+                "by": unrestricted_by,
+                "timestamp": datetime.now().astimezone().isoformat()
+            })
+            with open(HISTORY_FILE, 'w', encoding='utf-8') as f:
+                json.dump(history_db, f, ensure_ascii=False, indent=2)
+        except:
+            pass
+
+        return {"success": True, "message": f"{email}의 예매 제한이 해제되었습니다."}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"제한 해제 실패: {str(e)}")
+
+
+@app.get("/api/admin/restriction-history")
+async def get_restriction_history():
+    """제한/해제 이력을 반환합니다."""
+    try:
+        with open(HISTORY_FILE, 'r', encoding='utf-8') as f:
+            history_db = json.load(f)
+
+        # 사용자 이름 매핑
+        with open(USERS_FILE, 'r', encoding='utf-8') as f:
+            users_db = json.load(f)
+        name_map = {u['email']: u.get('name', '-') for u in users_db.get('users', [])}
+
+        # 현재 제한 상태 매핑
+        with open(RESTRICTED_FILE, 'r', encoding='utf-8') as f:
+            restricted_db = json.load(f)
+        restricted_emails = {r['email']: r for r in restricted_db.get('restricted_users', [])}
+
+        # 이메일별 그룹핑
+        grouped = {}
+        for h in history_db.get('history', []):
+            email = h.get('email', '')
+            if email not in grouped:
+                grouped[email] = {
+                    "email": email,
+                    "name": name_map.get(email, '-'),
+                    "currently_restricted": email in restricted_emails,
+                    "current_level": restricted_emails.get(email, {}).get('level', None),
+                    "history": []
+                }
+            grouped[email]['history'].append(h)
+
+        # 최신순 정렬
+        result = sorted(grouped.values(), key=lambda x: x['history'][-1]['timestamp'] if x['history'] else '', reverse=True)
+        return {"users": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"이력 조회 실패: {str(e)}")
+
+
+@app.get("/api/admin/cancelled-bookings")
+async def get_cancelled_bookings():
+    """취소된 예매 목록을 반환합니다."""
+    try:
+        # 사용자 이름 매핑
+        with open(USERS_FILE, 'r', encoding='utf-8') as f:
+            users_db = json.load(f)
+        name_map = {u['email']: u.get('name', '-') for u in users_db.get('users', [])}
+
+        cancelled = []
+        for filename in os.listdir(LOGS_DIR):
+            if not filename.endswith('.json'):
+                continue
+            filepath = os.path.join(LOGS_DIR, filename)
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    log = json.load(f)
+                meta = log.get('metadata', {})
+                if meta.get('cancelled'):
+                    cancelled.append({
+                        "filename": filename,
+                        "email": meta.get('user_email', '-'),
+                        "name": name_map.get(meta.get('user_email', ''), '-'),
+                        "booking_id": meta.get('booking_id', '-'),
+                        "performance_title": meta.get('performance_title', '-'),
+                        "selected_date": meta.get('selected_date', '-'),
+                        "selected_time": meta.get('selected_time', '-'),
+                        "cancelled_by": meta.get('cancelled_by', '-'),
+                        "cancel_reason": meta.get('cancel_reason', '-'),
+                        "cancelled_at": meta.get('cancelled_at', '')
+                    })
+            except:
+                continue
+
+        cancelled.sort(key=lambda x: x['cancelled_at'], reverse=True)
+        return {"bookings": cancelled}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"취소 내역 조회 실패: {str(e)}")
+
+
+@app.get("/api/admin/restricted-users")
+async def get_restricted_users():
+    """제한된 사용자 목록을 반환합니다."""
+    try:
+        with open(RESTRICTED_FILE, 'r', encoding='utf-8') as f:
+            restricted_db = json.load(f)
+
+        # 만료된 제한 자동 제거
+        now = datetime.now().astimezone()
+        active = []
+        for r in restricted_db['restricted_users']:
+            if r.get('expires_at'):
+                if datetime.fromisoformat(r['expires_at']) > now:
+                    active.append(r)
+            else:
+                active.append(r)  # 영구 제한
+
+        # 변경사항 저장
+        if len(active) != len(restricted_db['restricted_users']):
+            restricted_db['restricted_users'] = active
+            with open(RESTRICTED_FILE, 'w', encoding='utf-8') as f:
+                json.dump(restricted_db, f, ensure_ascii=False, indent=2)
+
+        return {"restricted_users": active}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"제한 목록 조회 실패: {str(e)}")
+
+
+@app.get("/api/admin/check-restriction/{email}")
+async def check_restriction(email: str):
+    """특정 사용자의 제한 상태를 확인합니다."""
+    try:
+        with open(RESTRICTED_FILE, 'r', encoding='utf-8') as f:
+            restricted_db = json.load(f)
+
+        restricted_user = next((r for r in restricted_db['restricted_users'] if r['email'] == email), None)
+
+        if not restricted_user:
+            return {"restricted": False}
+
+        # 만료 체크
+        if restricted_user.get('expires_at'):
+            if datetime.now().astimezone() > datetime.fromisoformat(restricted_user['expires_at']):
+                # 만료됨 - 자동 해제
+                restricted_db['restricted_users'] = [r for r in restricted_db['restricted_users'] if r['email'] != email]
+                with open(RESTRICTED_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(restricted_db, f, ensure_ascii=False, indent=2)
+                return {"restricted": False}
+
+        return {
+            "restricted": True,
+            "level": restricted_user['level'],
+            "reason": restricted_user['reason'],
+            "restricted_at": restricted_user['restricted_at'],
+            "expires_at": restricted_user.get('expires_at')
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"제한 확인 실패: {str(e)}")
+
+
+@app.post("/api/admin/cancel-booking")
+async def cancel_booking(data: CancelBooking):
+    """예매를 취소합니다 (로그 파일의 status를 cancelled로 변경)."""
+    try:
+        filepath = os.path.join(LOGS_DIR, data.filename)
+        if not os.path.exists(filepath):
+            raise HTTPException(status_code=404, detail="로그 파일을 찾을 수 없습니다.")
+
+        with open(filepath, 'r', encoding='utf-8') as f:
+            log_data = json.load(f)
+
+        # metadata에 취소 정보 추가
+        log_data['metadata']['cancelled'] = True
+        log_data['metadata']['cancelled_at'] = datetime.now().astimezone().isoformat()
+        log_data['metadata']['cancel_reason'] = data.reason
+        log_data['metadata']['cancelled_by'] = data.cancelled_by
+
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(log_data, f, ensure_ascii=False, indent=2)
+
+        return {"success": True, "message": f"예매가 취소되었습니다: {data.filename}"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"예매 취소 실패: {str(e)}")
+
+
+# ===== 마이페이지 API =====
+
+@app.get("/api/mypage/bookings/{email}")
+async def get_user_bookings(email: str):
+    """사용자의 예매 내역을 조회합니다."""
+    try:
+        bookings = []
+        for filename in os.listdir(LOGS_DIR):
+            if not filename.endswith('.json'):
+                continue
+            filepath = os.path.join(LOGS_DIR, filename)
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    log = json.load(f)
+                meta = log.get('metadata', {})
+                # 해당 이메일의 완료된 예매만
+                if meta.get('user_email') != email:
+                    continue
+                if not meta.get('is_completed'):
+                    continue
+
+                stages = log.get('stages', {})
+                discount = stages.get('discount', {})
+                order_info = stages.get('order_info', {})
+                payment = stages.get('payment', {})
+
+                booking = {
+                    "filename": filename,
+                    "performance_title": meta.get('performance_title', '-'),
+                    "selected_date": meta.get('selected_date', '-'),
+                    "selected_time": meta.get('selected_time', '-'),
+                    "booking_id": meta.get('booking_id', '-'),
+                    "cancelled": meta.get('cancelled', False),
+                    "cancel_reason": meta.get('cancel_reason', ''),
+                    "final_seats": meta.get('final_seats', []),
+                    "seat_grades": meta.get('seat_grades', []),
+                    "payment_type": payment.get('payment_type', '-'),
+                    "selected_discount": discount.get('selected_discount', 'disabled'),
+                    "delivery_type": order_info.get('delivery_type', 'pickup'),
+                    "delivery_address": meta.get('delivery_address', ''),
+                    "delivery_status": meta.get('delivery_status', '준비중'),
+                    "created_at": meta.get('created_at', '')
+                }
+                bookings.append(booking)
+            except:
+                continue
+
+        # 최신순 정렬
+        bookings.sort(key=lambda x: x['created_at'], reverse=True)
+        return {"bookings": bookings}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"예매 내역 조회 실패: {str(e)}")
+
+
+class UpdateDelivery(BaseModel):
+    filename: str
+    delivery_address: str
+
+@app.post("/api/mypage/update-delivery")
+async def update_delivery(data: UpdateDelivery):
+    """배송지 주소를 수정합니다."""
+    try:
+        filepath = os.path.join(LOGS_DIR, data.filename)
+        if not os.path.exists(filepath):
+            raise HTTPException(status_code=404, detail="예매 정보를 찾을 수 없습니다.")
+
+        with open(filepath, 'r', encoding='utf-8') as f:
+            log_data = json.load(f)
+
+        log_data['metadata']['delivery_address'] = data.delivery_address
+
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(log_data, f, ensure_ascii=False, indent=2)
+
+        return {"success": True, "message": "배송지가 수정되었습니다."}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"배송지 수정 실패: {str(e)}")
 
 
 # 정적 파일 서빙 (HTML, CSS, JS)
