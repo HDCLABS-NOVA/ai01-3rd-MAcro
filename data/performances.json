@@ -31,7 +31,7 @@
                     "price": 90000
                 }
             ],
-            "image": "이미지/아이유 1.jfif",
+            "image": "이미지/아이유 .jpg",
             "description": "아이유의 2026년 첫 단독 콘서트",
             "open_time": "2026-02-09T09:28:21.598Z",
             "status": "upcoming"
@@ -335,7 +335,7 @@
                     "seats": 300
                 }
             ],
-            "image": "이미지/우주소녀 1.jpg",
+            "image": "이미지/우주소녀 2.jpg",
             "description": "",
             "open_time": "2026-02-05T14:38:00+09:00",
             "status": "upcoming"
