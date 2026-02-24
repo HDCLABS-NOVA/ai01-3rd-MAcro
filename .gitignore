@@ -27,3 +27,7 @@ Thumbs.db
 3rd
 logs
 model/data/raw/*
+model/block_report/*
+model/model_score/*
+model/reports/*
+model/rule_score/*

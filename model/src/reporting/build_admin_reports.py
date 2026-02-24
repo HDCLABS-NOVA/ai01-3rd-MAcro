@@ -38,6 +38,9 @@ LLM_REPORT_ENABLED = os.getenv("LLM_REPORT_ENABLED", "true").strip().lower() in 
 LLM_REPORT_MODEL = os.getenv("LLM_REPORT_MODEL", "gpt-4.1-mini").strip() or "gpt-4.1-mini"
 LLM_REPORT_TIMEOUT_SEC = int(os.getenv("LLM_REPORT_TIMEOUT_SEC", "20"))
 LLM_REPORT_API_BASE = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1").rstrip("/")
+RISK_ALLOW_THRESHOLD_ENV = os.getenv("RISK_ALLOW_THRESHOLD")
+RISK_CHALLENGE_THRESHOLD_ENV = os.getenv("RISK_CHALLENGE_THRESHOLD")
+RISK_DECISION_THRESHOLDS_DEFAULT = {"allow": 0.30, "challenge": 0.70}
 
 
 def clamp01(value: float) -> float:
@@ -382,8 +385,15 @@ def resolve_thresholds(
     allow_override: Optional[str],
     challenge_override: Optional[str],
 ) -> Dict[str, float]:
-    allow = safe_float(thresholds.get("risk_allow"), 0.30)
-    challenge = safe_float(thresholds.get("risk_challenge"), 0.70)
+    # 배치 리포트도 런타임과 동일하게 정책 임계값(기본 0.30/0.70)을 사용한다.
+    # 모델 artifacts의 threshold 값에는 의존하지 않는다.
+    allow = float(RISK_DECISION_THRESHOLDS_DEFAULT["allow"])
+    challenge = float(RISK_DECISION_THRESHOLDS_DEFAULT["challenge"])
+
+    if RISK_ALLOW_THRESHOLD_ENV is not None:
+        allow = safe_float(RISK_ALLOW_THRESHOLD_ENV, allow)
+    if RISK_CHALLENGE_THRESHOLD_ENV is not None:
+        challenge = safe_float(RISK_CHALLENGE_THRESHOLD_ENV, challenge)
 
     if allow_override is not None and allow_override != "":
         allow = safe_float(allow_override, allow)
@@ -989,6 +999,9 @@ def main() -> None:
                 if str(item.get("feature", "")).strip()
             ]
 
+        # model/rule 점수 스케일 안정화를 위해 개별 점수를 먼저 0~1로 정규화한다.
+        model_score = clamp01(model_score)
+        rule_score = clamp01(rule_score)
         risk_score = clamp01(args.w_model * model_score + args.w_rule * rule_score)
         decision = decision_from_risk(risk_score, thresholds)
         if hard_action == "block":

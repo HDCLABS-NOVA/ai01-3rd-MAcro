@@ -1,4 +1,4 @@
-﻿// performance_detail.js - 怨듭뿰 ?곸꽭 ?섏씠吏
+﻿// performance_detail.js - 공연 상세 페이지
 
 let currentPerformance = null;
 let selectedDate = "";
@@ -27,7 +27,7 @@ async function issueBookingStartToken(performanceId) {
   const sessionId = String(meta.session_id || "").trim();
 
   if (!flowId || !sessionId) {
-    return { ok: false, message: "flow_id/session_id媛 ?놁뼱 ?湲곗뿴 ?낆옣 ?좏겙??諛쒓툒?????놁뒿?덈떎." };
+    return { ok: false, message: "flow_id/session_id가 없어 대기열 입장 토큰을 발급할 수 없습니다." };
   }
 
   const payload = {
@@ -52,19 +52,19 @@ async function issueBookingStartToken(performanceId) {
       return { ok: false, message: REALTIME_BLOCK_POPUP_MESSAGE };
     }
     if (!res.ok || !body?.success) {
-      return { ok: false, message: body?.detail || body?.message || "?좏겙 諛쒓툒 ?ㅽ뙣" };
+      return { ok: false, message: body?.detail || body?.message || "토큰 발급 실패" };
     }
 
     const token = String(body.start_token || "");
     if (!token) {
-      return { ok: false, message: "?좏겙 媛믪씠 鍮꾩뼱 ?덉뒿?덈떎." };
+      return { ok: false, message: "토큰 값이 비어 있습니다." };
     }
 
     sessionStorage.setItem("booking_start_token", token);
     sessionStorage.setItem("booking_start_token_expires_epoch_ms", String(body.expires_epoch_ms || 0));
     return { ok: true, token };
   } catch (e) {
-    return { ok: false, message: e?.message || "?좏겙 諛쒓툒 ?붿껌 ?ㅽ뙣" };
+    return { ok: false, message: e?.message || "토큰 발급 요청 실패" };
   }
 }
 
@@ -78,16 +78,16 @@ async function loadPerformance() {
   try {
     const response = await fetch(`/api/performances/${encodeURIComponent(perfId)}`, { cache: "no-store" });
     if (!response.ok) {
-      throw new Error("怨듭뿰 ?곗씠???붿껌 ?ㅽ뙣");
+      throw new Error("공연 데이터 요청 실패");
     }
 
     const payload = await response.json();
     currentPerformance = payload?.performance || null;
     if (!currentPerformance) {
-      throw new Error("怨듭뿰??李얠쓣 ???놁뒿?덈떎.");
+      throw new Error("공연을 찾을 수 없습니다.");
     }
 
-    // ?붽뎄?ы빆: ?곸꽭 ?섏씠吏 吏꾩엯 ?쒕쭏????긽 5珥????ㅽ뵂?쇰줈 ?ъ꽕??
+    // 요구사항: 상세 페이지 진입 시 항상 오픈 5초 전부터 시작
     currentPerformance.open_time = new Date(Date.now() + DETAIL_OPEN_DELAY_MS).toISOString();
     currentPerformance.status = "upcoming";
 
@@ -98,7 +98,7 @@ async function loadPerformance() {
     recordStageEntry("perf");
   } catch (error) {
     console.error(error);
-    showAlert("怨듭뿰 ?뺣낫瑜?遺덈윭?ㅻ뒗 ???ㅽ뙣?덉뒿?덈떎.", "error");
+    showAlert("공연 정보를 불러오는데 실패했습니다.", "error");
     setTimeout(() => navigateTo("index.html"), 1500);
   }
 }
@@ -114,13 +114,13 @@ function displayPerformance() {
   const openTimeAlert = !isOpen && openTime
     ? `
       <div class="alert alert-warning" style="margin-bottom: var(--spacing-lg);">
-        <h3 style="margin-bottom: var(--spacing-sm);">?덈ℓ ?ㅽ뵂 ?덉젙</h3>
+        <h3 style="margin-bottom: var(--spacing-sm);">예매 오픈 예정</h3>
         <p style="margin-bottom: var(--spacing-sm);">
-          <strong>?ㅽ뵂 ?쒓컙:</strong> ${formatOpenTimeDisplay(openTime)}
+          <strong>오픈 시간:</strong> ${formatOpenTimeDisplay(openTime)}
         </p>
         <div class="countdown-timer-detail" id="countdown-detail" data-open-time="${openTime.toISOString()}"></div>
         <p style="margin-top: var(--spacing-sm); font-size: 14px; opacity: 0.9;">
-          ?ㅽ뵂 ?쒓컙 ?댄썑 ?좎쭨? ?뚯감瑜??좏깮?????덉뒿?덈떎.
+          오픈 시간 이후 날짜와 회차를 선택할 수 있습니다.
         </p>
       </div>
     `
@@ -142,18 +142,18 @@ function displayPerformance() {
 
         <div class="card mt-lg">
           <div style="margin-bottom: var(--spacing-md);">
-            <strong>?μ냼:</strong> ${currentPerformance.venue || "-"}
+            <strong>장소:</strong> ${currentPerformance.venue || "-"}
           </div>
           <div style="margin-bottom: var(--spacing-md);">
-            <strong>移댄뀒怨좊━:</strong> ${getCategoryName(currentPerformance.category)}
+            <strong>카테고리:</strong> ${getCategoryName(currentPerformance.category)}
           </div>
           <div>
-            <strong>媛寃?</strong> ${getPriceRangeText(currentPerformance)}
+            <strong>가격:</strong> ${getPriceRangeText(currentPerformance)}
           </div>
         </div>
 
         <div class="card mt-lg">
-          <h3 style="margin-bottom: var(--spacing-md);">?좎쭨 ?좏깮</h3>
+          <h3 style="margin-bottom: var(--spacing-md);">날짜 선택</h3>
           <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--spacing-sm);" id="date-selection">
             ${(currentPerformance.dates || []).map((date) => `
               <button class="btn btn-outline date-btn" data-date="${date}" ${!isOpen ? "disabled" : ""}>
@@ -165,7 +165,7 @@ function displayPerformance() {
         </div>
 
         <div class="card mt-lg" id="time-selection-section" style="display: none;">
-          <h3 style="margin-bottom: var(--spacing-md);">?뚯감 ?좏깮</h3>
+          <h3 style="margin-bottom: var(--spacing-md);">회차 선택</h3>
           <div style="display: flex; gap: var(--spacing-sm); flex-wrap: wrap;" id="time-selection">
             ${(currentPerformance.times || []).map((time) => `
               <button class="btn btn-outline time-btn" data-time="${time}" ${!isOpen ? "disabled" : ""}>
@@ -201,14 +201,14 @@ function getBookingButton(isOpen, openTime) {
   if (!isOpen && openTime) {
     return `
       <button id="start-booking-btn" class="btn btn-primary btn-lg btn-block mt-xl" disabled style="cursor: not-allowed; opacity: 0.7;">
-        ?ㅽ뵂 ?湲?以?(${formatOpenTimeDisplay(openTime)})
+        오픈 대기 중 (${formatOpenTimeDisplay(openTime)})
       </button>
     `;
   }
 
   return `
     <button id="start-booking-btn" class="btn btn-primary btn-lg btn-block mt-xl" style="display: none;">
-      ?덈ℓ ?쒖옉
+      예매 시작
     </button>
   `;
 }
@@ -234,7 +234,7 @@ function attachEventListeners() {
 
 function selectDate(date, btnElement) {
   if (!isCurrentlyOpen()) {
-    showAlert("?ㅽ뵂 ?쒓컙 ?댄썑?먮쭔 ?좏깮?????덉뒿?덈떎.", "warning");
+    showAlert("오픈 시간 이후에만 선택할 수 있습니다.", "warning");
     return;
   }
 
@@ -261,7 +261,7 @@ function selectDate(date, btnElement) {
 
 function selectTime(time, btnElement) {
   if (!isCurrentlyOpen()) {
-    showAlert("?ㅽ뵂 ?쒓컙 ?댄썑?먮쭔 ?좏깮?????덉뒿?덈떎.", "warning");
+    showAlert("오픈 시간 이후에만 선택할 수 있습니다.", "warning");
     return;
   }
 
@@ -290,12 +290,12 @@ async function startBooking() {
   if (!requireLogin()) return;
 
   if (!isCurrentlyOpen()) {
-    showAlert("?ㅽ뵂 ?쒓컙 ?댄썑?먮쭔 ?덈ℓ?????덉뒿?덈떎.", "warning");
+    showAlert("오픈 시간 이후에만 예매할 수 있습니다.", "warning");
     return;
   }
 
   if (!selectedDate || !selectedTime) {
-    showAlert("?좎쭨? ?뚯감瑜?癒쇱? ?좏깮??二쇱꽭??", "warning");
+    showAlert("날짜와 회차를 먼저 선택해 주세요.", "warning");
     return;
   }
 
@@ -314,7 +314,7 @@ async function startBooking() {
 
   const tokenResult = await issueBookingStartToken(currentPerformance.id);
   if (!tokenResult.ok) {
-    showAlert(tokenResult.message || "?湲곗뿴 ?좏겙 諛쒓툒???ㅽ뙣?덉뒿?덈떎.", "error");
+    showAlert(tokenResult.message || "대기열 토큰 발급에 실패했습니다.", "error");
     return;
   }
 
@@ -401,7 +401,7 @@ function formatOpenTimeDisplay(date) {
   const day = date.getDate();
   const hours = date.getHours();
   const minutes = String(date.getMinutes()).padStart(2, "0");
-  const ampm = hours >= 12 ? "?ㅽ썑" : "?ㅼ쟾";
+  const ampm = hours >= 12 ? "오후" : "오전";
   const displayHours = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
   const dayOfWeek = getDayOfWeek(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`);
   return `${year}.${month}.${day} (${dayOfWeek}) ${ampm} ${displayHours}:${minutes}`;
@@ -418,7 +418,7 @@ function startDetailCountdown() {
     const totalSec = Math.max(0, Math.ceil(diff / 1000));
 
     if (totalSec <= 0) {
-      countdownEl.textContent = "?덈ℓ ?쒖옉!";
+      countdownEl.textContent = "예매 시작!";
       countdownEl.style.background = "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)";
       clearInterval(window.detailCountdownInterval);
 
@@ -433,8 +433,8 @@ function startDetailCountdown() {
     const minutes = Math.floor((totalSec % (60 * 60)) / 60);
     const seconds = Math.floor(totalSec % 60);
 
-    let text = "?ㅽ뵂源뚯? ";
-    if (days > 0) text += `${days}??`;
+    let text = "오픈까지 ";
+    if (days > 0) text += `${days}일 `;
     text += `${hours}시간 ${minutes}분 ${seconds}초`;
     countdownEl.textContent = text;
   };
@@ -459,13 +459,12 @@ function activateBookingPage() {
     bookingBtn.removeAttribute("disabled");
     bookingBtn.style.cursor = "pointer";
     bookingBtn.style.opacity = "1";
-    bookingBtn.textContent = "?덈ℓ ?쒖옉";
+    bookingBtn.textContent = "예매 시작";
     bookingBtn.style.display = "none";
   }
 
   attachEventListeners();
-  showAlert("?덈ℓ媛 ?쒖옉?섏뿀?듬땲?? ?좎쭨? ?뚯감瑜??좏깮??二쇱꽭??", "success");
+  showAlert("예매가 시작되었습니다. 날짜와 회차를 선택해 주세요.", "success");
 }
 
 loadPerformance();
-

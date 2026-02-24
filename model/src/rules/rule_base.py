@@ -1,11 +1,20 @@
+﻿"""
+룰 기반 리스크 평가 모듈.
+
+- hard rule: 명백한 위반 신호를 즉시 강한 액션(block/challenge)으로 승격
+- soft rule: 임계값 기반 신호를 점수(soft_score)로 누적
+"""
+
 from typing import Any, Dict, List, Tuple
 
 
 def clamp01(value: float) -> float:
+    """값을 0~1 범위로 고정한다."""
     return max(0.0, min(1.0, value))
 
 
 def _safe_float(value: Any, default: float = 0.0) -> float:
+    """숫자 변환 실패 시 기본값을 반환한다."""
     try:
         return float(value)
     except Exception:
@@ -13,13 +22,16 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
 
 
 def _promote_action(current: str, incoming: str) -> str:
+    """액션 우선순위(none < challenge < block)에 따라 더 강한 액션을 선택한다."""
     order = {"none": 0, "challenge": 1, "block": 2}
     return incoming if order.get(incoming, 0) > order.get(current, 0) else current
 
 
 def _count_untrusted_clicks(browser_log: Dict[str, Any]) -> int:
+    """브라우저 로그 전 단계에서 is_trusted=False 클릭 개수를 센다."""
     if not browser_log:
         return 0
+
     stages = browser_log.get("stages", {}) or {}
     total = 0
     for stage_data in stages.values():
@@ -31,6 +43,16 @@ def _count_untrusted_clicks(browser_log: Dict[str, Any]) -> int:
 
 
 def evaluate_rules(server_log: Dict[str, Any], browser_log: Dict[str, Any] | None = None) -> Dict[str, Any]:
+    """
+    서버/브라우저 로그를 바탕으로 룰을 평가한다.
+
+    반환값:
+    - hard_action: none/challenge/block
+    - hard_rules_triggered: 하드 룰 목록
+    - soft_score: 0~1로 정규화된 점수
+    - soft_rules_triggered: 소프트 룰 목록
+    - untrusted_click_count: 브라우저 비신뢰 클릭 수
+    """
     behavior = server_log.get("behavior", {}) if server_log else {}
     queue = server_log.get("queue", {}) if server_log else {}
     seat = server_log.get("seat", {}) if server_log else {}
@@ -42,9 +64,8 @@ def evaluate_rules(server_log: Dict[str, Any], browser_log: Dict[str, Any] | Non
     hard_action = "none"
 
     # ---- 하드 룰(즉시 게이트) ----
-    # 정책:
-    # 1) 불리언/명시적 위반은 즉시 block
-    # 2) 임계값 기반 급증은 soft score로만 반영
+    # 현재는 security.blocked=true 만 명백 위반으로 간주하여 즉시 block 승격.
+    # 나머지 임계값 기반 신호는 소프트 점수로만 반영한다.
     if bool(security.get("blocked")):
         hard_action = _promote_action(hard_action, "block")
         hard_rules.append("security.blocked=true")
@@ -59,8 +80,9 @@ def evaluate_rules(server_log: Dict[str, Any], browser_log: Dict[str, Any] | Non
 
     untrusted_clicks = _count_untrusted_clicks(browser_log or {})
 
-    # ---- 소프트 룰(rule_score 계산용) ----
-    # 세션/요청 행동 신호만 사용하고 계정 이력 성격의 신호는 제외
+    # ---- 소프트 룰(rule_score 계산) ----
+    # 세션/요청 행동 신호 중심으로 누적하며,
+    # 계정 신뢰도 같은 외부 이력 신호는 여기서 사용하지 않는다.
     if same_device >= 3:
         soft_score += 0.35
         soft_rules.append("concurrent_sessions_same_device>=3")
@@ -109,6 +131,7 @@ def evaluate_rules(server_log: Dict[str, Any], browser_log: Dict[str, Any] | Non
         soft_score += 0.30
         soft_rules.append("browser_untrusted_clicks>=3")
 
+    # soft_score는 최종적으로 0~1 범위로 클램프한다.
     return {
         "hard_action": hard_action,
         "hard_rules_triggered": hard_rules,
@@ -119,6 +142,6 @@ def evaluate_rules(server_log: Dict[str, Any], browser_log: Dict[str, Any] | Non
 
 
 def score_rules(server_log: Dict[str, Any]) -> Tuple[float, List[str]]:
-    # 기존 스크립트 호환을 위한 헬퍼 함수
+    """기존 호출부 호환을 위한 래퍼(soft_score, soft_rules만 반환)."""
     result = evaluate_rules(server_log, browser_log=None)
     return float(result.get("soft_score", 0.0)), list(result.get("soft_rules_triggered", []))

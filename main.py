@@ -50,10 +50,14 @@ BROWSER_LOGS_DIR = os.path.join(LOGS_DIR, "browser")
 SERVER_LOGS_DIR = os.path.join(LOGS_DIR, "server")
 BLOCK_REPORT_DIR = os.path.join("model", "block_report")
 BLOCK_REPORT_INDEX_JSONL = os.path.join(BLOCK_REPORT_DIR, "index.jsonl")
+RULE_SCORE_DIR = os.path.join("model", "rule_score")
+MODEL_SCORE_DIR = os.path.join("model", "model_score")
 os.makedirs(LOGS_DIR, exist_ok=True)
 os.makedirs(BROWSER_LOGS_DIR, exist_ok=True)
 os.makedirs(SERVER_LOGS_DIR, exist_ok=True)
 os.makedirs(BLOCK_REPORT_DIR, exist_ok=True)
+os.makedirs(RULE_SCORE_DIR, exist_ok=True)
+os.makedirs(MODEL_SCORE_DIR, exist_ok=True)
 
 try:
     from model.src.features.feature_pipeline import (
@@ -295,6 +299,85 @@ def _sanitize_filename_part(value: Any, fallback: str = "unknown") -> str:
 
 def _now_ms() -> int:
     return int(time.time() * 1000)
+
+
+def _save_score_snapshots(
+    *,
+    request: Request,
+    metadata: Dict[str, Any],
+    performance_id: Any,
+    flow_id: Any,
+    session_id: Any,
+    bot_type: str,
+    risk_payload: Dict[str, Any],
+) -> Dict[str, str]:
+    created_at = datetime.utcnow().isoformat() + "Z"
+    date_str = datetime.now().strftime("%Y%m%d")
+    safe_perf_id = _sanitize_filename_part(performance_id, fallback="unknownperf")
+    safe_flow_id = _sanitize_filename_part(flow_id, fallback="noflow")
+    safe_session_id = _sanitize_filename_part(session_id, fallback="nosession")
+    safe_endpoint = _sanitize_filename_part(str(request.url.path).replace("/", "_"), fallback="api")
+    safe_method = _sanitize_filename_part(str(request.method).lower(), fallback="req")
+    safe_request_id = _sanitize_filename_part(
+        str((metadata or {}).get("request_id", "")).strip(),
+        fallback=f"req_{uuid.uuid4().hex}",
+    )
+    base_name = (
+        f"{date_str}_{safe_perf_id}_{safe_flow_id}_{safe_session_id}_"
+        f"{safe_endpoint}_{safe_method}_{safe_request_id}"
+    )
+
+    rule_score_path = os.path.join(RULE_SCORE_DIR, f"{base_name}_rule_score.json")
+    model_score_path = os.path.join(MODEL_SCORE_DIR, f"{base_name}_model_score.json")
+
+    common = {
+        "created_at_iso": created_at,
+        "request_id": str((metadata or {}).get("request_id", "")),
+        "event_id": str((metadata or {}).get("event_id", "")),
+        "performance_id": str(performance_id or ""),
+        "flow_id": str(flow_id or ""),
+        "session_id": str(session_id or ""),
+        "endpoint": str(request.url.path),
+        "method": str(request.method),
+        "bot_type": str(bot_type or ""),
+        "decision": str((risk_payload or {}).get("decision", "allow")),
+    }
+
+    rule_doc = {
+        "type": "rule_score_v1",
+        **common,
+        "rule_score": round(_safe_float((risk_payload or {}).get("rule_score")), 6),
+        "hard_action": str((risk_payload or {}).get("hard_action", "none")),
+        "rules_triggered": list((risk_payload or {}).get("rules_triggered", []) or []),
+        "soft_rules_triggered": list((risk_payload or {}).get("soft_rules_triggered", []) or []),
+        "hard_rules_triggered": list((risk_payload or {}).get("hard_rules_triggered", []) or []),
+        "risk_score": round(_safe_float((risk_payload or {}).get("risk_score")), 6),
+        "threshold_allow": round(_safe_float((risk_payload or {}).get("threshold_allow")), 6),
+        "threshold_challenge": round(_safe_float((risk_payload or {}).get("threshold_challenge")), 6),
+    }
+
+    model_doc = {
+        "type": "model_score_v1",
+        **common,
+        "model_type": str((risk_payload or {}).get("model_type", "none")),
+        "model_score": round(_safe_float((risk_payload or {}).get("model_score")), 6),
+        "model_ready": bool((risk_payload or {}).get("model_ready", False)),
+        "model_skipped": bool((risk_payload or {}).get("model_skipped", False)),
+        "runtime_error": str((risk_payload or {}).get("runtime_error", "")),
+        "risk_score": round(_safe_float((risk_payload or {}).get("risk_score")), 6),
+        "threshold_allow": round(_safe_float((risk_payload or {}).get("threshold_allow")), 6),
+        "threshold_challenge": round(_safe_float((risk_payload or {}).get("threshold_challenge")), 6),
+    }
+
+    with open(rule_score_path, "w", encoding="utf-8") as f:
+        json.dump(rule_doc, f, ensure_ascii=False, indent=2)
+    with open(model_score_path, "w", encoding="utf-8") as f:
+        json.dump(model_doc, f, ensure_ascii=False, indent=2)
+
+    return {
+        "rule_score_path": rule_score_path,
+        "model_score_path": model_score_path,
+    }
 
 
 def _percentile(values: List[int], p: float) -> int:
@@ -679,17 +762,13 @@ def _model_score_from_features_runtime(
     return _clamp01((raw_score - raw_min) / (raw_max - raw_min))
 
 
-def _resolve_decision_thresholds(runtime_thresholds: Optional[Dict[str, Any]]) -> Dict[str, float]:
+def _resolve_decision_thresholds() -> Dict[str, float]:
+    # 운영 단순화를 위해 risk 임계값은 정책 고정값(기본 0.30/0.70)을 사용한다.
+    # 모델 파일(threshold json) 값에는 의존하지 않는다.
     allow = RISK_DECISION_THRESHOLDS_DEFAULT["allow"]
     challenge = RISK_DECISION_THRESHOLDS_DEFAULT["challenge"]
 
-    rt = runtime_thresholds or {}
-    if "risk_allow" in rt:
-        allow = _safe_float(rt.get("risk_allow"), allow)
-    if "risk_challenge" in rt:
-        challenge = _safe_float(rt.get("risk_challenge"), challenge)
-
-    # ENV overrides everything when present.
+    # ENV가 있으면 정책값을 오버라이드할 수 있다.
     if RISK_ALLOW_THRESHOLD_ENV is not None:
         allow = _safe_float(RISK_ALLOW_THRESHOLD_ENV, allow)
     if RISK_CHALLENGE_THRESHOLD_ENV is not None:
@@ -700,17 +779,6 @@ def _resolve_decision_thresholds(runtime_thresholds: Optional[Dict[str, Any]]) -
     if challenge <= allow:
         challenge = min(1.0, allow + 0.05)
     return {"allow": allow, "challenge": challenge}
-
-
-def _load_runtime_thresholds_only() -> Dict[str, Any]:
-    try:
-        if not os.path.exists(RISK_THRESHOLDS_PATH):
-            return {}
-        with open(RISK_THRESHOLDS_PATH, "r", encoding="utf-8") as f:
-            loaded = json.load(f)
-        return loaded if isinstance(loaded, dict) else {}
-    except Exception:
-        return {}
 
 
 def _decision_from_risk_runtime(risk_score: float, thresholds: Dict[str, float]) -> str:
@@ -742,14 +810,11 @@ def _score_request_risk(browser_log: Optional[Dict[str, Any]], server_log: Dict[
     runtime_error = ""
     runtime = None
     model_skipped = hard_action == "block"
-    runtime_thresholds: Dict[str, Any] = {}
 
     if model_skipped:
         runtime_error = "model_skipped_by_hard_rule_block"
-        runtime_thresholds = _load_runtime_thresholds_only()
     else:
         runtime = _load_risk_runtime()
-        runtime_thresholds = (runtime or {}).get("thresholds", {})
         if runtime:
             params = runtime.get("params") or {}
             model_type = str(params.get("model_type", "zscore"))
@@ -766,11 +831,15 @@ def _score_request_risk(browser_log: Optional[Dict[str, Any]], server_log: Dict[
                 except Exception as e:
                     runtime_error = str(e)
 
-    thresholds = _resolve_decision_thresholds(runtime_thresholds)
+    thresholds = _resolve_decision_thresholds()
+
+    # 점수 스케일 안정화를 위해 개별 점수를 먼저 0~1로 정규화(clamp)한다.
+    model_score = _clamp01(_safe_float(model_score))
+    rule_score = _clamp01(_safe_float(rule_score))
 
     risk_score = _clamp01(
-        RISK_DEFAULT_WEIGHTS["model"] * _safe_float(model_score)
-        + RISK_DEFAULT_WEIGHTS["rule"] * _safe_float(rule_score)
+        RISK_DEFAULT_WEIGHTS["model"] * model_score
+        + RISK_DEFAULT_WEIGHTS["rule"] * rule_score
     )
     decision = _decision_from_risk_runtime(risk_score, thresholds=thresholds)
 
@@ -794,8 +863,8 @@ def _score_request_risk(browser_log: Optional[Dict[str, Any]], server_log: Dict[
         "soft_rules_triggered": soft_rules,
         "hard_rules_triggered": hard_rules,
         "hard_action": hard_action,
-        "rule_score": _safe_float(rule_score),
-        "model_score": _safe_float(model_score),
+        "rule_score": rule_score,
+        "model_score": model_score,
         "model_type": model_type,
         "model_ready": (runtime is not None) and (not model_skipped),
         "model_skipped": model_skipped,
@@ -1143,8 +1212,16 @@ def _build_markdown_report_fallback(
     target_masked = str((ident or {}).get("target_masked_user", "")).strip() or "unknown"
     risk_summary = report_seed.get("risk_summary", {}) if isinstance(report_seed, dict) else {}
     score_100 = _safe_float((ui_fields.get("bot_score", {}) or {}).get("value"), _safe_float(risk_summary.get("total_score")) * 100.0)
-    level_map = {"low": "낮음", "medium": "중간", "high": "높음"}
-    level_ko = level_map.get(str(suspicion_level).lower(), "중간")
+    level = str(suspicion_level).lower()
+    if level not in {"low", "medium", "high"}:
+        level = "medium"
+
+    verdict_map = {
+        "low": "✅ 정상 (매크로 징후 낮음)",
+        "medium": "⚠️ 경고 (추가 확인 필요)",
+        "high": "🚨 위험 (매크로 확률 매우 높음)",
+    }
+    verdict_text = verdict_map.get(level, verdict_map["medium"])
     status_title = str(ui_fields.get("status_title_ko", "")).strip() or "판정 결과"
     reasons = ui_fields.get("suspicion_reasons", [])
     if not isinstance(reasons, list):
@@ -1154,29 +1231,45 @@ def _build_markdown_report_fallback(
         reasons = [str(x).strip() for x in (report_seed.get("rule_evidence", []) or []) if str(x).strip()][:3]
     narrative = str(ui_fields.get("suspicion_narrative_ko", "")).strip()
     if not narrative:
-        narrative = "명확한 추가 의심 요인은 관찰되지 않았습니다."
+        narrative = (
+            "해당 세션은 정상 범위 지표를 보여 추가 의심 요인이 뚜렷하지 않습니다."
+            if level == "low"
+            else ("일부 지표가 정상 범위를 벗어나 추가 확인이 필요합니다." if level == "medium" else "다수 지표가 정상 범위를 벗어나 위험도가 높습니다.")
+        )
     speed = ui_fields.get("speed_variability", {}) or {}
     curve = ui_fields.get("path_curvature", {}) or {}
     hover = ui_fields.get("hover_sections", {}) or {}
+    separator = "--------------------------------------------------"
     lines = [
-        "[ Header Area: 정량적 지표 ]",
+        f"[ Header Area: 정량적 지표 ] {separator}",
         f"ID: {report_id} / 대상: {target_masked}",
-        f"스코어: [ {round(max(0.0, min(100.0, score_100)), 1)} / 100 ] / 판정: {status_title} (위험도 {level_ko})",
+        f"스코어: [ {round(max(0.0, min(100.0, score_100)), 1)} / 100 ] / 판정: {verdict_text}",
+        separator,
         "",
-        "[ Analysis Summary: 모델 분석 요약 ]",
-        f"- 속도 변동성: {round(_safe_float(speed.get('value')), 2)}{str(speed.get('unit', '%'))} ({str(speed.get('judgement_ko', '정상'))})",
-        f"- 경로 곡선성: {round(_safe_float(curve.get('value')), 3)}{str(curve.get('unit', 'rad'))} ({str(curve.get('judgement_ko', '자연스러움'))})",
-        f"- 호버 구간: {int(_safe_float(hover.get('value')))}{str(hover.get('unit', '개'))} ({str(hover.get('judgement_ko', '발견'))})",
+        f"[ Analysis Summary: 모델 분석 요약 ] {separator}",
+        f"● 반응 속도(변동성): {round(_safe_float(speed.get('value')), 2)}{str(speed.get('unit', '%'))} ({str(speed.get('judgement_ko', '정상'))})",
+        f"● 궤적 곡선성: {round(_safe_float(curve.get('value')), 3)}{str(curve.get('unit', 'rad'))} ({str(curve.get('judgement_ko', '자연스러움'))})",
+        f"● 호버 구간: {int(_safe_float(hover.get('value')))}{str(hover.get('unit', '개'))} ({str(hover.get('judgement_ko', '발견'))})",
     ]
     if reasons:
-        lines.append("- 주요 의심 요인:")
-        lines.extend([f"  - {r}" for r in reasons])
+        lines.append("● 주요 의심 요인:")
+        lines.extend([f"  - {r}" for r in reasons[:3]])
+    lines.append(separator)
+
+    summary_text = summary_ko.strip()
+    if not summary_text:
+        summary_text = (
+            "해당 세션은 정상 사용자 범위 내 지표를 보였습니다."
+            if level == "low"
+            else ("일부 자동화 의심 신호가 관찰되어 추가 확인이 권장됩니다." if level == "medium" else "자동화 의심 신호가 다수 관찰되어 위험도가 높습니다.")
+        )
+
     lines.extend(
         [
             "",
-            "[ AI Insights: 생성 요약 ]",
-            summary_ko.strip() or "근거 기반 분석 결과, 자동화 의심 정황이 확인되었습니다.",
-            narrative,
+            f"[ AI Insights: GPT 생성 종합 리포트 ] {separator}",
+            f"\"{summary_text} {narrative}\"",
+            separator,
         ]
     )
     return "\n".join(lines).strip()
@@ -1184,11 +1277,17 @@ def _build_markdown_report_fallback(
 
 def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, Any]:
     fallback_ui_fields = _build_ui_fields_fallback(report_seed)
+    fallback_level = "low"
+    fallback_score = _clamp01(_safe_float(((report_seed.get("risk_summary", {}) or {}).get("total_score")), 0.0))
+    if fallback_score >= 0.70:
+        fallback_level = "high"
+    elif fallback_score >= 0.30:
+        fallback_level = "medium"
     fallback_markdown = _build_markdown_report_fallback(
         report_seed=report_seed,
         ui_fields=fallback_ui_fields,
         summary_ko="",
-        suspicion_level="medium",
+        suspicion_level=fallback_level,
     )
     api_key = _resolve_openai_api_key()
     if not LLM_REPORT_ENABLED:
@@ -1248,7 +1347,27 @@ def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, An
         "- ui_metric_seed의 수치와 크게 벗어나지 않게 작성하세요.\n"
         "- model_evidence.top_feature_contributions를 우선 근거로 사용하세요. "
         "각 항목의 feature/value/normal_mean/contribution을 직접 인용해 설명하세요.\n"
-        "- markdown_report는 관리자 화면에서 바로 보여줄 수 있도록 Markdown 형태(섹션/불릿 포함)로 작성하세요.\n"
+        "- markdown_report는 아래 템플릿 형식을 반드시 그대로 사용하세요.\n"
+        "  [ Header Area: 정량적 지표 ] --------------------------------------------------\n"
+        "  ID: {report_id} / 대상: {masked_user}\n"
+        "  스코어: [ {bot_score} / 100 ] / 판정: {이모지 포함 판정 문구}\n"
+        "  --------------------------------------------------\n"
+        "  \n"
+        "  [ Analysis Summary: 모델 분석 요약 ] --------------------------------------------------\n"
+        "  ● 반응 속도(...)\n"
+        "  ● 궤적 곡선성(...)\n"
+        "  ● 호버 구간(...)\n"
+        "  ● 주요 의심 요인: (있을 때만)\n"
+        "  --------------------------------------------------\n"
+        "  \n"
+        "  [ AI Insights: GPT 생성 종합 리포트 ] --------------------------------------------------\n"
+        "  \"2~4문장 줄글\"\n"
+        "  --------------------------------------------------\n"
+        "- 판정 문구는 반드시 다음 중 하나를 사용하세요:\n"
+        "  low: ✅ 정상 (매크로 징후 낮음)\n"
+        "  medium: ⚠️ 경고 (추가 확인 필요)\n"
+        "  high: 🚨 위험 (매크로 확률 매우 높음)\n"
+        "- low 판정에서 '자동화 의심 정황이 확인되었습니다' 같은 모순 문구를 금지합니다.\n"
         "- suspicion_narrative_ko는 2~4문장 줄글로 작성하세요.\n"
         f"입력: {json.dumps(model_input, ensure_ascii=False)}"
     )
@@ -1434,9 +1553,11 @@ def _build_realtime_block_report(
     server_log_path: str,
     bot_folder: str,
 ) -> Dict[str, str]:
+    # 함수명은 기존 호환을 위해 유지하지만, 내부적으로는 allow/challenge/block 모두 처리한다.
     risk = (server_log or {}).get("risk", {}) or {}
-    if str(risk.get("decision")) != "block":
-        return {}
+    decision = str(risk.get("decision", "allow")).strip().lower()
+    if decision not in {"allow", "challenge", "block"}:
+        decision = "challenge"
 
     hard_rules = list(risk.get("hard_rules_triggered", []) or [])
     soft_rules = list(risk.get("soft_rules_triggered", []) or [])
@@ -1457,7 +1578,7 @@ def _build_realtime_block_report(
     booking_id = str(browser_meta.get("booking_id", "")).strip()
 
     confidence = _realtime_report_confidence(
-        decision="block",
+        decision=decision,
         risk_score=_safe_float(risk.get("risk_score")),
         hard_action=str(risk.get("hard_action", "none")),
         hard_rules=hard_rules,
@@ -1541,15 +1662,17 @@ def _build_realtime_block_report(
 
     created_at = datetime.utcnow().isoformat() + "Z"
     request_id = str(metadata.get("request_id", "")).strip() or f"req_{uuid.uuid4().hex}"
+    safe_request_id = _sanitize_filename_part(request_id, fallback=f"req_{uuid.uuid4().hex}")
     date_str = datetime.now().strftime("%Y%m%d")
     safe_booking_id = _sanitize_filename_part(booking_id, fallback="nobooking")
-    report_id = f"{safe_booking_id}_REPORT"
+    safe_decision = _sanitize_filename_part(decision, fallback="challenge")
+    report_id = f"{safe_booking_id}_{safe_request_id}_{safe_decision}_REPORT"
     masked_email = _mask_email(str(browser_meta.get("user_email", "")).strip() or user_id)
-    report_filename = f"{date_str}_{safe_booking_id}.json"
+    report_filename = f"{date_str}_{safe_booking_id}_{safe_request_id}_{safe_decision}.json"
     report_path = os.path.join(BLOCK_REPORT_DIR, report_filename)
-    llm_report_filename_json = f"{date_str}_{safe_booking_id}_llm.json"
+    llm_report_filename_json = f"{date_str}_{safe_booking_id}_{safe_request_id}_{safe_decision}_llm.json"
     llm_report_json_path = os.path.join(BLOCK_REPORT_DIR, llm_report_filename_json)
-    llm_report_filename_txt = f"{date_str}_{safe_booking_id}_llm.txt"
+    llm_report_filename_txt = f"{date_str}_{safe_booking_id}_{safe_request_id}_{safe_decision}_llm.txt"
     llm_report_path = os.path.join(BLOCK_REPORT_DIR, llm_report_filename_txt)
 
     llm_seed = {
@@ -1558,7 +1681,7 @@ def _build_realtime_block_report(
             "booking_id": booking_id,
             "target_masked_user": masked_email,
         },
-        "decision": "block",
+        "decision": decision,
         "risk_summary": {
             "total_score": total_score,
             "grade": grade,
@@ -1589,13 +1712,22 @@ def _build_realtime_block_report(
     }
     llm_analysis = _generate_llm_report_payload(report_seed=llm_seed)
     llm_ui_fields = llm_analysis.get("ui_fields", _build_ui_fields_fallback(llm_seed))
-    user_message = _build_realtime_block_user_message(
-        llm_analysis=llm_analysis,
-        rule_entries=rule_entries,
-    )
+    if decision == "block":
+        user_message = _build_realtime_block_user_message(
+            llm_analysis=llm_analysis,
+            rule_entries=rule_entries,
+        )
+    elif decision == "challenge":
+        user_message = "의심 신호가 감지되어 추가 확인이 필요합니다."
+    else:
+        user_message = "정상 범위로 판단되었습니다."
+
+    recommended_action = str(llm_analysis.get("recommended_action", decision)).strip().lower()
+    if recommended_action not in {"allow", "challenge", "block"}:
+        recommended_action = decision
 
     llm_report_payload = {
-        "report_type": "realtime_block_llm_v1",
+        "report_type": "realtime_risk_llm_v1",
         "created_at_iso": created_at,
         "report_id": report_id,
         "request_id": request_id,
@@ -1603,7 +1735,7 @@ def _build_realtime_block_report(
         "flow_id": str(metadata.get("flow_id", "")),
         "session_id": str(metadata.get("session_id", "")),
         "target_masked_user": masked_email,
-        "decision": "block",
+        "decision": decision,
         "user_message": user_message,
         "llm_analysis": llm_analysis,
         "ui_fields": llm_ui_fields,
@@ -1624,7 +1756,7 @@ def _build_realtime_block_report(
             f"booking_id: {booking_id}",
             f"flow_id: {str(metadata.get('flow_id', ''))}",
             f"session_id: {str(metadata.get('session_id', ''))}",
-            f"decision: block",
+            f"decision: {decision}",
             "",
             f"user_message: {user_message}",
             "",
@@ -1640,7 +1772,7 @@ def _build_realtime_block_report(
             llm_report_error = f"txt_write_error:{e}"
 
     report = {
-        "report_type": "realtime_block_v1",
+        "report_type": "realtime_risk_v1",
         "created_at_iso": created_at,
         "report_id": report_id,
         "user_id": user_id,
@@ -1648,8 +1780,8 @@ def _build_realtime_block_report(
         "booking_id": booking_id,
         "flow_id": str(metadata.get("flow_id", "")),
         "session_id": str(metadata.get("session_id", "")),
-        "decision": "block",
-        "recommendation": "block",
+        "decision": decision,
+        "recommendation": recommended_action,
         "confidence": round(confidence, 6),
         "risk_summary": {
             "total_score": total_score,
@@ -1681,8 +1813,8 @@ def _build_realtime_block_report(
             "server_log_path": server_log_path,
         },
         "actions": {
-            "realtime_enforced": True,
-            "response_status_code": 403,
+            "realtime_enforced": decision in {"challenge", "block"},
+            "response_status_code": 403 if decision == "block" else (202 if decision == "challenge" else 200),
         },
         "user_message": user_message,
         "ui_fields": llm_ui_fields,
@@ -1703,7 +1835,7 @@ def _build_realtime_block_report(
         "user_id": user_id,
         "booking_id": booking_id,
         "flow_id": str(metadata.get("flow_id", "")),
-        "decision": "block",
+        "decision": decision,
         "risk_score": total_score,
         "report_path": report_path,
         "llm_report_path": llm_report_path,
@@ -1897,11 +2029,6 @@ async def server_log_middleware(request: Request, call_next):
                 'rate_limited': False,
                 'blocked': False,
                 'block_reason': ''
-            },
-            'risk': {
-                'risk_score': 0,
-                'decision': 'allow',
-                'rules_triggered': []
             }
         }
 
@@ -1914,7 +2041,7 @@ async def server_log_middleware(request: Request, call_next):
         server_log['queue'].update(queue_snapshot)
 
         risk_result = _score_request_risk(browser_payload, server_log)
-        server_log['risk'] = {
+        risk_payload = {
             'risk_score': round(_safe_float(risk_result.get('risk_score')), 6),
             'decision': str(risk_result.get('decision', 'allow')),
             'rules_triggered': risk_result.get('rules_triggered', []),
@@ -1933,16 +2060,16 @@ async def server_log_middleware(request: Request, call_next):
             'block_recommended': bool(risk_result.get('block_recommended', False)),
         }
 
-        if server_log['risk']['decision'] == 'block':
+        if risk_payload['decision'] == 'block':
             server_log['security']['blocked'] = True
             server_log['security']['block_reason'] = 'abnormal_access_detected'
             server_log['security']['block_message'] = '비정상적인 접근'
-            server_log['risk']['alert_message'] = '비정상적인 접근'
+            risk_payload['alert_message'] = '비정상적인 접근'
             print(
                 f"[SECURITY][BLOCK] 비정상적인 접근 감지 "
-                f"(request_id={request_id}, flow_id={flow_id or ''}, risk_score={server_log['risk'].get('risk_score')})"
+                f"(request_id={request_id}, flow_id={flow_id or ''}, risk_score={risk_payload.get('risk_score')})"
             )
-        elif server_log['risk']['decision'] == 'challenge':
+        elif risk_payload['decision'] == 'challenge':
             server_log['security']['captcha_required'] = True
 
         date_str = datetime.now().strftime('%Y%m%d')
@@ -1966,8 +2093,25 @@ async def server_log_middleware(request: Request, call_next):
         )
         filepath = os.path.join(bot_dir, filename)
 
-        if server_log['risk']['decision'] == 'block':
+        try:
+            score_paths = _save_score_snapshots(
+                request=request,
+                metadata=server_log.get("metadata", {}) or {},
+                performance_id=performance_id,
+                flow_id=flow_id,
+                session_id=session_id,
+                bot_type=folder_name,
+                risk_payload=risk_payload,
+            )
+            risk_payload.update(score_paths)
+        except Exception as score_error:
+            risk_payload["score_snapshot_error"] = str(score_error)
+
+        should_build_risk_report = (request.url.path == '/api/logs') or (risk_payload['decision'] == 'block')
+        if should_build_risk_report:
             try:
+                # 리포트 함수는 risk 컨텍스트를 사용하므로 호출 직전에만 주입한다.
+                server_log['risk'] = dict(risk_payload)
                 report_result = _build_realtime_block_report(
                     request=request,
                     server_log=server_log,
@@ -1977,30 +2121,40 @@ async def server_log_middleware(request: Request, call_next):
                 )
                 realtime_report_path = str((report_result or {}).get("report_path", "")).strip()
                 if realtime_report_path:
-                    server_log['risk']['realtime_report_path'] = realtime_report_path
+                    risk_payload['realtime_report_path'] = realtime_report_path
+                llm_report_path = str((report_result or {}).get("llm_report_path", "")).strip()
+                if llm_report_path:
+                    risk_payload['llm_report_path'] = llm_report_path
+                llm_report_json_path = str((report_result or {}).get("llm_report_json_path", "")).strip()
+                if llm_report_json_path:
+                    risk_payload['llm_report_json_path'] = llm_report_json_path
 
                 user_message = str((report_result or {}).get("user_message", "")).strip()
-                if user_message:
+                if user_message and risk_payload['decision'] == 'block':
                     server_log['security']['block_message'] = user_message
-                    server_log['risk']['alert_message'] = user_message
+                    risk_payload['alert_message'] = user_message
             except Exception as report_error:
-                server_log['risk']['realtime_report_error'] = str(report_error)
+                risk_payload['realtime_report_error'] = str(report_error)
+            finally:
+                # 서버 원본 로그에는 risk 필드를 남기지 않는다.
+                server_log.pop('risk', None)
 
+        server_log.pop('risk', None)
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(server_log, f, ensure_ascii=False, indent=2)
 
         # Enforce real action on booking flow endpoints.
-        if enforce_decision and server_log['risk']['decision'] == 'block':
+        if enforce_decision and risk_payload['decision'] == 'block':
             return JSONResponse(
                 status_code=403,
                 content={
                     'success': False,
                     'decision': 'block',
                     'message': str(server_log.get('security', {}).get('block_message') or '비정상적인 접근으로 요청이 차단되었습니다.'),
-                    'risk': server_log['risk'],
+                    'risk': risk_payload,
                 },
             )
-        if enforce_decision and server_log['risk']['decision'] == 'challenge':
+        if enforce_decision and risk_payload['decision'] == 'challenge':
             return JSONResponse(
                 status_code=202,
                 content={
@@ -2008,7 +2162,7 @@ async def server_log_middleware(request: Request, call_next):
                     'decision': 'challenge',
                     'message': 'additional verification required',
                     'challenge_required': True,
-                    'risk': server_log['risk'],
+                    'risk': risk_payload,
                 },
             )
     except Exception:
@@ -2463,7 +2617,7 @@ async def save_log(log_data: LogData):
         
         # JSON 파일로 저장
         with open(filepath, 'w', encoding='utf-8') as f:
-            json.dump(log_data.dict(), f, ensure_ascii=False, indent=2)
+            json.dump(log_data.model_dump(), f, ensure_ascii=False, indent=2)
         
         print(f"로그 저장 성공: {filename}")
         
@@ -2530,24 +2684,27 @@ async def get_log_file(filename: str):
 @app.get("/api/risk/runtime-status")
 async def risk_runtime_status():
     runtime = _load_risk_runtime()
+    thresholds = _resolve_decision_thresholds()
     if runtime is None:
         return {
             "success": False,
             "ready": False,
             "params_path": os.path.abspath(RISK_PARAMS_PATH),
             "thresholds_path": os.path.abspath(RISK_THRESHOLDS_PATH),
+            "threshold_source": "policy_fixed",
+            "decision_thresholds": thresholds,
             "artifact_path": "",
             "error": RISK_RUNTIME_CACHE.get("error", ""),
         }
 
     params = runtime.get("params") or {}
-    thresholds = _resolve_decision_thresholds(runtime.get("thresholds") or {})
     return {
         "success": True,
         "ready": True,
         "model_type": params.get("model_type", "zscore"),
         "params_path": os.path.abspath(RISK_PARAMS_PATH),
         "thresholds_path": os.path.abspath(RISK_THRESHOLDS_PATH),
+        "threshold_source": "policy_fixed",
         "artifact_path": runtime.get("artifact_path", ""),
         "weights": RISK_DEFAULT_WEIGHTS,
         "decision_thresholds": thresholds,
@@ -2709,7 +2866,7 @@ async def create_performance(performance_data: PerformanceCreate):
             raise HTTPException(status_code=400, detail="이미 존재하는 공연 ID입니다.")
         
         # 새 공연 추가
-        new_performance = performance_data.dict()
+        new_performance = performance_data.model_dump()
         data.setdefault("performances", []).append(new_performance)
         
         # 파일 저장

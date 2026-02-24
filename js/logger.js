@@ -82,7 +82,7 @@ function logStageEntry(stageName) {
     if (!logData) {
         // ?덈ℓ ?꾨즺 ?섏씠吏?닿굅???대? ?꾩넚??寃쎌슦 ?먮윭 臾댁떆
         if (window.location.pathname.includes('booking_complete.html')) return;
-        console.warn('濡쒓렇 ?곗씠?곌? ?꾩쭅 珥덇린?붾릺吏 ?딆븯?듬땲??');
+        console.warn('로그 데이터가 아직 초기화되지 않았습니다.');
         return;
     }
 

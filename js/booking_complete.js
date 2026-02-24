@@ -9,7 +9,7 @@ loadLogState();
 recordStageEntry('complete');
 
 if (!bookingId || !flowData) {
-    showAlert('?덈ℓ ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎.', 'error');
+    showAlert('예매 정보를 찾을 수 없습니다.', 'error');
     setTimeout(() => navigateTo('index.html'), 2000);
 } else {
     document.getElementById('booking-number').textContent = bookingId;
