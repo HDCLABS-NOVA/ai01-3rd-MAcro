@@ -129,7 +129,7 @@ function displayPerformance() {
   detailDiv.innerHTML = `
     <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
       <div class="card">
-        <div style="width: 100%; height: 400px; background: #1e293b; border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 72px;">
+        <div style="width: 100%; height: 400px; background: var(--primary-color); color: white; border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 72px;">
           ${getCategoryIcon(currentPerformance.category)}
         </div>
       </div>
