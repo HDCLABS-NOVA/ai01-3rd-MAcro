@@ -95,8 +95,8 @@ body>#captcha-overlay {
 #captcha-submit-btn {
     width: 100%;
     padding: 22px;
-    background: #d0d0d0;
-    color: #666;
+    background: #475569;
+    color: white;
     border: none;
     border-radius: 12px;
     font-size: 20px;
@@ -136,8 +136,15 @@ body>#captcha-overlay {
 }
 
 @keyframes popIn {
-    0% { transform: scale(0.9); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+    0% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 #alert-modal h3 {
@@ -157,7 +164,7 @@ body>#captcha-overlay {
 #alert-confirm-btn {
     width: 100%;
     padding: 16px;
-    background: linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%);
+    background: var(--primary-color, #E61E51);
     color: white;
     border: none;
     border-radius: 12px;

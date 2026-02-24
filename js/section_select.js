@@ -45,7 +45,7 @@ function drawSectionMap(grades) {
 
     // 무대
     svg.innerHTML = `
-        <rect x="${width / 2 - 100}" y="20" width="200" height="30" fill="#FF3D7F" rx="4"/>
+        <rect x="${width / 2 - 100}" y="20" width="200" height="30" fill="#E61E51" rx="4"/>
         <text x="${width / 2}" y="40" text-anchor="middle" fill="white" font-weight="bold">무대</text>
       `;
 

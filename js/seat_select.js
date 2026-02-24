@@ -153,8 +153,8 @@ document.getElementById('perf-info').textContent = flowData.performanceTitle;
 
 // 등급별 색상 정의
 const gradeColors = {
-    'VIP': { bg: '#FFE5F1', border: '#FF3D7F', color: '#FF3D7F', hoverBg: 'linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%)' },
-    'VIP석': { bg: '#FFE5F1', border: '#FF3D7F', color: '#FF3D7F', hoverBg: 'linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%)' },
+    'VIP': { bg: '#F1F5F9', border: '#E61E51', color: '#E61E51', hoverBg: '#E61E51' },
+    'VIP석': { bg: '#F1F5F9', border: '#E61E51', color: '#E61E51', hoverBg: '#E61E51' },
     'R': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
     'R석': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
     'S': { bg: '#E8F5E9', border: '#4CAF50', color: '#4CAF50', hoverBg: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' },
@@ -331,7 +331,7 @@ function toggleSeat(seatId, grade, price, element, event) {
         element.classList.remove('available');
         element.classList.add('selected');
 
-        element.style.background = 'linear-gradient(135deg, #FF3D7F 0%, #9C27B0 100%)';
+        element.style.background = '#E61E51';
         element.style.color = 'white';
         element.style.boxShadow = '0 4px 12px rgba(255, 61, 127, 0.4)';
 
