@@ -1319,9 +1319,11 @@ def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, An
     }
 
     system_prompt = (
-        "당신은 티켓팅 매크로 탐지 리포트 작성 보조 시스템입니다. "
-        "입력 데이터를 근거로 관리자용 한국어 요약을 JSON으로만 출력하세요. "
-        "추측을 금지하고 근거 기반으로 작성하세요."
+        "당신은 티켓팅 매크로 탐지 전문 리포트 작성 시스템입니다. "
+        "입력된 행동 분석 데이터를 바탕으로 관리자가 즉시 판단할 수 있는 "
+        "정확하고 구체적인 한국어 보안 리포트를 JSON으로만 출력하세요. "
+        "모든 수치는 입력 데이터에서 직접 인용해야 하며, 추측이나 일반론적 문구를 금지합니다. "
+        "판정 근거는 반드시 feature 이름과 수치를 명시하세요."
     )
     user_prompt = (
         "다음 JSON을 분석해 관리자 리포트용 결과를 작성하세요.\n"
@@ -1354,21 +1356,31 @@ def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, An
         "  --------------------------------------------------\n"
         "  \n"
         "  [ Analysis Summary: 모델 분석 요약 ] --------------------------------------------------\n"
-        "  ● 반응 속도(...)\n"
-        "  ● 궤적 곡선성(...)\n"
-        "  ● 호버 구간(...)\n"
-        "  ● 주요 의심 요인: (있을 때만)\n"
+        "  ● 반응 속도(변동성): {speed_variability_pct}% ({정상/의심/위험})\n"
+        "  ● 궤적 곡선성: {path_curvature_rad}rad ({자연스러움/기계적/매우 기계적})\n"
+        "  ● 호버 구간: {hover_sections_count}개 ({미발견/소수 발견/다수 발견})\n"
+        "  ● 호버 미세 떨림(dwell std): {hover_std_dwell_ms}ms / 평균 정지: {hover_avg_dwell_ms}ms\n"
+        "  ● 주요 기여 피처: top_feature_contributions 1~3위를 'feature(기여도: contribution)' 형식으로 나열 (기여 있을 때만)\n"
+        "  ● 주요 의심 요인: rule_evidence, behavior_evidence 기반으로 (있을 때만)\n"
         "  --------------------------------------------------\n"
         "  \n"
         "  [ AI Insights: GPT 생성 종합 리포트 ] --------------------------------------------------\n"
-        "  \"2~4문장 줄글\"\n"
+        "  다음 3가지를 반드시 포함하는 3~5문장 줄글:\n"
+        "  1) [수치 근거] speed_variability_pct, path_curvature_rad, bot_score_100 등 핵심 수치를 직접 인용\n"
+        "  2) [판정 근거] top_feature_contributions 중 가장 영향력 높은 피처와 그 수치(value, normal_mean 대비)가 판정에 미친 영향 설명\n"
+        "  3) [권장 조치] recommended_action(allow/challenge/block) 결정 이유를 한 문장으로 명시\n"
         "  --------------------------------------------------\n"
-        "- 판정 문구는 반드시 다음 중 하나를 사용하세요:\n"
-        "  low: ✅ 정상 (매크로 징후 낮음)\n"
-        "  medium: ⚠️ 경고 (추가 확인 필요)\n"
-        "  high: 🚨 위험 (매크로 확률 매우 높음)\n"
+        "  - 판정 문구는 반드시 다음 중 하나를 사용하세요:\n"
+        "    low (0~30): ✅ 정상 (매크로 징후 낮음)\n"
+        "    medium (30~70): ⚠️ 의심 (추가 확인 필요)\n"
+        "    high (70~100): 🚨 경고 (매크로 확률 매우 높음)\n"
         "- low 판정에서 '자동화 의심 정황이 확인되었습니다' 같은 모순 문구를 금지합니다.\n"
-        "- suspicion_narrative_ko는 2~4문장 줄글로 작성하세요.\n"
+        "- suspicion_narrative_ko도 동일하게 수치 인용 + 판정 근거 + 권장 조치 3요소를 포함하세요.\n"
+        "- Analysis Summary의 주요 기여 피처가 없으면 해당 항목을 생략하세요.\n"
+        "- 호버 미세 떨림(hover_std_dwell_ms) 해석 규칙:\n"
+        "  인간은 호버 시 손 떨림으로 std > 30ms 이상이 자연스러pc.\n"
+        "  매크로는 정확하게 제어되어 std ≈0ms(또는 매우 낙음) 로 나타남.\n"
+        "  hover_std_dwell_ms 값을 반드시 인급하고 '자연스러움 / 의심 / 강한 의심' 중 하나로 판정.\n"
         f"입력: {json.dumps(model_input, ensure_ascii=False)}"
     )
 
@@ -1708,6 +1720,8 @@ def _build_realtime_block_report(
             "speed_variability_pct": round(max(0.0, speed_variability_pct), 2),
             "path_curvature_rad": round(max(0.0, path_curvature_rad), 3),
             "hover_sections_count": max(0, hover_sections_count),
+            "hover_std_dwell_ms": round(max(0.0, _safe_float(features.get("seat_hover_std_dwell_ms") or features.get("perf_hover_std_dwell_ms"))), 2),
+            "hover_avg_dwell_ms": round(max(0.0, _safe_float(features.get("seat_hover_avg_dwell_ms") or features.get("perf_hover_avg_dwell_ms"))), 2),
         },
     }
     llm_analysis = _generate_llm_report_payload(report_seed=llm_seed)
@@ -3278,6 +3292,47 @@ async def update_delivery(data: UpdateDelivery):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"배송지 수정 실패: {str(e)}")
+
+
+# ---- Block Report API ----
+@app.get("/api/reports")
+async def list_reports():
+    """block_report 디렉토리의 LLM 리포트 목록 반환 (최신순)"""
+    try:
+        entries = []
+        index_path = BLOCK_REPORT_INDEX_JSONL
+        if os.path.exists(index_path):
+            with open(index_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        entries.append(json.loads(line))
+                    except Exception:
+                        pass
+        entries.sort(key=lambda x: x.get("created_at_iso", ""), reverse=True)
+        return {"reports": entries}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/reports/{filename}")
+async def get_report(filename: str):
+    """특정 LLM 리포트 JSON 반환"""
+    import re
+    # 경로 탐색 방지: 영숫자·언더스코어·하이픈·점 만 허용
+    base = filename.replace(".json", "")
+    if not re.fullmatch(r"[\w\-]+", base):
+        raise HTTPException(status_code=400, detail="invalid filename")
+    path = os.path.join(BLOCK_REPORT_DIR, base + ".json")
+    if not os.path.exists(path):
+        raise HTTPException(status_code=404, detail="report not found")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # 정적 파일 서빙 (HTML, CSS, JS)

@@ -90,7 +90,11 @@
             margin-top: var(--spacing-lg);
         }
 
-        /* 검색 박스 */
+        /* 검색 박스 플레이스홀더 가독성 */
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+
         .search-container {
             display: flex;
             gap: var(--spacing-md);
@@ -534,6 +538,379 @@
         .modal-btn-confirm.booking {
             background: #f59e0b;
         }
+
+        /* ===== 인라인 리포트 뷰어 ===== */
+        .rv-wrap {
+            display: flex;
+            height: 74vh;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+        }
+
+        .rv-sidebar {
+            width: 270px;
+            flex-shrink: 0;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .rv-sidebar-top {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .rv-sidebar-top input {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: #0f1117;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+        }
+
+        .rv-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            min-height: 0;
+            /* flex-column 내에서 스크롤 작동 보장 */
+        }
+
+        /* 리포트 사이드바 전용 스크롤바 스타일 */
+        .rv-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .rv-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .rv-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 99px;
+        }
+
+        .rv-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .rv-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 4px;
+            border: 1px solid transparent;
+            transition: all .15s ease;
+        }
+
+        .rv-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .rv-item.active {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: #6366f1;
+        }
+
+        .rv-item .rv-top {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 3px;
+        }
+
+        .rv-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 20px;
+        }
+
+        .rv-badge.allow {
+            background: #064e3b;
+            color: #34d399;
+        }
+
+        .rv-badge.challenge {
+            background: #451a03;
+            color: #fbbf24;
+        }
+
+        .rv-badge.block {
+            background: #450a0a;
+            color: #f87171;
+        }
+
+        .rv-booking {
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .rv-user {
+            font-size: 11px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .rv-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+        }
+
+        .rv-main {
+            flex: 1;
+            overflow-y: auto;
+            background: #c8c8c8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px;
+            gap: 20px;
+        }
+
+        .rv-empty {
+            margin: auto;
+            text-align: center;
+            color: #64748b;
+        }
+
+        .rv-empty .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        .rv-a4 {
+            width: 794px;
+            max-width: 100%;
+            background: #fff;
+            color: #1a1a2e;
+            border-radius: 4px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .3);
+            padding: 36px 44px;
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            line-height: 1.7;
+        }
+
+        .rv-a4 .a4-hdr {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #1a1a2e;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+        }
+
+        .rv-a4 .a4-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .rv-a4 .a4-sub {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        .rv-a4 .dec-badge {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .rv-a4 .dec-allow {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .rv-a4 .dec-challenge {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .rv-a4 .dec-block {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .rv-a4 .a4-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .rv-a4 .a4-meta-item .lbl {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .rv-a4 .a4-meta-item .val {
+            font-size: 12px;
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .rv-a4 .a4-sec {
+            margin-bottom: 20px;
+        }
+
+        .rv-a4 .a4-sec-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: #64748b;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .rv-a4 .score-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+
+        .rv-a4 .score-num {
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .rv-a4 .score-bar-bg {
+            height: 9px;
+            background: #e2e8f0;
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .rv-a4 .score-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+        }
+
+        .rv-a4 .s-low {
+            background: #10b981;
+        }
+
+        .rv-a4 .s-med {
+            background: #f59e0b;
+        }
+
+        .rv-a4 .s-hi {
+            background: #ef4444;
+        }
+
+        .rv-a4 .chips-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .rv-a4 .chip {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 11px;
+            flex: 1;
+        }
+
+        .rv-a4 .chip .c-lbl {
+            color: #64748b;
+            margin-bottom: 3px;
+        }
+
+        .rv-a4 .chip .c-val {
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .rv-a4 .chip .c-unit {
+            font-size: 10px;
+            color: #94a3b8;
+        }
+
+        .rv-a4 .chip .c-judge {
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .rv-a4 .j-ok {
+            color: #10b981;
+        }
+
+        .rv-a4 .j-warn {
+            color: #f59e0b;
+        }
+
+        .rv-a4 .j-danger {
+            color: #ef4444;
+        }
+
+        .rv-a4 .insights-box {
+            background: #f8fafc;
+            border-left: 4px solid #6366f1;
+            border-radius: 0 8px 8px 0;
+            padding: 14px 18px;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #1e293b;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .rv-a4 .insights-box.allow {
+            border-left-color: #10b981;
+        }
+
+        .rv-a4 .insights-box.challenge {
+            border-left-color: #f59e0b;
+        }
+
+        .rv-a4 .insights-box.block {
+            border-left-color: #ef4444;
+        }
+
+        .rv-a4 .rule-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .rv-a4 .rule-item {
+            font-size: 12px;
+            padding: 6px 10px;
+            background: #f8fafc;
+            border-radius: 5px;
+            border-left: 3px solid #94a3b8;
+        }
+
+        .rv-a4 .a4-footer {
+            border-top: 1px solid #e2e8f0;
+            margin-top: 24px;
+            padding-top: 10px;
+            font-size: 10px;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+        }
     </style>
 </head>
 
@@ -737,10 +1114,40 @@
 
             <!-- ===== 모델링 리포트 섹션 ===== -->
             <div id="section-report" class="top-section">
-                <div class="report-placeholder">
-                    <div class="icon">📋</div>
-                    <h3>모델링 리포트</h3>
-                    <p>봇 의심자 분류 리포트가 이 곳에 표시됩니다.<br>기준이 정해지면 추가될 예정입니다.</p>
+                <div class="rv-wrap">
+                    <!-- 좌측: 예매번호 목록 -->
+                    <div class="rv-sidebar">
+                        <div class="rv-sidebar-top">
+                            <div
+                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <div style="font-size:13px;font-weight:700;">📋 매크로 탐지 분석 리포트</div>
+                                <button onclick="rvLoadReports()"
+                                    style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:12px; padding:0; display:flex; align-items:center;"
+                                    title="새로고침">🔄</button>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <input type="text" id="rvSearch" placeholder="🔍 예매번호 / 사용자…" oninput="rvFilter()"
+                                    style="flex:1; background:#0f1117; color:#ffffff; border:1px solid #3f3f46; padding:8px 12px; border-radius:8px; font-size:13px; outline:none;">
+                                <select id="rvStatus" onchange="rvFilter()"
+                                    style="width:80px; padding:0 8px; border-radius:8px; border:1px solid #3f3f46; background:#0f1117; color:#a1a1aa; font-size:13px; outline:none; cursor:pointer; height:36px;">
+                                    <option value="all" style="background:#0f1117; color:#a1a1aa;">전체</option>
+                                    <option value="allow" style="background:#0f1117; color:#a1a1aa;">허용</option>
+                                    <option value="challenge" style="background:#0f1117; color:#a1a1aa;">의심</option>
+                                    <option value="block" style="background:#0f1117; color:#a1a1aa;">경고</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="rv-list" id="rvList">
+                            <div style="padding:20px;text-align:center;color:#64748b;font-size:13px;">로딩 중…</div>
+                        </div>
+                    </div>
+                    <!-- 우측: A4 리포트 -->
+                    <div class="rv-main" id="rvMain">
+                        <div class="rv-empty">
+                            <div class="icon">📄</div>
+                            <p>왼쪽에서 예매번호를 선택하세요</p>
+                        </div>
+                    </div>
                 </div>
             </div><!-- /section-report -->
 
@@ -822,6 +1229,163 @@
 
             if (section === 'restrict') loadRestrictionHistory();
             if (section === 'cancel') loadCancelledBookings();
+            if (section === 'report') rvLoadReports();
+        }
+
+        // ===== 인라인 리포트 뷰어 =====
+        let rvAllReports = [];
+
+        const rvDecLabel = { allow: '✅ 허용', challenge: '⚠️ 의심', block: '🚨 경고' };
+
+        async function rvLoadReports() {
+            try {
+                const res = await fetch('/api/reports');
+                const data = await res.json();
+                rvAllReports = (data.reports || []).filter(r => r.booking_id && r.booking_id !== 'nobooking');
+                rvRenderList(rvAllReports);
+            } catch (e) {
+                document.getElementById('rvList').innerHTML =
+                    '<div style="padding:20px;color:#ef4444;font-size:13px;">불러오기 실패</div>';
+            }
+        }
+
+        function rvFilter() {
+            const q = document.getElementById('rvSearch').value.toLowerCase();
+            const status = document.getElementById('rvStatus').value;
+
+            rvRenderList(rvAllReports.filter(r => {
+                const matchesSearch = (r.booking_id || '').toLowerCase().includes(q) || (r.user_id || '').toLowerCase().includes(q);
+                const matchesStatus = status === 'all' || (r.decision || 'allow') === status;
+                return matchesSearch && matchesStatus;
+            }));
+        }
+
+        function rvRenderList(reports) {
+            const el = document.getElementById('rvList');
+            if (!reports.length) {
+                el.innerHTML = '<div style="padding:20px;text-align:center;color:#64748b;font-size:13px;">리포트 없음</div>';
+                return;
+            }
+            el.innerHTML = reports.map(r => {
+                const d = r.decision || 'allow';
+                const score = r.risk_score != null ? (r.risk_score * 100).toFixed(1) : '-';
+                const t = r.created_at_iso ? new Date(r.created_at_iso).toLocaleString('ko-KR') : '';
+                const llmFile = (r.llm_report_json_path || '').split(/[/\\]/).pop();
+                return `
+                <div class="rv-item" onclick="rvSelectReport('${llmFile}', this)">
+                    <div class="rv-top">
+                        <span class="rv-badge ${d}">${rvDecLabel[d]}</span>
+                        <span class="rv-booking">${r.booking_id || '-'}</span>
+                    </div>
+                    <div class="rv-user">${r.user_id || '-'}</div>
+                    <div class="rv-meta">
+                        <span>점수 ${score}/100</span>
+                        <span>${t}</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function rvSelectReport(filename, el) {
+            if (!filename) return;
+            document.querySelectorAll('.rv-item').forEach(i => i.classList.remove('active'));
+            if (el) el.classList.add('active');
+            document.getElementById('rvMain').innerHTML =
+                '<div class="rv-empty"><div class="icon">⏳</div><p>불러오는 중…</p></div>';
+            try {
+                const res = await fetch(`/api/reports/${encodeURIComponent(filename)}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                rvRenderA4(data);
+            } catch (e) {
+                document.getElementById('rvMain').innerHTML =
+                    `<div class="rv-empty"><div class="icon">❌</div><p>로드 실패: ${e.message}</p></div>`;
+            }
+        }
+
+        function rvJudgeClass(judge) {
+            if (!judge) return '';
+            if (/정상|자연|미발견/.test(judge)) return 'j-ok';
+            if (/의심|소수/.test(judge)) return 'j-warn';
+            return 'j-danger';
+        }
+
+        function rvEsc(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function rvTryMarkdown(md) {
+            if (!md) return '';
+            const m = md.match(/\[ AI Insights[^\]]*\]\s*-+\s*\n([\s\S]*?)(?:\n\s*-{3,}|$)/);
+            return m ? m[1].trim() : '';
+        }
+
+        function rvRenderA4(d) {
+            const llm = d.llm_analysis || {};
+            const ui = d.ui_fields || llm.ui_fields || {};
+            const dec = d.decision || 'allow';
+            const score = ui.bot_score ? ui.bot_score.value : 0;
+            const scoreNum = parseFloat(score).toFixed(1);
+            const scorePct = Math.min(parseFloat(score), 100);
+            const scoreClass = scorePct >= 70 ? 's-hi' : scorePct >= 30 ? 's-med' : 's-low';
+            const speed = ui.speed_variability || {};
+            const curve = ui.path_curvature || {};
+            const hoverSec = ui.hover_sections || {};
+            const seed = d.ui_metric_seed || {};
+            const stdDwell = seed.hover_std_dwell_ms ?? null;
+            const avgDwell = seed.hover_avg_dwell_ms ?? null;
+            const tremorCls = stdDwell === null ? '' : stdDwell >= 30 ? 'j-ok' : stdDwell >= 10 ? 'j-warn' : 'j-danger';
+            const tremorLbl = stdDwell === null ? '-' : stdDwell >= 30 ? '자연스러움' : stdDwell >= 10 ? '의심' : '강한 의심';
+            const insights = (rvTryMarkdown(d.markdown_report) ||
+                rvTryMarkdown(llm.markdown_report) ||
+                llm.summary_ko ||
+                (ui.suspicion_narrative_ko) ||
+                ((llm.ui_fields || {}).suspicion_narrative_ko) || '').trim();
+            const rules = llm.top_reasons || [];
+            const createdAt = d.created_at_iso ? new Date(d.created_at_iso).toLocaleString('ko-KR') : '-';
+
+            document.getElementById('rvMain').innerHTML = `
+            <div class="rv-a4">
+                <div class="a4-hdr">
+                    <div>
+                        <div class="a4-title">🛡️ 매크로 탐지 분석 리포트</div>
+                        <div class="a4-sub">${d.report_id || '-'}</div>
+                    </div>
+                    <span class="dec-badge dec-${dec}">${rvDecLabel[dec] || dec}</span>
+                </div>
+                <div class="a4-meta">
+                    <div class="a4-meta-item"><div class="lbl">예매 ID</div><div class="val">${d.booking_id || '-'}</div></div>
+                    <div class="a4-meta-item"><div class="lbl">사용자</div><div class="val">${d.target_masked_user || '-'}</div></div>
+                    <div class="a4-meta-item"><div class="lbl">생성 시각</div><div class="val">${createdAt}</div></div>
+                    <div class="a4-meta-item"><div class="lbl">Flow ID</div><div class="val">${d.flow_id || '-'}</div></div>
+                    <div class="a4-meta-item"><div class="lbl">Session ID</div><div class="val">${d.session_id || '-'}</div></div>
+                    <div class="a4-meta-item"><div class="lbl">Request ID</div><div class="val">${(d.request_id || '-').replace(/^req_/, '')}</div></div>
+                </div>
+                <div class="a4-sec">
+                    <div class="a4-sec-title">봇 위험 점수</div>
+                    <div class="score-row">
+                        <div class="score-num">${scoreNum}</div>
+                        <div style="font-size:12px;color:#64748b;">/ 100</div>
+                        <div style="margin-left:auto;font-size:13px;font-weight:700;">${ui.status_title_ko || ''}</div>
+                    </div>
+                    <div class="score-bar-bg"><div class="score-bar-fill ${scoreClass}" style="width:${scorePct}%"></div></div>
+                </div>
+                <div class="a4-sec">
+                    <div class="a4-sec-title">행동 지표</div>
+                    <div class="chips-row">
+                        <div class="chip"><div class="c-lbl">반응 속도 변동성</div><div><span class="c-val">${speed.value ?? '-'}</span><span class="c-unit"> ${speed.unit || '%'}</span></div><div class="c-judge ${rvJudgeClass(speed.judgement_ko)}">${speed.judgement_ko || '-'}</div></div>
+                        <div class="chip"><div class="c-lbl">궤적 곡선성</div><div><span class="c-val">${curve.value ?? '-'}</span><span class="c-unit"> ${curve.unit || 'rad'}</span></div><div class="c-judge ${rvJudgeClass(curve.judgement_ko)}">${curve.judgement_ko || '-'}</div></div>
+                    </div>
+                    <div class="chips-row">
+                        <div class="chip"><div class="c-lbl">호버 구간</div><div><span class="c-val">${hoverSec.value ?? '-'}</span><span class="c-unit"> ${hoverSec.unit || '개'}</span></div><div class="c-judge ${rvJudgeClass(hoverSec.judgement_ko)}">${hoverSec.judgement_ko || '-'}</div></div>
+                        <div class="chip"><div class="c-lbl">미세 떨림 (hover std)</div><div><span class="c-val">${stdDwell !== null ? stdDwell : '-'}</span><span class="c-unit"> ms</span></div><div class="c-judge ${tremorCls}">${tremorLbl}</div></div>
+                        <div class="chip"><div class="c-lbl">평균 호버 정지</div><div><span class="c-val">${avgDwell !== null ? avgDwell : '-'}</span><span class="c-unit"> ms</span></div></div>
+                    </div>
+                </div>
+                ${insights ? `<div class="a4-sec"><div class="a4-sec-title">AI Insights: GPT 생성 종합 리포트</div><div class="insights-box ${dec}">${rvEsc(insights)}</div></div>` : ''}
+                ${rules.length ? `<div class="a4-sec"><div class="a4-sec-title">주요 탐지 사유</div><ul class="rule-list">${rules.map(r => `<li class="rule-item">• ${rvEsc(r)}</li>`).join('')}</ul></div>` : ''}
+                <div class="a4-footer"><span>매크로 탐지 시스템 — 자동 생성 리포트</span><span>${createdAt}</span></div>
+            </div>`;
         }
 
         // ===== 예매 제한 내역 =====
