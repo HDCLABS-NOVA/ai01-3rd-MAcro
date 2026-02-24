@@ -3220,45 +3220,48 @@ async def get_user_bookings(email: str):
     """사용자의 예매 내역을 조회합니다."""
     try:
         bookings = []
-        for filename in os.listdir(LOGS_DIR):
-            if not filename.endswith('.json'):
-                continue
-            filepath = os.path.join(LOGS_DIR, filename)
-            try:
-                with open(filepath, 'r', encoding='utf-8') as f:
-                    log = json.load(f)
-                meta = log.get('metadata', {})
-                # 해당 이메일의 완료된 예매만
-                if meta.get('user_email') != email:
+        # 브라우저 로그 디렉토리의 모든 하위 디렉토리를 탐색
+        for root, dirs, files in os.walk(BROWSER_LOGS_DIR):
+            for filename in files:
+                if not filename.endswith('.json'):
                     continue
-                if not meta.get('is_completed'):
+                filepath = os.path.join(root, filename)
+                try:
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        log = json.load(f)
+                    meta = log.get('metadata', {})
+                    # 해당 이메일의 완료된 예매만
+                    if meta.get('user_email') != email:
+                        continue
+                    # is_completed가 True이거나 completion_status가 success인 경우
+                    if not meta.get('is_completed') and meta.get('completion_status') != 'success':
+                        continue
+
+                    stages = log.get('stages', {})
+                    discount = stages.get('discount', {})
+                    order_info = stages.get('order_info', {})
+                    payment = stages.get('payment', {})
+
+                    booking = {
+                        "filename": os.path.relpath(filepath, BROWSER_LOGS_DIR).replace('\\', '/'),
+                        "performance_title": meta.get('performance_title', '-'),
+                        "selected_date": meta.get('selected_date', '-'),
+                        "selected_time": meta.get('selected_time', '-'),
+                        "booking_id": meta.get('booking_id', '-'),
+                        "cancelled": meta.get('cancelled', False),
+                        "cancel_reason": meta.get('cancel_reason', ''),
+                        "final_seats": meta.get('final_seats', []),
+                        "seat_grades": meta.get('seat_grades', []),
+                        "payment_type": payment.get('payment_type', '-'),
+                        "selected_discount": discount.get('selected_discount', 'disabled'),
+                        "delivery_type": order_info.get('delivery_type', 'pickup'),
+                        "delivery_address": meta.get('delivery_address', ''),
+                        "delivery_status": meta.get('delivery_status', '준비중'),
+                        "created_at": meta.get('created_at', '')
+                    }
+                    bookings.append(booking)
+                except:
                     continue
-
-                stages = log.get('stages', {})
-                discount = stages.get('discount', {})
-                order_info = stages.get('order_info', {})
-                payment = stages.get('payment', {})
-
-                booking = {
-                    "filename": filename,
-                    "performance_title": meta.get('performance_title', '-'),
-                    "selected_date": meta.get('selected_date', '-'),
-                    "selected_time": meta.get('selected_time', '-'),
-                    "booking_id": meta.get('booking_id', '-'),
-                    "cancelled": meta.get('cancelled', False),
-                    "cancel_reason": meta.get('cancel_reason', ''),
-                    "final_seats": meta.get('final_seats', []),
-                    "seat_grades": meta.get('seat_grades', []),
-                    "payment_type": payment.get('payment_type', '-'),
-                    "selected_discount": discount.get('selected_discount', 'disabled'),
-                    "delivery_type": order_info.get('delivery_type', 'pickup'),
-                    "delivery_address": meta.get('delivery_address', ''),
-                    "delivery_status": meta.get('delivery_status', '준비중'),
-                    "created_at": meta.get('created_at', '')
-                }
-                bookings.append(booking)
-            except:
-                continue
 
         # 최신순 정렬
         bookings.sort(key=lambda x: x['created_at'], reverse=True)
