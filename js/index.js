@@ -145,12 +145,12 @@ function startCountdowns() {
 
 function getCategoryIcon(category) {
     const icons = {
-        concert: '🎤',
-        musical: '🎭',
-        sports: '⚽',
-        exhibition: '🖼️'
+        concert: `<svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path><path d="M19 10v1a7 7 0 0 1-14 0v-1"></path><line x1="12" y1="19" x2="12" y2="22"></line><line x1="8" y1="22" x2="16" y2="22"></line></svg>`,
+        musical: `<svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4.5V12"></path><path d="M18.5 7v5a6.5 6.5 0 0 1-13 0V7"></path><path d="M12 4.5l6.5 2.5a1 1 0 0 1 .5.87V12a7 7 0 0 1-14 0V7.87a1 1 0 0 1 .5-.87l6.5-2.5z"></path></svg>`,
+        sports: `<svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M6.06 6.06l11.88 11.88"></path><path d="M17.94 6.06l-11.88 11.88"></path><circle cx="12" cy="12" r="4"></circle></svg>`,
+        exhibition: `<svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`
     };
-    return icons[category] || '🎫';
+    return icons[category] || `<svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18l1 10H2L3 7z"></path><path d="M12 4v4"></path></svg>`;
 }
 
 function getCategoryName(category) {
