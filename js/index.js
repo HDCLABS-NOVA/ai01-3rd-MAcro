@@ -34,9 +34,9 @@ function displayPerformances() {
 
         return `
             <div class="${cardClass}" onclick="${clickAction}">
-              <div class="performance-card-image" style="background: #e2e8f0">
-                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
-                  ${getCategoryIcon(perf.category)}
+              <div class="performance-card-image" style="background: url('${perf.image}') center/cover no-repeat, var(--primary-color)">
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px; background: rgba(0,0,0,0.2);">
+                  ${perf.image ? '' : getCategoryIcon(perf.category)}
                 </div>
                 ${statusBadge}
               </div>

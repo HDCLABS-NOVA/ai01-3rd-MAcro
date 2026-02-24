@@ -66,7 +66,7 @@ function updateCaptchaButton() {
     const btn = document.getElementById('captcha-submit-btn');
 
     if (input.value.trim().length > 0) {
-        btn.style.background = '#4f46e5';
+        btn.style.background = '#E61E51';
         btn.style.color = 'white';
         btn.style.cursor = 'pointer';
     } else {
