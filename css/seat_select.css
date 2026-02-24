@@ -69,10 +69,6 @@ body>#captcha-overlay {
     justify-content: center;
 }
 
-.captcha-btn-left {
-    left: 20px;
-}
-
 .captcha-btn-right {
     right: 20px;
 }
