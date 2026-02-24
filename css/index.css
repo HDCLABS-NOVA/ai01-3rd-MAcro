@@ -60,7 +60,7 @@
 
 /* 카운트다운 타이머 */
 .countdown-timer {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #6366f1;
     color: white;
     padding: 10px 16px;
     border-radius: 8px;
@@ -68,17 +68,15 @@
     font-weight: 600;
     text-align: center;
     margin-top: 8px;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .countdown-timer.countdown-urgent {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: #ef4444;
     animation: pulse 2s infinite;
-    box-shadow: 0 2px 12px rgba(245, 87, 108, 0.5);
 }
 
 .countdown-timer.countdown-finished {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    background: #10b981;
     animation: none;
 }
 

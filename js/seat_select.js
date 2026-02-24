@@ -66,7 +66,7 @@ function updateCaptchaButton() {
     const btn = document.getElementById('captcha-submit-btn');
 
     if (input.value.trim().length > 0) {
-        btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        btn.style.background = '#4f46e5';
         btn.style.color = 'white';
         btn.style.cursor = 'pointer';
     } else {
@@ -155,18 +155,18 @@ document.getElementById('perf-info').textContent = flowData.performanceTitle;
 const gradeColors = {
     'VIP': { bg: '#F1F5F9', border: '#E61E51', color: '#E61E51', hoverBg: '#E61E51' },
     'VIP석': { bg: '#F1F5F9', border: '#E61E51', color: '#E61E51', hoverBg: '#E61E51' },
-    'R': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
-    'R석': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
-    'S': { bg: '#E8F5E9', border: '#4CAF50', color: '#4CAF50', hoverBg: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' },
-    'S석': { bg: '#E8F5E9', border: '#4CAF50', color: '#4CAF50', hoverBg: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' },
-    'A': { bg: '#E3F2FD', border: '#2196F3', color: '#2196F3', hoverBg: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' },
-    'A석': { bg: '#E3F2FD', border: '#2196F3', color: '#2196F3', hoverBg: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' },
-    '프리미엄석': { bg: '#F3E5F5', border: '#9C27B0', color: '#9C27B0', hoverBg: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)' },
-    '지정석': { bg: '#E0F2F1', border: '#009688', color: '#009688', hoverBg: 'linear-gradient(135deg, #009688 0%, #00796B 100%)' },
-    '자유석': { bg: '#FFF9C4', border: '#FBC02D', color: '#F57F17', hoverBg: 'linear-gradient(135deg, #FBC02D 0%, #F57F17 100%)' },
-    '스탠딩': { bg: '#FFCCBC', border: '#FF5722', color: '#FF5722', hoverBg: 'linear-gradient(135deg, #FF5722 0%, #E64A19 100%)' },
-    '성인': { bg: '#E8EAF6', border: '#3F51B5', color: '#3F51B5', hoverBg: 'linear-gradient(135deg, #3F51B5 0%, #303F9F 100%)' },
-    '청소년': { bg: '#E1F5FE', border: '#03A9F4', color: '#03A9F4', hoverBg: 'linear-gradient(135deg, #03A9F4 0%, #0288D1 100%)' }
+    'R': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: '#FF9800' },
+    'R석': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: '#FF9800' },
+    'S': { bg: '#E8F5E9', border: '#4CAF50', color: '#4CAF50', hoverBg: '#4CAF50' },
+    'S석': { bg: '#E8F5E9', border: '#4CAF50', color: '#4CAF50', hoverBg: '#4CAF50' },
+    'A': { bg: '#E3F2FD', border: '#2196F3', color: '#2196F3', hoverBg: '#2196F3' },
+    'A석': { bg: '#E3F2FD', border: '#2196F3', color: '#2196F3', hoverBg: '#2196F3' },
+    '프리미엄석': { bg: '#F3E5F5', border: '#9C27B0', color: '#9C27B0', hoverBg: '#9C27B0' },
+    '지정석': { bg: '#E0F2F1', border: '#009688', color: '#009688', hoverBg: '#009688' },
+    '자유석': { bg: '#FFF9C4', border: '#FBC02D', color: '#F57F17', hoverBg: '#FBC02D' },
+    '스탠딩': { bg: '#FFCCBC', border: '#FF5722', color: '#FF5722', hoverBg: '#FF5722' },
+    '성인': { bg: '#E8EAF6', border: '#3F51B5', color: '#3F51B5', hoverBg: '#3F51B5' },
+    '청소년': { bg: '#E1F5FE', border: '#03A9F4', color: '#03A9F4', hoverBg: '#03A9F4' }
 };
 
 // 좌석 그리드 생성 (여러 등급 통합)

@@ -184,8 +184,7 @@
 
 .discount-option.selected {
     border-color: var(--primary-color);
-    background: linear-gradient(135deg, rgba(255, 61, 127, 0.05) 0%, rgba(156, 39, 176, 0.05) 100%);
-    box-shadow: var(--shadow-md);
+    background: #f1f5f9;
 }
 
 .discount-option-title {
@@ -226,8 +225,7 @@
 
 .payment-method.selected {
     border-color: var(--primary-color);
-    background: linear-gradient(135deg, rgba(255, 61, 127, 0.05) 0%, rgba(156, 39, 176, 0.05) 100%);
-    box-shadow: var(--shadow-md);
+    background: #f1f5f9;
 }
 
 .payment-icon {

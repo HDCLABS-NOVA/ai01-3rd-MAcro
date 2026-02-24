@@ -129,7 +129,7 @@ function displayPerformance() {
   detailDiv.innerHTML = `
     <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
       <div class="card">
-        <div style="width: 100%; height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 72px;">
+        <div style="width: 100%; height: 400px; background: #1e293b; border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 72px;">
           ${getCategoryIcon(currentPerformance.category)}
         </div>
       </div>
@@ -419,7 +419,7 @@ function startDetailCountdown() {
 
     if (totalSec <= 0) {
       countdownEl.textContent = "예매 시작!";
-      countdownEl.style.background = "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)";
+      countdownEl.style.background = "#10b981";
       clearInterval(window.detailCountdownInterval);
 
       setTimeout(() => {

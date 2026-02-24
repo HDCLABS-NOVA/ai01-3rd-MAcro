@@ -34,7 +34,7 @@ function displayPerformances() {
 
         return `
             <div class="${cardClass}" onclick="${clickAction}">
-              <div class="performance-card-image" style="background: linear-gradient(135deg, ${getRandomGradient()})">
+              <div class="performance-card-image" style="background: #e2e8f0">
                 <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
                   ${getCategoryIcon(perf.category)}
                 </div>

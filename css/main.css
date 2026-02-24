@@ -16,7 +16,7 @@
   --bg-primary: #FFFFFF;
   --bg-secondary: #F8FAFC;
   --bg-dark: #1E293B;
-  --bg-gradient: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+  --bg-gradient: var(--bg-dark);
 
   /* 텍스트 컬러 */
   --text-primary: #1A1A1A;
