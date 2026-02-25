@@ -911,6 +911,236 @@
             display: flex;
             justify-content: space-between;
         }
+
+        /* ===== report_viewer 공유 CSS ===== */
+        .rv-a4 .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #1a1a2e;
+            padding-bottom: 12px;
+            margin-bottom: 18px;
+        }
+
+        .rv-a4 .card-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .rv-a4 .card-sub {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        .rv-a4 .decision-badge {
+            font-size: 12px;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .rv-a4 .decision-allow {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .rv-a4 .decision-challenge {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .rv-a4 .decision-block {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .rv-a4 .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .rv-a4 .meta-item .label {
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .rv-a4 .meta-item .value {
+            font-size: 12px;
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .rv-a4 .score-section {
+            margin-bottom: 20px;
+        }
+
+        .rv-a4 .section {
+            margin-bottom: 20px;
+        }
+
+        .rv-a4 .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            color: #64748b;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .rv-a4 .score-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+
+        .rv-a4 .score-number {
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .rv-a4 .score-label {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .rv-a4 .score-bar-bg {
+            height: 9px;
+            background: #e2e8f0;
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .rv-a4 .score-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+        }
+
+        .rv-a4 .score-low {
+            background: #10b981;
+        }
+
+        .rv-a4 .score-medium {
+            background: #f59e0b;
+        }
+
+        .rv-a4 .score-high {
+            background: #ef4444;
+        }
+
+        .rv-a4 .score-guide {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            margin-top: 6px;
+        }
+
+        .rv-a4 .score-guide-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        .rv-a4 .score-guide-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .rv-a4 .chip {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 11px;
+            background: #fafbfc;
+        }
+
+        .rv-a4 .chip-label {
+            color: #64748b;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .rv-a4 .chip-val {
+            font-size: 16px;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .rv-a4 .chip-unit {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-left: 2px;
+        }
+
+        .rv-a4 .chip-judge {
+            font-size: 10px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .rv-a4 .chip-desc {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 4px;
+            line-height: 1.5;
+        }
+
+        .rv-a4 .judge-ok {
+            color: #10b981;
+        }
+
+        .rv-a4 .judge-warn {
+            color: #f59e0b;
+        }
+
+        .rv-a4 .judge-danger {
+            color: #ef4444;
+        }
+
+        .rv-a4 .insights-box {
+            background: #f8fafc;
+            border-left: 4px solid #6366f1;
+            border-radius: 0 8px 8px 0;
+            padding: 14px 18px;
+            font-size: 13px;
+            line-height: 1.8;
+            color: #1e293b;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .rv-a4 .insights-box.allow {
+            border-left-color: #10b981;
+        }
+
+        .rv-a4 .insights-box.challenge {
+            border-left-color: #f59e0b;
+        }
+
+        .rv-a4 .insights-box.block {
+            border-left-color: #ef4444;
+        }
+
+        .rv-a4 .card-footer {
+            border-top: 1px solid #e2e8f0;
+            margin-top: 24px;
+            padding-top: 10px;
+            font-size: 10px;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+        }
     </style>
 </head>
 
@@ -1321,71 +1551,218 @@
             return m ? m[1].trim() : '';
         }
 
+        /* ===== report_viewer 공유 JS ===== */
+        function escRv(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function rvJudgeClassFull(judge) {
+            if (!judge) return '';
+            if (/정상|자연|미발견/.test(judge)) return 'judge-ok';
+            if (/의심|소수/.test(judge)) return 'judge-warn';
+            return 'judge-danger';
+        }
+
+        const RV_FEATURE_META = {
+            perf_std_mouse_speed: { ko: '마우스 속도 변동성(STD)', unit: '' },
+            perf_avg_mouse_speed: { ko: '평균 마우스 속도', unit: '' },
+            queue_duration_ms: { ko: '대기열 체류 시간', unit: 'ms' },
+            queue_position_delta: { ko: '대기열 순위 변화', unit: '' },
+            queue_mouse_points: { ko: '대기열 마우스 이벤트 수', unit: '개' },
+            perf_click_count: { ko: '클릭 횟수', unit: '회' },
+            perf_scroll_count: { ko: '스크롤 이벤트 수', unit: '회' },
+            perf_hover_count: { ko: '호버 이벤트 수', unit: '회' },
+            perf_avg_click_interval: { ko: '평균 클릭 간격', unit: 'ms' },
+            perf_session_duration: { ko: '세션 지속 시간', unit: 'ms' },
+            login_fail_count: { ko: '로그인 실패 횟수', unit: '회' },
+            requests_last_1s: { ko: '초당 요청 수(1초)', unit: '회' },
+            requests_last_10s: { ko: '요청 수(10초)', unit: '회' },
+            requests_last_60s: { ko: '요청 수(60초)', unit: '회' },
+        };
+
+        function rvRenderFeatureContributions(d) {
+            const contribs = ((d.evidence_logs || {}).model || {}).top_feature_contributions || [];
+            if (!contribs.length) return '';
+            const fmtNum = (n, u) => { const abs = Math.abs(n); const dp = abs >= 1000 ? 0 : abs >= 100 ? 1 : abs >= 10 ? 2 : 3; let s = n.toFixed(dp); if (s.includes('.')) s = s.replace(/0+$/, '').replace(/\.$/, '.0'); return s + (u || ''); };
+            const diffLabel = (val, mean, unit) => { if (mean === 0) return '비교 불가'; const d = ((val - mean) / Math.abs(mean)) * 100; const isT = (unit || '').toLowerCase() === 'ms'; if (d <= -80) return isT ? '매우 짧음' : '매우 낮음'; if (d <= -40) return isT ? '짧음' : '낮음'; if (d <= -10) return isT ? '다소 짧음' : '다소 낮음'; if (d < 10) return '정상 범위'; if (d < 40) return isT ? '다소 김' : '다소 높음'; if (d < 80) return isT ? '김' : '높음'; return isT ? '매우 김' : '매우 높음'; };
+            const diffColor = (val, mean) => { if (mean === 0) return '#94a3b8'; const d = ((val - mean) / Math.abs(mean)) * 100; if (Math.abs(d) < 10) return '#15803d'; if (Math.abs(d) < 40) return '#b45309'; return '#b91c1c'; };
+            const lines = contribs.map(c => { const meta = RV_FEATURE_META[c.feature] || { ko: c.feature, unit: '' }; const val = parseFloat(c.value || 0); const mean = parseFloat(c.normal_mean || c.baseline || 0); const contrib = parseFloat(c.contribution || 0); const unit = meta.unit; const label = diffLabel(val, mean, unit); const color = diffColor(val, mean); return '<div style="padding:7px 0;border-bottom:1px solid #f1f5f9;line-height:1.7;font-size:13px;"><span style="color:#6366f1;font-weight:700;">•</span>&nbsp;' + escRv(c.feature) + '&nbsp;값&nbsp;<strong>' + fmtNum(val, unit) + '</strong>&nbsp;(정상 평균&nbsp;<span style="color:#64748b;">' + fmtNum(mean, unit) + '</span>&nbsp;대비&nbsp;<span style="color:' + color + ';font-weight:700;">' + label + '</span>,&nbsp;<span style="color:#6366f1;">기여도 ' + contrib.toFixed(4) + '</span>)</div>'; });
+            return '<div style="border:1px solid #e2e8f0;border-radius:8px;padding:4px 16px;background:#f8fafc;">' + lines.join('') + '</div>';
+        }
+
+        const RV_RULE_META = {
+            concurrent_sessions_same_device: { ko: '동일 기기 동시 세션', src: d => ((d.evidence_logs || {}).behavior || {}).concurrent_sessions_same_device, unit: '개' },
+            concurrent_sessions_same_ip: { ko: '동일 IP 동시 세션', src: d => ((d.evidence_logs || {}).behavior || {}).concurrent_sessions_same_ip, unit: '개' },
+            requests_last_1s: { ko: '1초 내 요청 수', src: d => ((d.evidence_logs || {}).behavior || {}).requests_last_1s, unit: '회' },
+            requests_last_10s: { ko: '10초 내 요청 수', src: d => ((d.evidence_logs || {}).behavior || {}).requests_last_10s, unit: '회' },
+            poll_interval_ms_p50: { ko: '폴링 간격 P50', src: d => (((d.evidence_logs || {}).queue || {}).poll_interval_ms_stats || {}).p50, unit: 'ms' },
+            reserve_attempt_count: { ko: '좌석 예약 시도 횟수', src: d => ((d.evidence_logs || {}).seat || {}).reserve_attempt_count, unit: '회' },
+            browser_untrusted_clicks: { ko: '비신뢰 클릭 수', src: d => ((d.evidence_logs || {}).behavior || {}).untrusted_click_count, unit: '회' },
+        };
+        const RV_RULE_SCORE_MAP = { 'concurrent_sessions_same_device>=3': 0.35, 'concurrent_sessions_same_device>=8': 0.30, 'concurrent_sessions_same_ip>=10': 0.35, 'concurrent_sessions_same_ip>=20': 0.30, 'requests_last_1s>=10': 0.25, 'requests_last_1s>=20': 0.25, 'captcha_failed': 0.30, 'queue_fast_poll_and_jump': 0.25, 'queue_fast_poll_and_jump_hard': 0.35, 'reserve_attempt_count>=10': 0.20, 'browser_untrusted_clicks>=1': 0.20, 'browser_untrusted_clicks>=3': 0.30, 'security.blocked=true': 1.00 };
+
+        function rvParseRule(ruleStr) {
+            if (ruleStr === 'security.blocked=true') return { key: 'security_blocked', op: '=', threshold: 'true' };
+            if (ruleStr === 'captcha_failed') return { key: 'captcha_failed', op: null, threshold: null };
+            if (ruleStr === 'queue_fast_poll_and_jump') return { key: 'poll_interval_ms_p50', op: '<', threshold: 200 };
+            if (ruleStr === 'queue_fast_poll_and_jump_hard') return { key: 'poll_interval_ms_p50', op: '<', threshold: 120 };
+            const m = ruleStr.match(/^(.+?)(>=|<=|>|<|=)(.+)$/);
+            if (m) return { key: m[1], op: m[2], threshold: parseFloat(m[3]) };
+            return { key: ruleStr, op: null, threshold: null };
+        }
+
+        function rvRenderRuleReasons(d) {
+            const ruleList = ((d.evidence_logs || {}).rule) || [];
+            if (!ruleList.length) return '';
+            const opLbl = op => ({ '>=': `이상`, '<=': `이하`, '>': `초과`, '<': `미만`, '=': `=` }[op] || op);
+            const lines = ruleList.map(r => { const parsed = rvParseRule(r); const meta = RV_RULE_META[parsed.key]; const score = RV_RULE_SCORE_MAP[r]; const measured = meta ? meta.src(d) : undefined; const unit = (meta || {}).unit || ''; const koName = (meta || {}).ko || parsed.key; const scoreSpan = score != null ? ' <span style="color:#ef4444;font-weight:700;">기여 +' + score.toFixed(2) + 'pt</span>' : ''; let detail = ''; if (measured != null && parsed.threshold != null && parsed.op) { detail = '&nbsp;값&nbsp;<strong>' + measured + unit + '</strong>&nbsp;(기준&nbsp;<span style="color:#64748b;">' + parsed.threshold + unit + '&nbsp;' + opLbl(parsed.op) + '</span>' + scoreSpan + ')'; } else { detail = scoreSpan ? '&nbsp;(' + scoreSpan.trim() + ')' : ''; } return '<div style="padding:7px 0;border-bottom:1px solid #f1f5f9;line-height:1.7;font-size:13px;"><span style="color:#f59e0b;font-weight:700;">•</span>&nbsp;<strong>' + escRv(koName) + '</strong>&nbsp;<span style="font-family:monospace;font-size:11px;background:#f1f5f9;border-radius:4px;padding:1px 5px;">' + escRv(r) + '</span>' + detail + '</div>'; });
+            return '<div style="margin-top:12px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #e2e8f0;padding-bottom:5px;margin-bottom:4px;">규칙 엔진 탐지 사유</div><div style="border:1px solid #e2e8f0;border-radius:8px;padding:4px 16px;background:#f8fafc;">' + lines.join('') + '</div>';
+        }
+
+        function rvGenerateInsights(d, ui, dec, scoreNum) {
+            const contribs = ((d.evidence_logs || {}).model || {}).top_feature_contributions || [];
+            const speed = ui.speed_variability || {};
+            const curve = ui.path_curvature || {};
+
+            const fmtN = n => {
+                const abs = Math.abs(n);
+                const dp = abs >= 1000 ? 0 : abs >= 100 ? 1 : abs >= 10 ? 2 : 3;
+                let s = n.toFixed(dp);
+                if (s.includes('.')) s = s.replace(/0+$/, '').replace(/\.$/, '.0');
+                return s;
+            };
+
+            const devWord = (val, mean) => {
+                if (!mean) return '확인 불가';
+                const pct = (val - mean) / Math.abs(mean) * 100;
+                if (pct <= -80) return '매우 낮아';
+                if (pct <= -40) return '낮아';
+                if (pct <= -10) return '다소 낮아';
+                if (pct < 10) return '유사하여';
+                if (pct < 40) return '다소 높아';
+                if (pct < 80) return '높아';
+                return '매우 높아';
+            };
+
+            // ① 행동 지표 문장
+            const metaParts = [];
+            if (speed.value != null) metaParts.push(`speed_variability는 ${speed.value}${speed.unit || '%'}`);
+            if (curve.value != null) metaParts.push(`path_curvature는 ${curve.value}${curve.unit || 'rad'}`);
+            metaParts.push(`bot_score는 ${scoreNum}/100`);
+
+            const rangeWord = dec === 'allow' ? '정상 범위 내에 있습니다' :
+                dec === 'challenge' ? '일부 비정상 범위에 있습니다' :
+                    '위험 범위에 있습니다';
+            const sent1 = `본 사용자의 ${metaParts.join(', ')}으로 ${rangeWord}.`;
+
+            // ② 주요 피처 문장
+            let sent2 = '';
+            if (contribs.length) {
+                const top = contribs[0];
+                const val = parseFloat(top.value || 0);
+                const mean = parseFloat(top.normal_mean || top.baseline || 0);
+                const dev = devWord(val, mean);
+                const isSuspicious = dec !== 'allow';
+                const implication = isSuspicious
+                    ? '매크로 의심 가능성을 시사합니다'
+                    : '매크로 의심 가능성이 낮음을 시사합니다';
+                sent2 = `가장 영향력 높은 피처인 ${top.feature} 값 ${fmtN(val)}은 정상 평균 ${fmtN(mean)} 대비 ${dev} ${implication}.`;
+            }
+
+            // ③ 결론 문장
+            const verdict = dec === 'allow'
+                ? '정상 사용자로 판단되며, 접근 허용(allow)을 권장합니다'
+                : dec === 'challenge'
+                    ? '주의 대상으로 판단되며, 추가 인증(challenge)을 권장합니다'
+                    : '매크로·봇으로 강하게 의심되며, 접근 차단(block)을 권장합니다';
+            const sent3 = `따라서 본 사례는 ${verdict}.`;
+
+            return [sent1, sent2, sent3].filter(Boolean).join(' ');
+        }
+
         function rvRenderA4(d) {
             const llm = d.llm_analysis || {};
             const ui = d.ui_fields || llm.ui_fields || {};
             const dec = d.decision || 'allow';
-            const score = ui.bot_score ? ui.bot_score.value : 0;
+            const score = ui.bot_score ? ui.bot_score.value : (d.risk_summary ? d.risk_summary.total_score * 100 : 0);
             const scoreNum = parseFloat(score).toFixed(1);
             const scorePct = Math.min(parseFloat(score), 100);
-            const scoreClass = scorePct >= 70 ? 's-hi' : scorePct >= 30 ? 's-med' : 's-low';
+            const scoreClass = scorePct >= 70 ? 'score-high' : scorePct >= 30 ? 'score-medium' : 'score-low';
             const speed = ui.speed_variability || {};
             const curve = ui.path_curvature || {};
-            const hoverSec = ui.hover_sections || {};
+            const hover = ui.hover_sections || {};
             const seed = d.ui_metric_seed || {};
-            const stdDwell = seed.hover_std_dwell_ms ?? null;
-            const avgDwell = seed.hover_avg_dwell_ms ?? null;
-            const tremorCls = stdDwell === null ? '' : stdDwell >= 30 ? 'j-ok' : stdDwell >= 10 ? 'j-warn' : 'j-danger';
-            const tremorLbl = stdDwell === null ? '-' : stdDwell >= 30 ? '자연스러움' : stdDwell >= 10 ? '의심' : '강한 의심';
-            const insights = (rvTryMarkdown(d.markdown_report) ||
-                rvTryMarkdown(llm.markdown_report) ||
-                llm.summary_ko ||
-                (ui.suspicion_narrative_ko) ||
-                ((llm.ui_fields || {}).suspicion_narrative_ko) || '').trim();
-            const rules = llm.top_reasons || [];
+            const stdDwell = seed.hover_std_dwell_ms ?? (ui.hover_std_dwell || {}).value ?? null;
+            const avgDwell = seed.hover_avg_dwell_ms ?? (ui.hover_avg_dwell || {}).value ?? null;
+            const tremorClass = stdDwell === null ? '' : stdDwell >= 30 ? 'judge-ok' : stdDwell >= 10 ? 'judge-warn' : 'judge-danger';
+            const tremorLabel = stdDwell === null ? '-' : stdDwell >= 30 ? '자연스러움' : stdDwell >= 10 ? '의심' : '강한 의심';
+            const decLabel2 = { allow: '✅ 허용', challenge: '⚠️ 의심', block: '🚨 경고' };
             const createdAt = d.created_at_iso ? new Date(d.created_at_iso).toLocaleString('ko-KR') : '-';
+
+            let insights = '';
+            const tryMd = md => { if (!md) return ''; const m = md.match(/\[ AI Insights[^\]]*\]\s*-+\s*\n([\s\S]*?)(?:\n\s*-{3,}|$)/); return m ? m[1].trim() : ''; };
+            insights = tryMd(d.markdown_report) || tryMd((d.llm_analysis || {}).markdown_report) || (d.llm_analysis || {}).summary_ko || ((d.ui_fields || {}).suspicion_narrative_ko) || '';
+            insights = insights.replace(/^"|"$/g, '').trim();
+            if (!insights || insights.length < 120) {
+                try { const g = rvGenerateInsights(d, ui, dec, scoreNum); if (g) insights = g; } catch (e) { }
+            }
 
             document.getElementById('rvMain').innerHTML = `
             <div class="rv-a4">
-                <div class="a4-hdr">
-                    <div>
-                        <div class="a4-title">🛡️ 매크로 탐지 분석 리포트</div>
-                        <div class="a4-sub">${d.report_id || '-'}</div>
-                    </div>
-                    <span class="dec-badge dec-${dec}">${rvDecLabel[dec] || dec}</span>
+              <div class="card-header">
+                <div>
+                  <div class="card-title">🛡️ 매크로 탐지 분석 리포트</div>
+                  <div class="card-sub">${d.report_id || '-'}</div>
                 </div>
-                <div class="a4-meta">
-                    <div class="a4-meta-item"><div class="lbl">예매 ID</div><div class="val">${d.booking_id || '-'}</div></div>
-                    <div class="a4-meta-item"><div class="lbl">사용자</div><div class="val">${d.target_masked_user || '-'}</div></div>
-                    <div class="a4-meta-item"><div class="lbl">생성 시각</div><div class="val">${createdAt}</div></div>
-                    <div class="a4-meta-item"><div class="lbl">Flow ID</div><div class="val">${d.flow_id || '-'}</div></div>
-                    <div class="a4-meta-item"><div class="lbl">Session ID</div><div class="val">${d.session_id || '-'}</div></div>
-                    <div class="a4-meta-item"><div class="lbl">Request ID</div><div class="val">${(d.request_id || '-').replace(/^req_/, '')}</div></div>
+                <span class="decision-badge decision-${dec}">${decLabel2[dec] || dec}</span>
+              </div>
+              <div class="meta-grid">
+                <div class="meta-item"><div class="label">예매 ID</div><div class="value">${d.booking_id || '-'}</div></div>
+                <div class="meta-item"><div class="label">사용자</div><div class="value">${d.target_masked_user || '-'}</div></div>
+                <div class="meta-item"><div class="label">생성 시각</div><div class="value">${createdAt}</div></div>
+                <div class="meta-item"><div class="label">Flow ID</div><div class="value">${d.flow_id || '-'}</div></div>
+                <div class="meta-item"><div class="label">Session ID</div><div class="value">${d.session_id || '-'}</div></div>
+                <div class="meta-item"><div class="label">Request ID</div><div class="value">${(d.request_id || '-').replace(/^req_/, '')}</div></div>
+              </div>
+              <div class="score-section">
+                <div class="section-title">봇 위험 점수 (Bot Risk Score)</div>
+                <div class="score-row">
+                  <div class="score-number" style="color:${scorePct >= 70 ? '#ef4444' : scorePct >= 30 ? '#f59e0b' : '#10b981'}">${scoreNum}</div>
+                  <div class="score-label">/ 100</div>
+                  <div style="margin-left:auto;font-size:15px;font-weight:700;">${ui.status_title_ko || (scorePct >= 70 ? '🚨 봇 의심 강함' : scorePct >= 30 ? '⚠️ 주의 필요' : '✅ 정상 사용자')}</div>
                 </div>
-                <div class="a4-sec">
-                    <div class="a4-sec-title">봇 위험 점수</div>
-                    <div class="score-row">
-                        <div class="score-num">${scoreNum}</div>
-                        <div style="font-size:12px;color:#64748b;">/ 100</div>
-                        <div style="margin-left:auto;font-size:13px;font-weight:700;">${ui.status_title_ko || ''}</div>
-                    </div>
-                    <div class="score-bar-bg"><div class="score-bar-fill ${scoreClass}" style="width:${scorePct}%"></div></div>
+                <div class="score-bar-bg"><div class="score-bar-fill ${scoreClass}" style="width:${scorePct}%"></div></div>
+                <div class="score-guide">
+                  <div class="score-guide-item"><div class="score-guide-dot" style="background:#10b981"></div>0–29점: 정상 — 인간 행동 패턴과 유사, 예매 허용</div>
+                  <div class="score-guide-item"><div class="score-guide-dot" style="background:#f59e0b"></div>30–69점: 주의 — 일부 비정상 패턴 감지, 모니터링</div>
+                  <div class="score-guide-item"><div class="score-guide-dot" style="background:#ef4444"></div>70–100점: 위험 — 자동화 도구 강하게 의심, 차단</div>
                 </div>
-                <div class="a4-sec">
-                    <div class="a4-sec-title">행동 지표</div>
-                    <div class="chips-row">
-                        <div class="chip"><div class="c-lbl">반응 속도 변동성</div><div><span class="c-val">${speed.value ?? '-'}</span><span class="c-unit"> ${speed.unit || '%'}</span></div><div class="c-judge ${rvJudgeClass(speed.judgement_ko)}">${speed.judgement_ko || '-'}</div></div>
-                        <div class="chip"><div class="c-lbl">궤적 곡선성</div><div><span class="c-val">${curve.value ?? '-'}</span><span class="c-unit"> ${curve.unit || 'rad'}</span></div><div class="c-judge ${rvJudgeClass(curve.judgement_ko)}">${curve.judgement_ko || '-'}</div></div>
-                    </div>
-                    <div class="chips-row">
-                        <div class="chip"><div class="c-lbl">호버 구간</div><div><span class="c-val">${hoverSec.value ?? '-'}</span><span class="c-unit"> ${hoverSec.unit || '개'}</span></div><div class="c-judge ${rvJudgeClass(hoverSec.judgement_ko)}">${hoverSec.judgement_ko || '-'}</div></div>
-                        <div class="chip"><div class="c-lbl">미세 떨림 (hover std)</div><div><span class="c-val">${stdDwell !== null ? stdDwell : '-'}</span><span class="c-unit"> ms</span></div><div class="c-judge ${tremorCls}">${tremorLbl}</div></div>
-                        <div class="chip"><div class="c-lbl">평균 호버 정지</div><div><span class="c-val">${avgDwell !== null ? avgDwell : '-'}</span><span class="c-unit"> ms</span></div></div>
-                    </div>
+              </div>
+              <div class="section">
+                <div class="section-title">행동 지표 (Behavioral Metrics)</div>
+                <div style="font-size:11px;color:#94a3b8;margin-bottom:10px;line-height:1.6;">사용자의 마우스·클릭 행동을 실시간으로 분석한 지표입니다.</div>
+                <div style="display:flex;gap:10px;margin-bottom:10px;">
+                  <div class="chip" style="flex:1;"><div class="chip-label">⚡ 반응 속도 변동성</div><div><span class="chip-val">${speed.value ?? '-'}</span><span class="chip-unit">${speed.unit || '%'}</span></div><div class="chip-judge ${rvJudgeClassFull(speed.judgement_ko)}">${speed.judgement_ko || '-'}</div><div class="chip-desc">클릭·이동 반응 속도의 표준편차 비율. 값이 낮을수록 기계적으로 일정한 속도를 유지함을 의미합니다.</div></div>
+                  <div class="chip" style="flex:1;"><div class="chip-label">🌀 궤적 곡선성</div><div><span class="chip-val">${curve.value ?? '-'}</span><span class="chip-unit">${curve.unit || 'rad'}</span></div><div class="chip-judge ${rvJudgeClassFull(curve.judgement_ko)}">${curve.judgement_ko || '-'}</div><div class="chip-desc">마우스 이동 경로의 평균 곡률(라디안). 자연스러운 곡선 이동 없이 직선에 가까울수록 봇 가능성이 높습니다.</div></div>
                 </div>
-                ${insights ? `<div class="a4-sec"><div class="a4-sec-title">AI Insights: GPT 생성 종합 리포트</div><div class="insights-box ${dec}">${rvEsc(insights)}</div></div>` : ''}
-                ${rules.length ? `<div class="a4-sec"><div class="a4-sec-title">주요 탐지 사유</div><ul class="rule-list">${rules.map(r => `<li class="rule-item">• ${rvEsc(r)}</li>`).join('')}</ul></div>` : ''}
-                <div class="a4-footer"><span>매크로 탐지 시스템 — 자동 생성 리포트</span><span>${createdAt}</span></div>
+                <div style="display:flex;gap:10px;">
+                  <div class="chip" style="flex:1;"><div class="chip-label">🖱️ 호버 구간</div><div><span class="chip-val">${hover.value ?? '-'}</span><span class="chip-unit">${hover.unit || '개'}</span></div><div class="chip-judge ${rvJudgeClassFull(hover.judgement_ko)}">${hover.judgement_ko || '-'}</div><div class="chip-desc">마우스가 요소 위에 멈춘 구간 수. 정상 사용자는 여러 요소를 탐색하며 다수의 호버 구간을 가집니다.</div></div>
+                  <div class="chip" style="flex:1;"><div class="chip-label">🔬 미세 떨림 (Hover STD)</div><div><span class="chip-val">${stdDwell !== null ? stdDwell : '-'}</span><span class="chip-unit">ms</span></div><div class="chip-judge ${tremorClass}">${tremorLabel}</div><div class="chip-desc">호버 정지 시간의 표준편차(ms). 30ms 이상이면 자연스러운 떨림, 10ms 미만이면 봇 의심.</div></div>
+                  <div class="chip" style="flex:1;"><div class="chip-label">⏱️ 평균 호버 정지</div><div><span class="chip-val">${avgDwell !== null ? avgDwell : '-'}</span><span class="chip-unit">ms</span></div><div class="chip-desc">호버 구간당 평균 정지 시간(ms).</div></div>
+                </div>
+              </div>
+              <div class="section">
+                <div class="section-title">🤖 AI Insights — 종합 분석</div>
+                <div style="font-size:11px;color:#64748b;margin-bottom:8px;">주요 피처 값 및 정상 평균 대비를 바탕으로 자동 생성된 분석문입니다.</div>
+                <div class="insights-box ${dec}">${escRv(insights || '분석 데이터가 없습니다.')}</div>
+              </div>
+              <div class="section">
+                <div class="section-title">📌 주요 탐지 사유 (Top Detection Reasons)</div>
+                <div style="font-size:11px;color:#64748b;margin-bottom:10px;line-height:1.6;">AI 모델이 봇 점수에 가장 큰 영향을 미친 지표를 내림차순으로 보여줍니다.</div>
+                ${rvRenderFeatureContributions(d)}
+                ${rvRenderRuleReasons(d)}
+              </div>
+              <div class="card-footer"><span>🛡️ 매크로 탐지 시스템 v1.0 — AI 자동 생성 리포트</span><span>${createdAt}</span></div>
             </div>`;
         }
 
