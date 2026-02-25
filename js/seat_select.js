@@ -135,23 +135,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 페이지 로드 시 보안문자 팝업 표시 (이미 통과한 경우 제외)
+// 페이지 로드 시 보안문자 팝업 항상 표시 (매 예매마다 재인증 필요)
 window.addEventListener('load', () => {
-    // 세션 동안 이미 보안문자를 통과한 경우 건너뛰기
-    const alreadyVerified = sessionStorage.getItem('captchaVerified') === 'true';
-
-    if (alreadyVerified) {
-        console.log('Captcha already verified in this session - skipping');
-        isCaptchaVerified = true;
-        // 오버레이를 표시하지 않음
-        document.getElementById('captcha-overlay').classList.add('captcha-hidden');
-    } else {
-        // 처음 방문하는 경우 보안문자 표시
-        setTimeout(() => {
-            document.getElementById('captcha-overlay').classList.remove('captcha-hidden');
-            generateCaptcha();
-        }, 500);
-    }
+    sessionStorage.removeItem('captchaVerified'); // 이전 인증 초기화
+    isCaptchaVerified = false;
+    setTimeout(() => {
+        document.getElementById('captcha-overlay').classList.remove('captcha-hidden');
+        generateCaptcha();
+    }, 500);
 });
 
 // 페이지 진입 시 플로우 데이터 확인
@@ -183,20 +174,20 @@ document.getElementById('perf-info').textContent = flowData.performanceTitle;
 
 // 등급별 색상 정의
 const gradeColors = {
-    'VIP': { bg: '#FFE5F1', border: '#FF3D7F', color: '#FF3D7F', hoverBg: 'linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%)' },
-    'VIP석': { bg: '#FFE5F1', border: '#FF3D7F', color: '#FF3D7F', hoverBg: 'linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%)' },
-    'R': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
-    'R석': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
-    'S': { bg: '#E8F5E9', border: '#4CAF50', color: '#4CAF50', hoverBg: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' },
-    'S석': { bg: '#E8F5E9', border: '#4CAF50', color: '#4CAF50', hoverBg: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' },
-    'A': { bg: '#E3F2FD', border: '#2196F3', color: '#2196F3', hoverBg: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' },
-    'A석': { bg: '#E3F2FD', border: '#2196F3', color: '#2196F3', hoverBg: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' },
-    '프리미엄석': { bg: '#F3E5F5', border: '#9C27B0', color: '#9C27B0', hoverBg: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)' },
-    '지정석': { bg: '#E0F2F1', border: '#009688', color: '#009688', hoverBg: 'linear-gradient(135deg, #009688 0%, #00796B 100%)' },
-    '자유석': { bg: '#FFF9C4', border: '#FBC02D', color: '#F57F17', hoverBg: 'linear-gradient(135deg, #FBC02D 0%, #F57F17 100%)' },
-    '스탠딩': { bg: '#FFCCBC', border: '#FF5722', color: '#FF5722', hoverBg: 'linear-gradient(135deg, #FF5722 0%, #E64A19 100%)' },
-    '성인': { bg: '#E8EAF6', border: '#3F51B5', color: '#3F51B5', hoverBg: 'linear-gradient(135deg, #3F51B5 0%, #303F9F 100%)' },
-    '청소년': { bg: '#E1F5FE', border: '#03A9F4', color: '#03A9F4', hoverBg: 'linear-gradient(135deg, #03A9F4 0%, #0288D1 100%)' }
+    'VIP': { bg: '#f8f8f8', seatBg: '#FF3D7F', border: '#FF3D7F', color: '#FF3D7F', hoverBg: 'linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%)' },
+    'VIP석': { bg: '#f8f8f8', seatBg: '#FF3D7F', border: '#FF3D7F', color: '#FF3D7F', hoverBg: 'linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%)' },
+    'R': { bg: '#f8f8f8', seatBg: '#FF9800', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
+    'R석': { bg: '#f8f8f8', seatBg: '#FF9800', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
+    'S': { bg: '#f8f8f8', seatBg: '#4CAF50', border: '#4CAF50', color: '#4CAF50', hoverBg: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' },
+    'S석': { bg: '#f8f8f8', seatBg: '#4CAF50', border: '#4CAF50', color: '#4CAF50', hoverBg: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' },
+    'A': { bg: '#f8f8f8', seatBg: '#2196F3', border: '#2196F3', color: '#2196F3', hoverBg: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' },
+    'A석': { bg: '#f8f8f8', seatBg: '#2196F3', border: '#2196F3', color: '#2196F3', hoverBg: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' },
+    '프리미엄석': { bg: '#f8f8f8', seatBg: '#9C27B0', border: '#9C27B0', color: '#9C27B0', hoverBg: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)' },
+    '지정석': { bg: '#f8f8f8', seatBg: '#009688', border: '#009688', color: '#009688', hoverBg: 'linear-gradient(135deg, #009688 0%, #00796B 100%)' },
+    '자유석': { bg: '#f8f8f8', seatBg: '#FBC02D', border: '#FBC02D', color: '#F57F17', hoverBg: 'linear-gradient(135deg, #FBC02D 0%, #F57F17 100%)' },
+    '스탠딩': { bg: '#f8f8f8', seatBg: '#FF5722', border: '#FF5722', color: '#FF5722', hoverBg: 'linear-gradient(135deg, #FF5722 0%, #E64A19 100%)' },
+    '성인': { bg: '#f8f8f8', seatBg: '#3F51B5', border: '#3F51B5', color: '#3F51B5', hoverBg: 'linear-gradient(135deg, #3F51B5 0%, #303F9F 100%)' },
+    '청소년': { bg: '#f8f8f8', seatBg: '#03A9F4', border: '#03A9F4', color: '#03A9F4', hoverBg: 'linear-gradient(135deg, #03A9F4 0%, #0288D1 100%)' }
 };
 
 // 좌석 그리드 생성 (여러 등급 통합)
@@ -218,7 +209,7 @@ async function createSeatGrid() {
         gradeHeader.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md); padding: var(--spacing-sm) var(--spacing-md); background: ${gradeColor.bg}; border-left: 4px solid ${gradeColor.border}; border-radius: 8px;">
                 <div style="display: flex; align-items: center; gap: var(--spacing-md);">
-                    <div style="width: 24px; height: 24px; background: ${gradeColor.border}; border-radius: 4px;"></div>
+                    <div style="width: 24px; height: 24px; background: transparent; border: 3px solid ${gradeColor.border}; border-radius: 4px;"></div>
                     <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 18px;">${gradeName}석</span>
                 </div>
                 <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 20px;">${formatPrice(grade.price)}</span>
@@ -269,7 +260,7 @@ async function createSeatGrid() {
 
                 if (!isTaken) {
                     // 등급별 색상 적용
-                    seat.style.background = gradeColor.bg;
+                    seat.style.background = gradeColor.seatBg;
                     seat.style.borderColor = gradeColor.border;
                     seat.style.color = gradeColor.color;
 
@@ -291,7 +282,7 @@ async function createSeatGrid() {
                     seat.addEventListener('mouseleave', function () {
                         // 1. 시각적 효과
                         if (!this.classList.contains('selected')) {
-                            this.style.background = gradeColor.bg;
+                            this.style.background = gradeColor.seatBg;
                             this.style.color = gradeColor.color;
                         }
                         // 2. 로깅
@@ -516,3 +507,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
