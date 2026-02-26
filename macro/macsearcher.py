@@ -29,6 +29,7 @@ SEAT_COLORS = {
         "upper": np.array([27, 255, 255]),
     },
     "전체": {     # 위 3가지 합쳐서 모든 선택가능 좌석 탐색
+    
         "lower": None,
         "upper": None,
     },
@@ -54,6 +55,21 @@ def capture_screen() -> np.ndarray:
     """현재 화면을 캡처해 BGR numpy 배열로 반환"""
     screenshot = pyautogui.screenshot()
     return cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
+
+
+def _get_dpi_scale() -> tuple[float, float]:
+    """
+    Windows DPI 스케일 팩터 반환.
+    pyautogui.screenshot() → 물리적 픽셀
+    pydirectinput.moveTo() → 논리적(OS) 좌표
+    125% DPI에서 예) 물리 1920×1080 → 논리 1536×864 → scale=(0.8, 0.8)
+    """
+    logical_w, logical_h = pyautogui.size()           # 논리 해상도
+    screenshot = pyautogui.screenshot()
+    phys_w, phys_h = screenshot.size                  # 물리 해상도
+    sx = logical_w / phys_w if phys_w > 0 else 1.0
+    sy = logical_h / phys_h if phys_h > 0 else 1.0
+    return sx, sy
 
 
 def find_seats_by_color(screen_bgr: np.ndarray, grade: str = "전체") -> list[tuple]:
@@ -120,6 +136,121 @@ def click_at(x: int, y: int):
     log.info(f"클릭: ({tx}, {ty})")
 
 
+def _move_to_confirm_button():
+    """좌석 선택 후 [선택 완료] 또는 팝업 [확인] 버튼으로 마우스를 이동한다.
+    - [선택 완료] : 우측 패널 (화면 X 65% 이후)
+    - 팝업 [확인] : 화면 중앙 (알림 모달)
+    두 버튼 모두 #667eea (파란색) — 화면 어디에 있든 파란 직사각형을 찾음.
+    최대 8회 × 0.4초 = 3.2초 재시도
+    """
+    import pydirectinput
+    import os
+
+    # ── DPI 스케일 보정 ────────────────────────────────────────────────
+    # pyautogui.screenshot() = 물리적 픽셀 기준
+    # pydirectinput.moveTo() = 논리적(OS) 좌표 기준
+    # Windows 125% DPI면 물리→논리 비율 = 0.8
+    sx, sy = _get_dpi_scale()
+    log.info(f"🔍 DPI 스케일: sx={sx:.3f}, sy={sy:.3f}")
+
+    # #667eea HSV: H=114, S=144, V=234
+    # V 하한을 80으로 낮춰서 팝업 오버레이 dimming 상황에도 대응
+    LOWER = np.array([ 95, 40,  80])
+    UPPER = np.array([140, 255, 255])
+
+    MAX_TRIES = 8
+    WAIT_EACH = 0.4
+
+    def _find_button_in_region(hsv_img, x_min_r, x_max_r, y_min_r, lower_hsv, upper_hsv):
+        """지정 영역에서 파란 직사각형 버튼 탐색 → (cx_phys, cy_phys) or None"""
+        h_img, w_img = hsv_img.shape[:2]
+        msk = cv2.inRange(hsv_img, lower_hsv, upper_hsv)
+        msk[:y_min_r, :]    = 0
+        msk[:, :x_min_r]    = 0
+        msk[:, x_max_r:]    = 0
+        k = np.ones((15, 15), np.uint8)
+        msk = cv2.morphologyEx(msk, cv2.MORPH_CLOSE, k)
+        cnts, _ = cv2.findContours(msk, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        best_c, best_a = None, 0
+        for c in cnts:
+            a = cv2.contourArea(c)
+            if a < 2000:
+                continue
+            xr, yr, w, h = cv2.boundingRect(c)
+            cx = xr + w // 2
+            cy = yr + h // 2
+            asp = w / h if h > 0 else 0
+            # 버튼 조건: 가로>세로, 너비>=60, 높이>=30 (좌석 도트 클러스터 제거)
+            if asp > 1.5 and w >= 60 and h >= 30 and a > best_a:
+                best_c = (cx, cy)
+                best_a = a
+        return best_c, best_a
+
+    for attempt in range(1, MAX_TRIES + 1):
+        time.sleep(WAIT_EACH)
+
+        screen = capture_screen()
+        h_sc, w_sc = screen.shape[:2]
+        hsv = cv2.cvtColor(screen, cv2.COLOR_BGR2HSV)
+
+        y_nav = int(h_sc * 0.15)   # 상단 네비 제외
+
+        # ── 1차: 우측 패널 [선택 완료] 버튼 (x > 65%) ───────────────────
+        # 좌석맵은 x < 65%이므로 도트 오인식 없음
+        x_panel = int(w_sc * 0.65)
+        LO_PANEL = np.array([ 95, 40,  80])
+        HI_PANEL = np.array([140, 255, 255])
+        pos, area = _find_button_in_region(
+            hsv, x_panel, int(w_sc * 0.98), y_nav, LO_PANEL, HI_PANEL
+        )
+
+        if pos:
+            bx = int(pos[0] * sx)
+            by = int(pos[1] * sy)
+            log.info(f"🖱️ [선택 완료] 발견! phys=({pos[0]},{pos[1]}) → 논리=({bx},{by}) [{attempt}/{MAX_TRIES}회]")
+            pydirectinput.moveTo(bx, by)
+            return
+
+        # ── 2차: 팝업 [확인] 버튼 (화면 중앙, V>=150) ────────────────────
+        # 팝업 overlay(rgba 0,0,0,0.7)가 배경을 어둡게 함 → 배경 V<80
+        # 팝업 버튼은 밝은 파란색 V≈234 → V>=150 조건으로 팝업만 잡음
+        x_pop_l = int(w_sc * 0.25)
+        x_pop_r = int(w_sc * 0.75)
+        LO_POP  = np.array([ 95, 60, 150])
+        HI_POP  = np.array([140, 255, 255])
+        pos2, area2 = _find_button_in_region(
+            hsv, x_pop_l, x_pop_r, y_nav, LO_POP, HI_POP
+        )
+
+        if pos2:
+            bx = int(pos2[0] * sx)
+            by = int(pos2[1] * sy)
+            log.info(f"🖱️ 팝업 [확인] 발견! phys=({pos2[0]},{pos2[1]}) → 논리=({bx},{by}) [{attempt}/{MAX_TRIES}회]")
+            pydirectinput.moveTo(bx, by)
+            return
+
+        log.info(f"[{attempt}/{MAX_TRIES}] 버튼 미발견 (화면 {w_sc}×{h_sc})")
+
+    # ── 전부 실패 → 상세 디버그 이미지 2종 저장 ─────────────────────
+    log.warning("⚠️ 버튼 끝내 못 찾음 → debug_confirm_btn.png / debug_mask.png 저장")
+    out_dir = os.path.dirname(__file__)
+
+    dbg = screen.copy()
+    cv2.line(dbg, (x_left,  0),    (x_left,  h_sc), (0, 255, 0), 2)
+    cv2.line(dbg, (x_right, 0),    (x_right, h_sc), (0, 255, 0), 2)
+    cv2.line(dbg, (0, y_top), (w_sc, y_top),        (0, 255, 0), 2)
+    cv2.imwrite(os.path.join(out_dir, "debug_confirm_btn.png"), dbg)
+
+    # 색상 마스크 (흰 픽셀 = 파란색 감지됨)
+    raw_mask = cv2.inRange(hsv, LOWER, UPPER)
+    raw_mask[:y_top, :]   = 0
+    raw_mask[:, :x_left]  = 0
+    raw_mask[:, x_right:] = 0
+    cv2.imwrite(os.path.join(out_dir, "debug_mask.png"), raw_mask)
+    log.warning(f"   저장 완료: {out_dir}")
+
+
+
 def search_and_click(grade: str = "전체", max_retries: int = 50, stop_flag: list = None) -> bool:
     """
     F2 모드: 선택가능한 첫 번째 좌석을 찾아 클릭.
@@ -139,6 +270,8 @@ def search_and_click(grade: str = "전체", max_retries: int = 50, stop_flag: li
             x, y = seats[0]  # 가장 앞줄 왼쪽 좌석
             log.info(f"✅ 좌석 발견! ({x}, {y}) — {len(seats)}개 중 첫 번째 [{attempt}회 시도]")
             click_at(x, y)
+            # 좌석 선택 후 [선택 완료] 버튼으로 마우스 이동
+            _move_to_confirm_button()
             return True
 
         log.info(f"[{attempt}/{max_retries}] 미발견, {RETRY_INTERVAL}초 후 재시도...")
@@ -168,6 +301,7 @@ def search_front_priority(max_retries: int = 50, stop_flag: list = None) -> bool
                 x, y = seats[0]
                 log.info(f"✅ [{grade}] 앞좌석 발견! ({x}, {y}) [{attempt}회 시도]")
                 click_at(x, y)
+                _move_to_confirm_button()
                 return True
 
         log.info(f"[{attempt}/{max_retries}] 미발견, {RETRY_INTERVAL}초 후 재시도...")
