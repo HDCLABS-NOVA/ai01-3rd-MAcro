@@ -286,6 +286,11 @@ class TicketBookingBot:
                 self.logger.error("❌ 좌석 선택 실패 - 가능한 좌석이 없습니다")
                 self._log_event("error", {"step": 10, "error": "no_available_seats"})
                 return False
+            
+            # 리스타트 신호 확인 (Undefined 등급 등)
+            if seat_result.get("status") == "RESTART":
+                print("🔄 유효하지 않은 좌석 상태로 인해 처음 화면으로 이동합니다.")
+                return False
 
             # 선택된 좌석 정보 저장
             booking_data["selected_seat"] = seat_result
@@ -868,32 +873,64 @@ class TicketBookingBot:
                     seat_id = available_seat.get_attribute("data-seat")
                     seat_grade = available_seat.get_attribute("data-grade")
 
-                    print(f"🎯 좌석 클릭: {seat_id} ({seat_grade}석)")
+                    # "Undefined" 등급 체크 (비정상적인 좌석 상태)
+                    if not seat_grade or seat_grade.lower() in ["undefined", "none", "null"]:
+                        print(f"⚠️  올바르지 않은 좌석 등급 감지: {seat_id} ({seat_grade}). 처음 화면으로 이동합니다.")
+                        return {"status": "RESTART"}
 
-                    # 인간형 클릭 적용
-                    self._human_move_and_click(page, f"[data-seat='{seat_id}']", f"좌석 {seat_id}")
-                    self._human_delay(0.2, 0.5)
+                    # 요소의 위치와 크기 가져오기
+                    available_seat.scroll_into_view_if_needed()
+                    time.sleep(0.1) # 스크롤 후 안정화
+                    box = available_seat.bounding_box()
+                    if not box:
+                        print(f"⚠️  좌석 {seat_id}의 좌표를 가져올 수 없습니다. 재시도...")
+                        continue
 
-                    # 좌석이 선택되었는지 확인
-                    # 단순히 .selected뿐만 아니라 #next-btn(선택 완료 버튼)이 나타났는지 확인해야 확실함
+                    # 버튼 내부의 중앙에 밀집된 좌표 계산 (작아진 좌석 대응: 0.2~0.8 -> 0.4~0.6)
+                    target_x = box['x'] + box['width'] * random.uniform(0.4, 0.6)
+                    target_y = box['y'] + box['height'] * random.uniform(0.4, 0.6)
+
+                    # 인간형 마우스 이동 및 클릭 적용
+                    self._human_delay(0.2, 0.5) # 좌석 고르는데 걸리는 시간
+                    
+                    seat_selector = f"[data-seat='{seat_id}']"
+                    if not self._human_move_and_click(page, seat_selector, f"좌석 {seat_id}"):
+                        continue
+
+                    # 클릭 후 확인 전 잠시 대기 (사람의 반응 속도)
+                    self._human_delay(0.3, 0.8)
+
+                    # 팝업 체크 (이미 선택된 좌석인 경우)
+                    try:
+                        alert_btn = page.locator("#alert-confirm-btn")
+                        if alert_btn.is_visible(timeout=500):
+                            print(f"⚠️  이미 선택된 좌석입니다 ({seat_id}). 팝업 확인 중...")
+                            self._human_delay(0.5, 1.2) # 팝업 보고 당황하는 시간
+                            alert_btn.click()
+                            time.sleep(0.5)
+                            continue 
+                    except:
+                        pass
+
+                    # 최종 확인
                     selected_count = page.locator(".seat.selected").count()
                     next_btn = page.locator("#next-btn")
                     
                     if selected_count > 0:
-                        # 버튼이 나타날 때까지 아주 잠시 대기
                         try:
+                            # 버튼이 나타날 때까지 대기
                             next_btn.wait_for(state="visible", timeout=2000)
-                            print(f"✅ 좌석 선택 완료 및 다음 버튼 활성화 (선택된 좌석: {selected_count}개)")
+                            print(f"✅ 좌석 선택 완료 (선택된 좌석: {selected_count}개)")
+                            self._human_delay(0.5, 1.0) # 다음 단계 누르기 전 생각하는 시간
                             return {
                                 "seat_id": seat_id or "unknown",
                                 "seat_grade": seat_grade or "unknown",
                             }
                         except:
-                            print(f"⚠️  좌석은 클릭되었으나 '선택 완료' 버튼이 나타나지 않음. 다시 시도합니다.")
-                            # 다른 좌석을 시도하기 위해 루프 계속
+                            print(f"⚠️  좌석은 선택된 듯하나 '선택 완료' 버튼이 보이지 않음. 재시도...")
                     else:
-                        print(f"⚠️  좌석이 선택되지 않음 (이미 선택된 좌석일 수 있음)")
-                        time.sleep(0.5)
+                        print(f"⚠️  좌석 선택 실패. 다음 좌석을 시도합니다.")
+                        self._human_delay(0.3, 0.6)
 
                 except Exception as e:
                     print(f"⚠️  좌석 클릭 실패 (시도 {attempt + 1}): {e}")

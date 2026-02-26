@@ -93,7 +93,11 @@ Example: If an element is at pixel (960, 540) on a 1920x1080 screen, return x=0.
    - Look for a "확인" (OK/Confirm) button
    - Return NORMALIZED coordinates (0-1) for the confirm button
 
-RETURN JSON ONLY. Choose ONE best action.
+5. **Seat Already Taken Popup**: A popup with title "선택 불가" or message "이미 선택된 좌석입니다. 다른 좌석을 선택해주세요."
+   - It usually has a prominent pink button with text "확인".
+   - Return NORMALIZED coordinates (0-1) for the "확인" button.
+
+RETURN JSON ONLY. Choose ONE best action. If none of the specific elements (CAPTCHA title, Performance icons, Date/Time modal, or popups) are clearly visible, you MUST return "NONE". NEVER imagine or hallucinate elements from previous turns.
 
 Type "CAPTCHA":
 {{"type":"CAPTCHA", "text":"6CHARS", "input_x":0.xxx, "input_y":0.xxx, "refresh_x":0.xxx, "refresh_y":0.xxx}} 
@@ -106,6 +110,9 @@ Type "DATE_TIME":
 
 Type "TIMEOUT_ALERT":
 {{"type":"TIMEOUT_ALERT", "confirm_x":0.xxx, "confirm_y":0.xxx}}
+
+Type "SEAT_ALREADY_TAKEN":
+{{"type":"SEAT_ALREADY_TAKEN", "confirm_x":0.xxx, "confirm_y":0.xxx}}
 
 Type "NONE":
 {{"type":"NONE"}}"""
@@ -141,7 +148,7 @@ Type "NONE":
                      click_and_restore(abs_ref_x, abs_ref_y)
                      time.sleep(1.0)  # Wait for new CAPTCHA to load
                      self.captcha_attempt_count = 0
-                     self.last_captcha_text = None
+                     # DO NOT reset self.last_captcha_text here, to prevent re-entering if refresh fails or VLM hallucinations
                      return True
                  return False
              
@@ -167,38 +174,26 @@ Type "NONE":
                      return True
                  return False
              
-             # Case 3: Check retry counter for same CAPTCHA
+             # Case 3: Strictly skip duplicate CAPTCHA
              if captcha_str == self.last_captcha_text:
                  self.captcha_attempt_count += 1
                  
                  if self.captcha_attempt_count >= 3:
-                     self.update_status(f"❌ Failed 3 times on '{captcha_str}', refreshing...")
+                     self.update_status(f"❌ Duplicate CAPTCHA '{captcha_str}' detected 3 times. Triggering refresh...")
                      if click_refresh():
                          return True
                      return False
                  
-                 self.update_status(f"⏭️ Skipping duplicate CAPTCHA '{captcha_str}' - Attempt {self.captcha_attempt_count}/3 (Waiting for screen change)")
-                 return False # Skip actual typing for duplicate text
-             else:
-                 # New CAPTCHA text
-                 self.captcha_attempt_count = 1
-                 self.last_captcha_text = captcha_str
+                 self.update_status(f"⏭️ Skipping duplicate CAPTCHA '{captcha_str}' - Attempt {self.captcha_attempt_count}/3 (Waiting for screen/CAPTCHA change)")
+                 return False # Always skip if it's the same as last one
              
-             # Case 4: Validate coordinates (DISABLED - using hardcoded position)
-             # if not (0.1 < input_x < 0.9 and 0.1 < input_y < 0.9):
-             #     self.update_status(f"⚠️ Invalid input coordinates: ({input_x:.3f},{input_y:.3f})")
-             #     return False
+             # Case 4: NEW CAPTCHA or First CAPTCHA
+             self.captcha_attempt_count = 1
+             self.last_captcha_text = captcha_str
              
-             # Convert coordinates (DISABLED - using hardcoded position)
-             # if input_x > 1.0: input_x /= width
-             # if input_y > 1.0: input_y /= height
-             # 
-             # abs_x = self.mon_x + int(input_x * width)
-             # abs_y = self.mon_y + int(input_y * height)
-             
-             # Hardcoded position for CAPTCHA input field
+             # Case 5: Hardcoded position for CAPTCHA input field
              abs_x = 625
-             abs_y = 625
+             abs_y = 757
              
              self.update_status(f"🔐 CAPTCHA DETECTED: '{captcha_str}' (Hardcoded Click: {abs_x}, {abs_y})")
              
@@ -326,6 +321,29 @@ Type "NONE":
                     return True
             except Exception as e:
                 self.update_status(f"⚠️ Timeout alert error: {e}")
+            
+            return False
+
+        # 5. Seat Already Taken Popup
+        elif p_type == "SEAT_ALREADY_TAKEN":
+            try:
+                confirm_x = float(result.get("confirm_x", 0))
+                confirm_y = float(result.get("confirm_y", 0))
+                
+                if confirm_x > 0 and confirm_y > 0:
+                    # Convert coordinates
+                    if confirm_x > 1.0: confirm_x /= width
+                    if confirm_y > 1.0: confirm_y /= height
+                    
+                    abs_x = self.mon_x + int(confirm_x * width)
+                    abs_y = self.mon_y + int(confirm_y * height)
+                    
+                    self.update_status(f"💺 Seat Taken Popup - clicking OK ({abs_x},{abs_y})")
+                    click_and_restore(abs_x, abs_y)
+                    time.sleep(0.5)
+                    return True
+            except Exception as e:
+                self.update_status(f"⚠️ Seat taken popup error: {e}")
             
             return False
 

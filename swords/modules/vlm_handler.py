@@ -78,7 +78,7 @@ def human_type(text: str):
 USE_PROVIDER = "LM_STUDIO"  # "LM_STUDIO" 또는 "GROQ"
 
 LM_STUDIO_CONFIG = {
-    "URL": "http://localhost:12345/v1/chat/completions",
+    "URL": "http://localhost:1234/v1/chat/completions",
     "MODEL": "local-model",
     "API_KEY": "lm-studio"
 }
