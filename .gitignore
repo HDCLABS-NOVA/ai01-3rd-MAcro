@@ -31,3 +31,9 @@ model/block_report/*
 model/model_score/*
 model/reports/*
 model/rule_score/*
+
+# Temporary files
+tmp/
+swords/tmp/
+temp/
+swords/temp/
