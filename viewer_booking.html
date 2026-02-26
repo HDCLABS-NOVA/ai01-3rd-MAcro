@@ -32,7 +32,7 @@
         }
 
         .stat-card {
-            background: #6366f1;
+            background: #667eea;
             color: white;
             padding: var(--spacing-lg);
             border-radius: var(--border-radius);
@@ -164,11 +164,11 @@
                     <div class="stat-number" id="total-logs">0</div>
                     <div class="stat-label">총 로그 수</div>
                 </div>
-                <div class="stat-card" style="background: #E61E51;">
+                <div class="stat-card" style="background: #667eea;">
                     <div class="stat-number" id="avg-duration">-</div>
                     <div class="stat-label">평균 소요시간</div>
                 </div>
-                <div class="stat-card" style="background: #10b981;">
+                <div class="stat-card" style="background: #4CAF50;">
                     <div class="stat-number" id="completion-rate">-</div>
                     <div class="stat-label">완료율</div>
                 </div>
@@ -230,9 +230,10 @@
         let currentStage = null;
         let hoverSegments = [];
 
-        const BOOKING_STAGES = ['seat', 'discount', 'order_info', 'payment'];
+        const BOOKING_STAGES = ['seat_captcha', 'seat_pick', 'discount', 'order_info', 'payment'];
         const STAGE_NAMES = {
-            'seat': '좌석 선택',
+            'seat_captcha': '보안문자',
+            'seat_pick': '좌석 선택',
             'discount': '할인',
             'order_info': '배송 정보',
             'payment': '결제'
@@ -255,7 +256,7 @@
                 );
 
                 const logDetails = await Promise.all(logPromises);
-                allLogs = logDetails.map(log => log.data).filter(log => log.stages.seat);
+                allLogs = logDetails.map(log => log.data).filter(log => log.stages.seat || log.stages.seat_captcha || log.stages.seat_pick);
 
                 document.getElementById('total-logs').textContent = allLogs.length;
 
@@ -323,7 +324,11 @@
             container.style.display = 'block';
 
             createStageSelector();
-            selectStage('seat');
+            // 첫 번째로 존재하는 스테이지를 기본 선택
+            const firstStage = BOOKING_STAGES.find(s => currentLog.stages[s]) || BOOKING_STAGES[0];
+            selectStage(firstStage);
+            // 봇 분석: 전체 스테이지 종합
+            analyzeBotBehavior(currentLog);
 
             container.scrollIntoView({ behavior: 'smooth' });
         }
@@ -353,7 +358,8 @@
             });
 
             drawMainCanvas(currentLog.stages[stage]);
-            analyzeBotBehavior(currentLog.stages[stage]);
+            // 봇 분석 카드는 항상 표시 (전체 로그 기준으로 고정)
+
         }
 
         function drawMainCanvas(stageData) {
@@ -861,115 +867,195 @@
             document.getElementById('tremor-stats').innerHTML = statsHtml;
         }
 
-        function analyzeBotBehavior(stageData) {
-            const trajectory = stageData.mouse_trajectory || [];
-            const clicks = stageData.clicks || [];
+        function analyzeBotBehavior(logOrStage) {
+            // 전체 로그가 넘어오면 모든 스테이지 합산, 단일 스테이지면 그대로 사용
+            let trajectory = [], clicks = [], entryTime = null;
+            if (logOrStage && logOrStage.stages) {
+                // 보 분석은 좌석 선택 단계만 (할인/배송/결제 제외)
+                const stagesToMerge = ['seat_captcha', 'seat_pick', 'seat'];
+                stagesToMerge.forEach(stageName => {
+                    const s = logOrStage.stages[stageName];
+                    if (!s) return;
+                    if (!entryTime) entryTime = s.entry_time;
+                    (s.mouse_trajectory || []).forEach(p => trajectory.push(p));
+                    (s.clicks || []).forEach(c => clicks.push({ ...c, _stage: stageName }));
+                });
+            } else {
+                const sd = logOrStage || {};
+                trajectory = sd.mouse_trajectory || [];
+                clicks = sd.clicks || [];
+                entryTime = sd.entry_time;
+            }
+            const stageData = { mouse_trajectory: trajectory, clicks, entry_time: entryTime };
 
-            if (trajectory.length < 3) {
-                document.getElementById('bot-analysis').innerHTML = '<p style="text-align: center; color: var(--text-secondary);">분석할 데이터가 부족합니다</p>';
+            const container = document.getElementById('bot-analysis');
+
+            if (trajectory.length < 2 && clicks.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">분석할 데이터가 부족합니다</p>';
                 return;
             }
 
-            const speeds = [];
-            const angles = [];
-
+            // ── 신호 1: 최대 순간 이동 속도 (핵심 매크로 지표) ──────────────
+            // pydirectinput.moveTo() = OS 레벨 순간이동 → 50ms 샘플에 300~600px 점프
+            // 사람의 최대 속도 ≈ 800~1200px/s, 매크로 = 5000~30000px/s
+            let maxJumpVelocity = 0;
+            let maxJumpDist = 0;
             for (let i = 1; i < trajectory.length; i++) {
-                const prev = trajectory[i - 1];
-                const curr = trajectory[i];
-                const timeDiff = (curr[2] - prev[2]) / 1000;
-
-                if (timeDiff > 0) {
-                    const distance = Math.sqrt(Math.pow(curr[0] - prev[0], 2) + Math.pow(curr[1] - prev[1], 2));
-                    speeds.push(distance / timeDiff);
-                }
-
-                if (i < trajectory.length - 1) {
-                    const next = trajectory[i + 1];
-                    const angle1 = Math.atan2(curr[1] - prev[1], curr[0] - prev[0]);
-                    const angle2 = Math.atan2(next[1] - curr[1], next[0] - curr[0]);
-                    angles.push(Math.abs(angle2 - angle1));
+                const dx = trajectory[i][0] - trajectory[i - 1][0];
+                const dy = trajectory[i][1] - trajectory[i - 1][1];
+                const dt = (trajectory[i][2] - trajectory[i - 1][2]);
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dt > 0) {
+                    const v = dist / dt * 1000;
+                    if (v > maxJumpVelocity) { maxJumpVelocity = v; maxJumpDist = dist; }
                 }
             }
 
-            const avgSpeed = speeds.reduce((a, b) => a + b, 0) / speeds.length;
-            const speedVariance = speeds.reduce((sum, s) => sum + Math.pow(s - avgSpeed, 2), 0) / speeds.length;
-            const speedStdDev = Math.sqrt(speedVariance);
-            const avgAngle = angles.reduce((a, b) => a + b, 0) / angles.length;
+            // 클릭에서 직접 기록된 최대 속도도 참조 (logger.js에서 이미 계산)
+            const clickMaxVelocities = clicks.map(c => c.max_velocity_before || 0);
+            const loggedMaxVel = clickMaxVelocities.length ? Math.max(...clickMaxVelocities) : 0;
+            const effectiveMaxVel = Math.max(maxJumpVelocity, loggedMaxVel);
 
+            // ── 신호 2: 첫 클릭까지 시간 (ISO / 상대시간 모두 처리) ──
+            let firstClickTime = Infinity;
+            if (clicks.length > 0) {
+                const raw = clicks[0].timestamp;
+                if (typeof raw === 'string' && raw.includes('T')) {
+                    firstClickTime = new Date(raw).getTime() - new Date(stageData.entry_time).getTime();
+                } else {
+                    firstClickTime = Number(raw);
+                }
+                if (firstClickTime < 0) firstClickTime = Infinity;
+            }
+
+            // ── 신호 3: 클릭 직전 궤적 포인트 수 ────────────────────────────
+            // 매크로: 0~3개 (순간이동), 사람: 10개+ (이동하면서 탐색)
+            const trajPointsBefore = clicks.length > 0
+                ? (clicks[0].traj_points_before ?? clicks.filter(c => c.traj_points_before !== undefined).reduce((s, c) => s + c.traj_points_before, 0) / clicks.length)
+                : trajectory.length;
+
+            // ── 신호 4: 클릭 지속 시간 ────────────────────────────────────────
+            // 매크로(DirectInput): < 10ms, 사람: 80~250ms
+            const avgClickDuration = clicks.filter(c => c.click_duration > 0).length > 0
+                ? clicks.filter(c => c.click_duration > 0).reduce((s, c) => s + c.click_duration, 0) / clicks.filter(c => c.click_duration > 0).length
+                : null;
+
+            // ── 신호 5: 경로 직선성 (기존) ───────────────────────────────────
+            const angles = [];
+            for (let i = 1; i < trajectory.length - 1; i++) {
+                const prev = trajectory[i - 1], curr = trajectory[i], next = trajectory[i + 1];
+                const a1 = Math.atan2(curr[1] - prev[1], curr[0] - prev[0]);
+                const a2 = Math.atan2(next[1] - curr[1], next[0] - curr[0]);
+                angles.push(Math.abs(a2 - a1));
+            }
+            const avgAngle = angles.length ? angles.reduce((a, b) => a + b, 0) / angles.length : 0;
+
+            // ── 봇 점수 계산 ──────────────────────────────────────────────────
             let botScore = 0;
             const reasons = [];
+            const details = [];
 
-            const speedCV = speedStdDev / avgSpeed;
-            if (speedCV < 0.3) {
-                botScore += 30;
-                reasons.push('속도가 매우 일정함');
-            }
-
-            if (avgAngle < 0.2) {
+            // [핵심] 최대 순간 이동속도 > 3000px/s = 매크로 순간이동
+            if (effectiveMaxVel > 10000) {
+                botScore += 40;
+                reasons.push(`순간이동 감지: 최대 ${(effectiveMaxVel / 1000).toFixed(0)}k px/s`);
+            } else if (effectiveMaxVel > 3000) {
                 botScore += 25;
-                reasons.push('경로가 거의 직선');
+                reasons.push(`빠른 이동: 최대 ${(effectiveMaxVel / 1000).toFixed(1)}k px/s`);
             }
 
-            if (avgSpeed > 5000) {
-                botScore += 20;
-                reasons.push('비정상적으로 빠른 속도');
-            }
-
-            const integerClicks = clicks.filter(c => c.is_integer).length;
-            if (integerClicks > clicks.length * 0.8) {
+            // 첫 클릭 < 500ms
+            if (firstClickTime < 500 && firstClickTime !== Infinity) {
+                botScore += 30;
+                reasons.push(`첫 클릭 ${firstClickTime}ms (인간 불가능 수준)`);
+            } else if (firstClickTime < 1500 && firstClickTime !== Infinity) {
                 botScore += 15;
-                reasons.push('클릭 좌표가 정수값');
+                reasons.push(`첫 클릭 ${(firstClickTime / 1000).toFixed(1)}s (매우 빠름)`);
             }
 
-            if (hoverSegments.length === 0) {
+            // 클릭 전 궤적 포인트 < 5개
+            if (trajPointsBefore < 5) {
+                botScore += 20;
+                reasons.push(`클릭 전 이동 기록 ${trajPointsBefore.toFixed(0)}개 (순간이동 후 클릭)`);
+            }
+
+            // 클릭 지속시간 < 10ms (있는 경우)
+            if (avgClickDuration !== null) {
+                if (avgClickDuration < 10) {
+                    botScore += 15;
+                    reasons.push(`클릭 지속시간 ${avgClickDuration.toFixed(0)}ms (즉시 클릭)`);
+                } else if (avgClickDuration < 40) {
+                    botScore += 5;
+                    reasons.push(`클릭 지속시간 ${avgClickDuration.toFixed(0)}ms (짧음)`);
+                }
+            }
+
+            // 경로 직선성
+            if (avgAngle < 0.15 && trajectory.length > 3) {
                 botScore += 10;
-                reasons.push('호버 구간 없음');
+                reasons.push('마우스 경로가 직선적');
             }
 
-            let scoreClass = 'human';
-            let verdict = '✅ 정상 사용자';
-            if (botScore > 60) {
-                scoreClass = 'bot';
-                verdict = '🤖 봇 의심';
-            } else if (botScore > 30) {
-                scoreClass = 'suspicious';
-                verdict = '⚠️ 의심스러움';
+            // 호버 없음
+            if (hoverSegments.length === 0 && trajectory.length < 10) {
+                botScore += 10;
+                reasons.push('탐색 호버 없음');
             }
 
-            const html = `
-                <div class="bot-score ${scoreClass}">${verdict}</div>
-                <div class="analysis-grid">
+            botScore = Math.min(100, botScore);
+
+            let scoreClass = 'human', verdict = '✅ 정상 사용자';
+            if (botScore >= 60) { scoreClass = 'bot'; verdict = '🤖 매크로/봇'; }
+            else if (botScore >= 30) { scoreClass = 'suspicious'; verdict = '⚠️ 의심스러움'; }
+
+            const velColor = effectiveMaxVel > 10000 ? '#F44336' : effectiveMaxVel > 3000 ? '#FF9800' : '#4CAF50';
+            const timeColor = firstClickTime < 500 ? '#F44336' : firstClickTime < 1500 ? '#FF9800' : '#4CAF50';
+            const trajColor = trajPointsBefore < 5 ? '#F44336' : '#4CAF50';
+            const durColor = avgClickDuration !== null && avgClickDuration < 10 ? '#F44336' : '#4CAF50';
+
+            container.innerHTML = `
+                <div class="bot-score ${scoreClass}">${verdict} (${botScore}/100)</div>
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:12px; margin-top:16px;">
                     <div class="analysis-card">
-                        <h5 style="color: var(--primary-color);">봇 점수</h5>
-                        <p style="font-size: 24px; font-weight: 700;">${botScore.toFixed(1)} / 100</p>
+                        <h5 style="color:${velColor}">⚡ 최대 순간속도</h5>
+                        <p style="font-size:20px;font-weight:700;color:${velColor}">${effectiveMaxVel > 1000 ? (effectiveMaxVel / 1000).toFixed(1) + 'k' : effectiveMaxVel.toFixed(0)} px/s</p>
+                        <small>${effectiveMaxVel > 10000 ? '🤖 순간이동 (매크로)' : effectiveMaxVel > 3000 ? '⚠️ 비정상적 빠름' : '✅ 정상 범위'}</small>
                     </div>
                     <div class="analysis-card">
-                        <h5 style="color: var(--primary-color);">속도 변동성</h5>
-                        <p style="font-size: 20px; font-weight: 700;">${(speedCV * 100).toFixed(1)}%</p>
-                        <small>${speedCV < 0.3 ? '⚠️ 낮음' : '✅ 정상'}</small>
+                        <h5 style="color:${timeColor}">⏱️ 첫 클릭 시간</h5>
+                        <p style="font-size:20px;font-weight:700;color:${timeColor}">${firstClickTime === Infinity ? '-' : firstClickTime < 1000 ? firstClickTime + 'ms' : (firstClickTime / 1000).toFixed(1) + 's'}</p>
+                        <small>${firstClickTime < 500 ? '🤖 불가능한 속도' : firstClickTime < 1500 ? '⚠️ 매우 빠름' : '✅ 정상'}</small>
                     </div>
                     <div class="analysis-card">
-                        <h5 style="color: var(--primary-color);">경로 곡선성</h5>
-                        <p style="font-size: 20px; font-weight: 700;">${avgAngle.toFixed(2)} rad</p>
-                        <small>${avgAngle < 0.2 ? '⚠️ 직선적' : '✅ 자연스러움'}</small>
+                        <h5 style="color:${trajColor}">📍 클릭 전 이동 기록</h5>
+                        <p style="font-size:20px;font-weight:700;color:${trajColor}">${trajPointsBefore.toFixed(0)}개</p>
+                        <small>${trajPointsBefore < 5 ? '🤖 이동없이 클릭' : '✅ 정상 탐색'}</small>
                     </div>
                     <div class="analysis-card">
-                        <h5 style="color: var(--primary-color);">호버 구간</h5>
-                        <p style="font-size: 20px; font-weight: 700;">${hoverSegments.length}개</p>
-                        <small>${hoverSegments.length === 0 ? '⚠️ 없음' : '✅ 발견'}</small>
+                        <h5 style="color:${durColor}">🖱️ 클릭 지속시간</h5>
+                        <p style="font-size:20px;font-weight:700;color:${durColor}">${avgClickDuration !== null ? avgClickDuration.toFixed(0) + 'ms' : '(구버전 로그)'}</p>
+                        <small>${avgClickDuration === null ? '' : avgClickDuration < 10 ? '🤖 즉시 클릭 (봇)' : avgClickDuration < 40 ? '⚠️ 짧음' : '✅ 정상'}</small>
+                    </div>
+                    <div class="analysis-card">
+                        <h5 style="color:var(--primary-color)">📐 경로 곡선성</h5>
+                        <p style="font-size:20px;font-weight:700;">${avgAngle.toFixed(3)} rad</p>
+                        <small>${avgAngle < 0.15 ? '⚠️ 직선적' : '✅ 자연스러움'}</small>
+                    </div>
+                    <div class="analysis-card">
+                        <h5 style="color:var(--primary-color)">🔍 호버 구간</h5>
+                        <p style="font-size:20px;font-weight:700;">${hoverSegments.length}개</p>
+                        <small>${hoverSegments.length === 0 ? '⚠️ 탐색 없음' : '✅ 탐색 발견'}</small>
                     </div>
                 </div>
                 ${reasons.length > 0 ? `
-                    <div style="margin-top: var(--spacing-lg); padding: var(--spacing-md); background: rgba(255, 152, 0, 0.1); border-left: 4px solid #FF9800; border-radius: var(--border-radius);">
-                        <h5>⚠️ 의심 요인:</h5>
-                        <ul style="margin: 0; padding-left: 20px;">
-                            ${reasons.map(r => `<li>${r}</li>`).join('')}
+                    <div style="margin-top:16px; padding:16px; background:rgba(244,67,54,0.08); border-left:4px solid #F44336; border-radius:8px;">
+                        <h5>🚨 매크로 의심 요인 (${reasons.length}개):</h5>
+                        <ul style="margin:8px 0 0; padding-left:20px;">
+                            ${reasons.map(r => `<li style="margin:4px 0;">${r}</li>`).join('')}
                         </ul>
                     </div>
-                ` : ''}
+                ` : '<div style="margin-top:16px;padding:16px;background:rgba(76,175,80,0.1);border-left:4px solid #4CAF50;border-radius:8px;"><strong>✅ 의심 요인 없음 — 정상 사용자로 판단</strong></div>'}
             `;
-
-            document.getElementById('bot-analysis').innerHTML = html;
         }
 
         loadLogs();

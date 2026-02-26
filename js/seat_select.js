@@ -1,12 +1,35 @@
 // seat_select.js - 좌석 선택 페이지 전용 JavaScript
 
 // 초기화
-loadLogState();
-recordStageEntry('captcha');
+loadLogFromSession();
+logStageEntry('seat_captcha');  // 스테이지 1: 예매창 입장~보안문자 완료
+enableMouseTracking();
 
-// 보안문자 관련 변수 (전역 접근을 위해 window에 할당)
-window.currentCaptcha = '';
+// 예매 제한 체크
+(async function checkRestriction() {
+    const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    if (user.email) {
+        try {
+            const res = await fetch(`/api/admin/check-restriction/${encodeURIComponent(user.email)}`);
+            const data = await res.json();
+            if (data.restricted) {
+                const levelNames = { 1: '1차 (3개월)', 2: '2차 (6개월)', 3: '3차 (영구)' };
+                const expires = data.expires_at
+                    ? new Date(data.expires_at).toLocaleDateString('ko-KR') + '까지'
+                    : '영구';
+                alert(`⚠️ 예매 제한 안내\n\n제한 단계: ${levelNames[data.level]}\n기간: ${expires}\n\n문의사항은 고객센터로 연락해주세요.`);
+                window.location.href = '/';
+            }
+        } catch (e) {
+            console.error('제한 상태 확인 실패:', e);
+        }
+    }
+})();
+
+// 보안문자 관련 변수
+let currentCaptcha = '';
 let isCaptchaVerified = false;
+let captchaAttempts = 0;  // 보안문자 시도 횟수 추적
 
 // 보안문자 생성 함수
 function generateCaptcha() {
@@ -66,7 +89,7 @@ function updateCaptchaButton() {
     const btn = document.getElementById('captcha-submit-btn');
 
     if (input.value.trim().length > 0) {
-        btn.style.background = '#E61E51';
+        btn.style.background = '#667eea';
         btn.style.color = 'white';
         btn.style.cursor = 'pointer';
     } else {
@@ -86,18 +109,23 @@ function verifyCaptcha() {
     }
 
     if (input === currentCaptcha) {
+        captchaAttempts++;
         isCaptchaVerified = true;
 
         // 세션 동안 보안문자 통과 여부 저장
         sessionStorage.setItem('captchaVerified', 'true');
 
+        // 로그 기록 (클릭 먼저)
+        trackClick(event, { target: 'captcha_verify', action: 'success', captcha: currentCaptcha });
+
+        // ── 스테이지 전환: seat_captcha 종료 → seat_pick 시작 ──
+        logStageExit('seat_captcha', { captcha_attempts: captchaAttempts });
+        logStageEntry('seat_pick');  // 스테이지 2: 보안문자 닫힘~선택완료
+
         document.getElementById('captcha-overlay').classList.add('captcha-hidden');
         showAlert('인증되었습니다! 좌석을 선택해주세요.', 'success');
-
-        // [v2] 캡차 단계 종료 및 좌석 선택 단계 시작
-        recordStageExit('captcha', { status: 'verified' });
-        recordStageEntry('seat');
     } else {
+        captchaAttempts++;
         showAlert('문자가 일치하지 않습니다. 다시 시도해주세요.', 'error');
         generateCaptcha();
         // 자동 수집에 맡깁니다.
@@ -112,12 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// 페이지 로드 시 보안문자 팝업 표시 (항상 표시)
+// 페이지 로드 시 보안문자 팝업 항상 표시 (매 예매마다 재인증 필요)
 window.addEventListener('load', () => {
-    // 세션 기록과 상관없이 무조건 보안문자 표시
-    isCaptchaVerified = false; // 검증 상태 초기화
-
-    // 오버레이 표시 및 캡차 생성
+    sessionStorage.removeItem('captchaVerified'); // 이전 인증 초기화
+    isCaptchaVerified = false;
     setTimeout(() => {
         document.getElementById('captcha-overlay').classList.remove('captcha-hidden');
         generateCaptcha();
@@ -153,20 +179,20 @@ document.getElementById('perf-info').textContent = flowData.performanceTitle;
 
 // 등급별 색상 정의
 const gradeColors = {
-    'VIP': { bg: '#F1F5F9', border: '#E61E51', color: '#E61E51', hoverBg: '#E61E51' },
-    'VIP석': { bg: '#F1F5F9', border: '#E61E51', color: '#E61E51', hoverBg: '#E61E51' },
-    'R': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: '#FF9800' },
-    'R석': { bg: '#FFF3E0', border: '#FF9800', color: '#FF9800', hoverBg: '#FF9800' },
-    'S': { bg: '#E8F5E9', border: '#4CAF50', color: '#4CAF50', hoverBg: '#4CAF50' },
-    'S석': { bg: '#E8F5E9', border: '#4CAF50', color: '#4CAF50', hoverBg: '#4CAF50' },
-    'A': { bg: '#E3F2FD', border: '#2196F3', color: '#2196F3', hoverBg: '#2196F3' },
-    'A석': { bg: '#E3F2FD', border: '#2196F3', color: '#2196F3', hoverBg: '#2196F3' },
-    '프리미엄석': { bg: '#F3E5F5', border: '#9C27B0', color: '#9C27B0', hoverBg: '#9C27B0' },
-    '지정석': { bg: '#E0F2F1', border: '#009688', color: '#009688', hoverBg: '#009688' },
-    '자유석': { bg: '#FFF9C4', border: '#FBC02D', color: '#F57F17', hoverBg: '#FBC02D' },
-    '스탠딩': { bg: '#FFCCBC', border: '#FF5722', color: '#FF5722', hoverBg: '#FF5722' },
-    '성인': { bg: '#E8EAF6', border: '#3F51B5', color: '#3F51B5', hoverBg: '#3F51B5' },
-    '청소년': { bg: '#E1F5FE', border: '#03A9F4', color: '#03A9F4', hoverBg: '#03A9F4' }
+    'VIP': { bg: '#f8f8f8', seatBg: '#FF3D7F', border: '#FF3D7F', color: '#FF3D7F', hoverBg: 'linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%)' },
+    'VIP석': { bg: '#f8f8f8', seatBg: '#FF3D7F', border: '#FF3D7F', color: '#FF3D7F', hoverBg: 'linear-gradient(135deg, #FF3D7F 0%, #C2185B 100%)' },
+    'R': { bg: '#f8f8f8', seatBg: '#FF9800', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
+    'R석': { bg: '#f8f8f8', seatBg: '#FF9800', border: '#FF9800', color: '#FF9800', hoverBg: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)' },
+    'S': { bg: '#f8f8f8', seatBg: '#4CAF50', border: '#4CAF50', color: '#4CAF50', hoverBg: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' },
+    'S석': { bg: '#f8f8f8', seatBg: '#4CAF50', border: '#4CAF50', color: '#4CAF50', hoverBg: 'linear-gradient(135deg, #4CAF50 0%, #388E3C 100%)' },
+    'A': { bg: '#f8f8f8', seatBg: '#2196F3', border: '#2196F3', color: '#2196F3', hoverBg: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' },
+    'A석': { bg: '#f8f8f8', seatBg: '#2196F3', border: '#2196F3', color: '#2196F3', hoverBg: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)' },
+    '프리미엄석': { bg: '#f8f8f8', seatBg: '#9C27B0', border: '#9C27B0', color: '#9C27B0', hoverBg: 'linear-gradient(135deg, #9C27B0 0%, #7B1FA2 100%)' },
+    '지정석': { bg: '#f8f8f8', seatBg: '#009688', border: '#009688', color: '#009688', hoverBg: 'linear-gradient(135deg, #009688 0%, #00796B 100%)' },
+    '자유석': { bg: '#f8f8f8', seatBg: '#FBC02D', border: '#FBC02D', color: '#F57F17', hoverBg: 'linear-gradient(135deg, #FBC02D 0%, #F57F17 100%)' },
+    '스탠딩': { bg: '#f8f8f8', seatBg: '#FF5722', border: '#FF5722', color: '#FF5722', hoverBg: 'linear-gradient(135deg, #FF5722 0%, #E64A19 100%)' },
+    '성인': { bg: '#f8f8f8', seatBg: '#3F51B5', border: '#3F51B5', color: '#3F51B5', hoverBg: 'linear-gradient(135deg, #3F51B5 0%, #303F9F 100%)' },
+    '청소년': { bg: '#f8f8f8', seatBg: '#03A9F4', border: '#03A9F4', color: '#03A9F4', hoverBg: 'linear-gradient(135deg, #03A9F4 0%, #0288D1 100%)' }
 };
 
 // 좌석 그리드 생성 (여러 등급 통합)
@@ -190,8 +216,8 @@ async function createSeatGrid() {
         gradeHeader.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md); padding: var(--spacing-sm) var(--spacing-md); background: ${gradeColor.bg}; border-left: 4px solid ${gradeColor.border}; border-radius: 8px;">
                 <div style="display: flex; align-items: center; gap: var(--spacing-md);">
-                    <div style="width: 24px; height: 24px; background: ${gradeColor.border}; border-radius: 4px;"></div>
-                    <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 18px;">${gradeName.endsWith('석') ? gradeName : gradeName + '석'}</span>
+                    <div style="width: 24px; height: 24px; background: transparent; border: 3px solid ${gradeColor.border}; border-radius: 4px;"></div>
+                    <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 18px;">${gradeName}석</span>
                 </div>
                 <span style="font-weight: 700; color: ${gradeColor.color}; font-size: 20px;">${formatPrice(grade.price)}</span>
             </div>
@@ -241,7 +267,7 @@ async function createSeatGrid() {
 
                 if (!isTaken) {
                     // 등급별 색상 적용
-                    seat.style.background = gradeColor.bg;
+                    seat.style.background = gradeColor.seatBg;
                     seat.style.borderColor = gradeColor.border;
                     seat.style.color = gradeColor.color;
 
@@ -263,7 +289,7 @@ async function createSeatGrid() {
                     };
                     seat.onmouseleave = function () {
                         if (!this.classList.contains('selected')) {
-                            this.style.background = gradeColor.bg;
+                            this.style.background = gradeColor.seatBg;
                             this.style.color = gradeColor.color;
                         }
                     };
@@ -331,7 +357,7 @@ function toggleSeat(seatId, grade, price, element, event) {
         element.classList.remove('available');
         element.classList.add('selected');
 
-        element.style.background = '#E61E51';
+        element.style.background = '#667eea';
         element.style.color = 'white';
         element.style.boxShadow = '0 4px 12px rgba(255, 61, 127, 0.4)';
 
@@ -411,7 +437,7 @@ function confirmSeats() {
         seat_grades: selectedSeats.map(s => ({ seat: s.id, grade: s.grade, price: s.price }))
     });
 
-    recordStageExit('seat', {
+    logStageExit('seat_pick', {
         selected_seats: selectedSeats.map(s => s.id),
         seat_details: selectedSeats
     });
@@ -460,3 +486,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+

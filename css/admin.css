@@ -380,7 +380,7 @@ body {
 
 /* Countdown Timer */
 .countdown-timer {
-    background: var(--admin-primary);
+    background: #667eea;
     color: white;
     padding: 12px 20px;
     border-radius: 8px;
@@ -390,7 +390,7 @@ body {
 }
 
 .countdown-timer.urgent {
-    background: var(--admin-danger);
+    background: #ef4444;
     animation: pulse 2s infinite;
 }
 

@@ -5,6 +5,7 @@ let currentStage = null;
 let stageStartTime = null;
 let mouseTrajectory = [];
 let lastMouseMoveTime = 0;
+let mouseDownTime = 0;  // 클릭 지속 시간 측정용
 
 /**
  * 濡쒓굅 珥덇린??
@@ -191,17 +192,38 @@ function handleMouseDown(event) {
 function trackClick(event, targetInfo = {}) {
     if (!logData || !currentStage) return;
 
-    const clickDuration = lastMouseDownTime > 0 ? Date.now() - lastMouseDownTime : 0;
+    const clickTs = stageStartTime ? Date.now() - stageStartTime : 0;
+    const duration = mouseDownTime > 0 ? Date.now() - mouseDownTime : 0;
+    mouseDownTime = 0;
+
+    // 클릭 직전 궤적에서 최대 이동 속도 계산 (매크로 감지 핵심 신호)
+    // 매크로: 순간이동 → 한 샘플(50ms)에 수백px 이동 → 속도 수천px/s
+    // 사람: 최대 ~1000px/s
+    let maxVelocityPx = 0;
+    const traj = logData.stages[currentStage]?.mouse_trajectory || [];
+    if (traj.length >= 2) {
+        for (let i = 1; i < traj.length; i++) {
+            const dx = traj[i][0] - traj[i - 1][0];
+            const dy = traj[i][1] - traj[i - 1][1];
+            const dt = traj[i][2] - traj[i - 1][2]; // ms
+            if (dt > 0) {
+                const v = Math.sqrt(dx * dx + dy * dy) / dt * 1000; // px/s
+                if (v > maxVelocityPx) maxVelocityPx = v;
+            }
+        }
+    }
 
     const clickData = {
         x: event.clientX,
         y: event.clientY,
         nx: (event.clientX / window.innerWidth).toFixed(4),
         ny: (event.clientY / window.innerHeight).toFixed(4),
-        timestamp: stageStartTime ? Date.now() - stageStartTime : 0,
+        timestamp: clickTs,
         is_trusted: event.isTrusted,
-        duration: clickDuration,
-        button: event.button, // 0: 醫뚰겢由? 2: ?고겢由?
+        click_duration: duration,          // mousedown→mouseup 실측(ms)
+        max_velocity_before: Math.round(maxVelocityPx), // 클릭 전 최대 속도(px/s)
+        traj_points_before: traj.filter(p => p[2] < clickTs).length, // 클릭 전 궤적 포인트 수
+        is_integer: Number.isInteger(event.clientX) && Number.isInteger(event.clientY),
         ...targetInfo
     };
 
@@ -298,8 +320,9 @@ async function sendLogToServer() {
  * ?섏씠吏 留덉슦??異붿쟻 ?쒖꽦??
  */
 function enableMouseTracking() {
-    document.addEventListener('pointermove', trackMouseMove);
-    document.addEventListener('pointerdown', handleMouseDown);
+    document.addEventListener('mousemove', trackMouseMove);
+    // mousedown 시간 기록 (click_duration 측정)
+    document.addEventListener('mousedown', () => { mouseDownTime = Date.now(); });
 }
 
 /**

@@ -4,19 +4,20 @@
    ====================== */
 
 :root {
-  /* 브랜드 컬러 - 차분하고 전문적인 레드/다크 테마 */
-  --primary-color: #E61E51;
-  --primary-dark: #B9143D;
-  --primary-light: #FF4B78;
-  --secondary-color: #313131;
-  --secondary-dark: #1A1A1A;
-  --accent-color: #6366F1;
+  /* 브랜드 컬러 - 단색 파란 테마 */
+  --primary-color: #667eea;
+  --primary-dark: #5468d4;
+  --primary-light: #8b9ef5;
+  --secondary-color: #667eea;
+  --secondary-dark: #5468d4;
+  --accent-purple: #667eea;
+  --accent-violet: #667eea;
 
   /* 배경 컬러 */
   --bg-primary: #FFFFFF;
-  --bg-secondary: #F8FAFC;
-  --bg-dark: #1E293B;
-  --bg-gradient: var(--bg-dark);
+  --bg-secondary: #F5F5F7;
+  --bg-dark: #1A1A1A;
+  --bg-gradient: #667eea;
 
   /* 텍스트 컬러 */
   --text-primary: #1A1A1A;
@@ -135,14 +136,14 @@ header {
 }
 
 .btn-primary {
-  background: var(--primary-color);
+  background: #667eea;
   color: var(--text-white);
-  box-shadow: 0 2px 4px rgba(230, 30, 81, 0.2);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 61, 127, 0.4);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .btn-primary:active {

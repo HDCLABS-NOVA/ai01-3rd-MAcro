@@ -21,7 +21,7 @@
     width: 100%;
     height: 300px;
     object-fit: cover;
-    background: var(--primary-color);
+    background: #667eea;
 }
 
 .performance-card-content {
@@ -62,7 +62,7 @@
 
 /* 대기열 카드 */
 .queue-card {
-    background: var(--bg-gradient);
+    background: #667eea;
     color: var(--text-white);
     padding: var(--spacing-xl);
     border-radius: var(--border-radius);
@@ -104,23 +104,23 @@
 }
 
 .seat.available {
-    background: #f1f5f9;
-    border: 1px solid #cbd5e1;
-    color: #64748b;
+    background: #EEF0FD;
+    border: 2px solid #667eea;
+    color: #667eea;
 }
 
 .seat.available:hover {
-    background: var(--primary-color);
+    background: #667eea;
     color: white;
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(230, 30, 81, 0.3);
+    transform: scale(1.15);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .seat.selected {
-    background: var(--primary-color);
-    border: 1px solid var(--primary-dark);
+    background: #667eea;
+    border: 2px solid #5468d4;
     color: white;
-    box-shadow: 0 4px 12px rgba(230, 30, 81, 0.3);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 .seat.taken {
@@ -134,7 +134,9 @@
 /* 선택 요약 */
 .selection-summary {
     background: var(--bg-primary);
-    border: 1px solid var(--border-color);
+    border: 2px solid #667eea;
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
     border-radius: var(--border-radius);
     padding: var(--spacing-lg);
     margin-top: var(--spacing-lg);
@@ -147,10 +149,8 @@
     font-size: 18px;
     font-weight: 700;
     margin-bottom: var(--spacing-md);
-    color: var(--text-primary);
-    border-bottom: 2px solid var(--primary-color);
-    display: inline-block;
-    padding-bottom: 4px;
+    color: #667eea;
+    font-weight: 700;
 }
 
 .summary-item {
@@ -186,7 +186,8 @@
 
 .discount-option.selected {
     border-color: var(--primary-color);
-    background: #f1f5f9;
+    background: rgba(102, 126, 234, 0.05);
+    box-shadow: var(--shadow-md);
 }
 
 .discount-option-title {
@@ -227,7 +228,8 @@
 
 .payment-method.selected {
     border-color: var(--primary-color);
-    background: #f1f5f9;
+    background: rgba(102, 126, 234, 0.05);
+    box-shadow: var(--shadow-md);
 }
 
 .payment-icon {
@@ -371,7 +373,7 @@
 
 /* ✅ 추가: 상세 페이지 카운트다운 타이머 */
 .countdown-timer-detail {
-    background: var(--bg-gradient);
+    background: #667eea;
     color: white;
     padding: 16px 24px;
     border-radius: 8px;

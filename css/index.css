@@ -60,7 +60,7 @@
 
 /* 카운트다운 타이머 */
 .countdown-timer {
-    background: #6366f1;
+    background: #667eea;
     color: white;
     padding: 10px 16px;
     border-radius: 8px;
@@ -76,7 +76,7 @@
 }
 
 .countdown-timer.countdown-finished {
-    background: #E61E51;
+    background: #10b981;
     animation: none;
 }
 

@@ -160,7 +160,7 @@ body>#captcha-overlay {
 #alert-confirm-btn {
     width: 100%;
     padding: 16px;
-    background: var(--primary-color, #E61E51);
+    background: #667eea;
     color: white;
     border: none;
     border-radius: 12px;

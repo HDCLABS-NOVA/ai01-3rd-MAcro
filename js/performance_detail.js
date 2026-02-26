@@ -111,22 +111,48 @@ function displayPerformance() {
   const now = new Date();
   const isOpen = !openTime || openTime <= now;
 
-  const openTimeAlert = !isOpen && openTime
-    ? `
-      <div class="alert alert-warning" style="margin-bottom: var(--spacing-lg);">
-        <h3 style="margin-bottom: var(--spacing-sm);">예매 오픈 예정</h3>
-        <p style="margin-bottom: var(--spacing-sm);">
-          <strong>오픈 시간:</strong> ${formatOpenTimeDisplay(openTime)}
-        </p>
-        <div class="countdown-timer-detail" id="countdown-detail" data-open-time="${openTime.toISOString()}"></div>
-        <p style="margin-top: var(--spacing-sm); font-size: 14px; opacity: 0.9;">
-          오픈 시간 이후 날짜와 회차를 선택할 수 있습니다.
-        </p>
-      </div>
-    `
-    : "";
+  // 오픈 시간 안내 메시지
+  const openTimeAlert = !isOpen ? `
+        <div class="alert alert-warning" style="margin-bottom: var(--spacing-lg);">
+            <h3 style="margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: 8px;">
+                🔒 티켓 오픈 예정
+            </h3>
+            <p style="margin-bottom: var(--spacing-sm);">
+                <strong>오픈 시간:</strong> ${formatOpenTimeDisplay(openTime)}
+            </p>
+            <div class="countdown-timer-detail" id="countdown-detail" data-open-time="${openTime.toISOString()}"></div>
+            <p style="margin-top: var(--spacing-sm); font-size: 14px; opacity: 0.9;">
+                오픈 시간 이후에 날짜와 시간을 선택할 수 있습니다.
+            </p>
+        </div>
+    ` : '';
 
   detailDiv.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
+          <div class="card">
+            <div style="width: 100%; height: 400px; background: #667eea; border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 80px;">
+              ${getCategoryIcon(currentPerformance.category)}
+            </div>
+          </div>
+          
+          <div>
+            <h1 class="page-title">${currentPerformance.title}</h1>
+            <p class="page-subtitle">${currentPerformance.description}</p>
+            
+            ${openTimeAlert}
+            
+            <div class="card mt-lg">
+              <div style="margin-bottom: var(--spacing-md);">
+                <strong>📍 장소:</strong> ${currentPerformance.venue}
+              </div>
+              <div style="margin-bottom: var(--spacing-md);">
+                <strong>🎭 카테고리:</strong> ${getCategoryName(currentPerformance.category)}
+              </div>
+              <div>
+                <strong>💰 가격:</strong> ${formatPrice(currentPerformance.grades[currentPerformance.grades.length - 1].price)} ~ ${formatPrice(currentPerformance.grades[0].price)}
+              </div>
+            </div>
+
     <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
       <div class="card">
         <div style="width: 100%; height: 400px; background-image: url('${encodeURI(currentPerformance.image)}'); background-size: cover; background-position: center; background-repeat: no-repeat; background-color: var(--primary-color); color: white; border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 72px;">
@@ -417,6 +443,10 @@ function startDetailCountdown() {
     const diff = openTime - now;
     const totalSec = Math.max(0, Math.ceil(diff / 1000));
 
+    if (diff <= 0) {
+      // ✅ 변경: 새로고침 대신 동적 UI 업데이트
+      countdownEl.textContent = '🎉 판매 시작!';
+      countdownEl.style.background = '#10b981';
     if (totalSec <= 0) {
       countdownEl.textContent = "예매 시작!";
       countdownEl.style.background = "#E61E51";
@@ -433,6 +463,18 @@ function startDetailCountdown() {
     const minutes = Math.floor((totalSec % (60 * 60)) / 60);
     const seconds = Math.floor(totalSec % 60);
 
+      let text = '⏰ 오픈까지: ';
+      if (days > 0) text += `${days}일 `;
+      text += `${hours}시간 ${minutes}분 ${seconds}초`;
+
+      countdownEl.textContent = text;
+
+      // 1시간 미만이면 색상 변경
+      if (diff < 3600000) {
+        countdownEl.style.background = '#ef4444';
+        countdownEl.style.animation = 'pulse 2s infinite';
+      }
+    }
     let text = "오픈까지 ";
     if (days > 0) text += `${days}일 `;
     text += `${hours}시간 ${minutes}분 ${seconds}초`;

@@ -29,7 +29,7 @@
                         <!-- 무대 -->
                         <div style="text-align: center; margin-bottom: var(--spacing-xl);">
                             <div
-                                style="background: var(--bg-dark); color: white; padding: var(--spacing-md) var(--spacing-xl); display: inline-block; border-radius: 50px 50px 0 0; font-weight: 700; letter-spacing: 2px; border: 1px solid #334155;">
+                                style="background: #222244; color: white; padding: var(--spacing-md) var(--spacing-xl); display: inline-block; border-radius: 50px 50px 0 0; font-weight: 700; letter-spacing: 2px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
                                 STAGE
                             </div>
                         </div>
@@ -64,7 +64,7 @@
                 <div>
                     <div class="selection-summary" style="position: sticky; top: 20px;">
                         <div class="summary-title"
-                            style="background: var(--bg-dark); color: white; padding: var(--spacing-md); margin: calc(var(--spacing-md) * -1) calc(var(--spacing-md) * -1) var(--spacing-md); border-radius: var(--border-radius) var(--border-radius) 0 0;">
+                            style="background: #667eea; color: white; padding: var(--spacing-md); margin: calc(var(--spacing-md) * -1) calc(var(--spacing-md) * -1) var(--spacing-md); border-radius: var(--border-radius) var(--border-radius) 0 0;">
                             선택 좌석</div>
 
                         <div id="selected-seats-list" class="mb-md"
@@ -102,9 +102,16 @@
 
     <script src="js/utils.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/log_collect.js"></script>
+    <script src="js/logger.js"></script>
+    <script src="js/browser-info.js"></script>
     <script src="js/flow-manager.js"></script>
-    <script src="js/seat_select.js"></script>
+
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/logger.js?v=2"></script>
+    <script src="js/browser-info.js"></script>
+    <script src="js/flow-manager.js"></script>
+    <script src="js/seat_select.js?v=2"></script>
 
     <!-- 알림 모달 -->
     <div id="alert-overlay">
