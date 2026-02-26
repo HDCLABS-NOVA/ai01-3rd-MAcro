@@ -15,6 +15,26 @@ async function loadPerformances() {
     }
 }
 
+function escapeHtmlAttr(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+function resolvePerformanceImagePath(perf) {
+    const raw = typeof perf?.image === 'string' ? perf.image.trim() : '';
+    if (!raw) return '';
+
+    const normalized = raw.replace(/\\/g, '/');
+    const fileName = normalized.split('/').pop();
+    if (!fileName) return '';
+
+    return `image/${fileName}`;
+}
+
 function displayPerformances() {
     const listDiv = document.getElementById('performance-list');
     const filtered = currentFilter === 'all'
@@ -32,10 +52,15 @@ function displayPerformances() {
         const clickAction = `selectPerformance('${perf.id}')`;
         const cardClass = 'performance-card'; // 잠금 스타일 제거
 
+        const imagePath = resolvePerformanceImagePath(perf);
+        const imageUrl = imagePath ? encodeURI(imagePath) : '';
+        const imageClass = imageUrl ? 'performance-card-image has-image' : 'performance-card-image';
+
         return `
             <div class="${cardClass}" onclick="${clickAction}">
-              <div class="performance-card-image" style="background: ${getRandomColor()}">
-                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
+              <div class="${imageClass}" style="background: ${getRandomColor()}">
+                ${imageUrl ? `<img class="performance-card-photo" src="${imageUrl}" alt="${escapeHtmlAttr(perf.title)}" loading="lazy" decoding="async" onerror="this.parentElement.classList.remove('has-image'); this.remove();">` : ''}
+                <div class="performance-card-fallback">
                   ${getCategoryIcon(perf.category)}
                 </div>
                 ${statusBadge}

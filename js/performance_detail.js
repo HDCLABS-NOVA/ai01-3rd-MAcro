@@ -110,6 +110,9 @@ function displayPerformance() {
   const openTime = currentPerformance.open_time ? new Date(currentPerformance.open_time) : null;
   const now = new Date();
   const isOpen = !openTime || openTime <= now;
+  const imagePath = resolvePerformanceImagePath(currentPerformance);
+  const imageUrl = imagePath ? encodeURI(imagePath) : "";
+  const imageAlt = escapeHtmlAttr(currentPerformance.title || "공연 이미지");
 
   // 오픈 시간 안내 메시지
   const openTimeAlert = !isOpen ? `
@@ -128,35 +131,13 @@ function displayPerformance() {
     ` : '';
 
   detailDiv.innerHTML = `
-        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
-          <div class="card">
-            <div style="width: 100%; height: 400px; background: #667eea; border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 80px;">
-              ${getCategoryIcon(currentPerformance.category)}
-            </div>
-          </div>
-          
-          <div>
-            <h1 class="page-title">${currentPerformance.title}</h1>
-            <p class="page-subtitle">${currentPerformance.description}</p>
-            
-            ${openTimeAlert}
-            
-            <div class="card mt-lg">
-              <div style="margin-bottom: var(--spacing-md);">
-                <strong>📍 장소:</strong> ${currentPerformance.venue}
-              </div>
-              <div style="margin-bottom: var(--spacing-md);">
-                <strong>🎭 카테고리:</strong> ${getCategoryName(currentPerformance.category)}
-              </div>
-              <div>
-                <strong>💰 가격:</strong> ${formatPrice(currentPerformance.grades[currentPerformance.grades.length - 1].price)} ~ ${formatPrice(currentPerformance.grades[0].price)}
-              </div>
-            </div>
-
     <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
       <div class="card">
-        <div style="width: 100%; height: 400px; background-image: url('${encodeURI(currentPerformance.image)}'); background-size: cover; background-position: center; background-repeat: no-repeat; background-color: var(--primary-color); color: white; border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 72px;">
-          ${currentPerformance.image ? '' : getCategoryIcon(currentPerformance.category)}
+        <div style="position: relative; width: 100%; height: 400px; background: var(--primary-color); border-radius: var(--border-radius); overflow: hidden;">
+          ${imageUrl ? `<img src="${imageUrl}" alt="${imageAlt}" loading="lazy" decoding="async" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.remove(); const fallback = this.parentElement.querySelector('.detail-image-fallback'); if (fallback) fallback.style.display = 'flex';">` : ""}
+          <div class="detail-image-fallback" style="position: absolute; inset: 0; display: ${imageUrl ? "none" : "flex"}; align-items: center; justify-content: center; color: #fff; font-size: 72px;">
+            ${getCategoryIcon(currentPerformance.category)}
+          </div>
         </div>
       </div>
 
@@ -211,6 +192,26 @@ function displayPerformance() {
   } else {
     startDetailCountdown();
   }
+}
+
+function escapeHtmlAttr(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function resolvePerformanceImagePath(performance) {
+  const raw = typeof performance?.image === "string" ? performance.image.trim() : "";
+  if (!raw) return "";
+
+  const normalized = raw.replace(/\\/g, "/");
+  const fileName = normalized.split("/").pop();
+  if (!fileName) return "";
+
+  return `image/${fileName}`;
 }
 
 function getPriceRangeText(performance) {
@@ -437,20 +438,22 @@ function startDetailCountdown() {
   const countdownEl = document.getElementById("countdown-detail");
   if (!countdownEl) return;
 
+  if (window.detailCountdownInterval) {
+    clearInterval(window.detailCountdownInterval);
+    window.detailCountdownInterval = null;
+  }
+
   const updateCountdown = () => {
     const openTime = new Date(countdownEl.dataset.openTime);
     const now = new Date();
     const diff = openTime - now;
     const totalSec = Math.max(0, Math.ceil(diff / 1000));
 
-    if (diff <= 0) {
-      // ✅ 변경: 새로고침 대신 동적 UI 업데이트
-      countdownEl.textContent = '🎉 판매 시작!';
-      countdownEl.style.background = '#10b981';
     if (totalSec <= 0) {
       countdownEl.textContent = "예매 시작!";
       countdownEl.style.background = "#E61E51";
       clearInterval(window.detailCountdownInterval);
+      window.detailCountdownInterval = null;
 
       setTimeout(() => {
         activateBookingPage();
@@ -463,22 +466,19 @@ function startDetailCountdown() {
     const minutes = Math.floor((totalSec % (60 * 60)) / 60);
     const seconds = Math.floor(totalSec % 60);
 
-      let text = '⏰ 오픈까지: ';
-      if (days > 0) text += `${days}일 `;
-      text += `${hours}시간 ${minutes}분 ${seconds}초`;
-
-      countdownEl.textContent = text;
-
-      // 1시간 미만이면 색상 변경
-      if (diff < 3600000) {
-        countdownEl.style.background = '#ef4444';
-        countdownEl.style.animation = 'pulse 2s infinite';
-      }
-    }
     let text = "오픈까지 ";
     if (days > 0) text += `${days}일 `;
     text += `${hours}시간 ${minutes}분 ${seconds}초`;
     countdownEl.textContent = text;
+
+    // 1시간 미만이면 색상 강조
+    if (diff < 3600000) {
+      countdownEl.style.background = "#ef4444";
+      countdownEl.style.animation = "pulse 2s infinite";
+    } else {
+      countdownEl.style.background = "";
+      countdownEl.style.animation = "";
+    }
   };
 
   updateCountdown();

@@ -1,2 +1,0 @@
-model_type,threshold,human_fpr,macro_recall,precision,recall,f1,auroc,pr_auc,tp,tn,fp,fn,human_score_mean,human_score_std,human_score_p50,human_score_p95,macro_score_mean,macro_score_std,macro_score_p50,macro_score_p95
-isolation_forest,0.67296288,0.00952381,0.18095238,0.95000000,0.18095238,0.30400000,0.95727891,0.94006099,19,104,1,86,0.40745853,0.08688404,0.39018542,0.54267465,0.61457351,0.06757521,0.61725929,0.71137837

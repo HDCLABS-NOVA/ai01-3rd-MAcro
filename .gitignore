@@ -53,3 +53,5 @@ tmp_*.html
 # Runtime data (do not commit)
 data/restricted_users.json
 data/restriction_history.json
+
+hybrid_model/*

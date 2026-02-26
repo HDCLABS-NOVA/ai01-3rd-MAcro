@@ -487,3 +487,97 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+let seatMacroF2Requesting = false;
+
+function selectFirstAvailableSeatByDom() {
+    const firstAvailable = document.querySelector('.seat.available');
+    if (!firstAvailable) return false;
+    firstAvailable.click();
+    return true;
+}
+
+async function waitSeatMacroF2Result(timeoutMs = 15000) {
+    const startedAt = Date.now();
+    while (Date.now() - startedAt < timeoutMs) {
+        await new Promise((resolve) => setTimeout(resolve, 700));
+        try {
+            const res = await fetch('/api/macro/f2/status', { cache: 'no-store' });
+            const data = await res.json().catch(() => ({}));
+            if (!data.running) {
+                return data;
+            }
+        } catch (e) {
+            // ignore polling error and retry until timeout
+        }
+    }
+    return null;
+}
+
+async function triggerSeatMacroF2() {
+    if (seatMacroF2Requesting) {
+        return;
+    }
+    if (!isCaptchaVerified) {
+        showAlert('보안문자 인증 후 F2 매크로를 실행해 주세요.', 'warning');
+        return;
+    }
+
+    seatMacroF2Requesting = true;
+    try {
+        const res = await fetch('/api/macro/f2', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ grade: '전체' })
+        });
+        const data = await res.json().catch(() => ({}));
+        const ok = !!data.success;
+        const message = data.message || (ok ? 'F2 매크로 실행을 시작했습니다.' : 'F2 매크로 실행에 실패했습니다.');
+
+        if (!ok) {
+            showAlert(message, 'warning');
+            return;
+        }
+
+        showAlert('F2 매크로 실행 중입니다. 잠시만 기다려 주세요.', 'success');
+
+        const result = await waitSeatMacroF2Result(15000);
+        if (!result) {
+            showAlert('F2 매크로 상태 확인이 시간 초과되었습니다.', 'warning');
+            return;
+        }
+
+        if (result.last_success) {
+            if (selectedSeats.length === 0) {
+                const fallbackSelected = selectFirstAvailableSeatByDom();
+                if (fallbackSelected) {
+                    showAlert('F2 매크로 완료 후 화면 기준 자동 선택을 보조 적용했습니다.', 'success');
+                } else {
+                    showAlert('F2 매크로는 완료되었지만 선택 가능한 좌석을 찾지 못했습니다.', 'warning');
+                }
+            } else {
+                showAlert('F2 매크로가 완료되었습니다.', 'success');
+            }
+        } else {
+            const err = result.last_error || 'unknown';
+            if (selectedSeats.length === 0 && err.includes('seat_not_selected_or_confirm_button_not_found')) {
+                const fallbackSelected = selectFirstAvailableSeatByDom();
+                if (fallbackSelected) {
+                    showAlert('F2 매크로가 버튼을 못 찾았습니다. 화면 기준 보조 선택을 적용했습니다.', 'warning');
+                    return;
+                }
+            }
+            showAlert(`F2 매크로 실패: ${err}`, 'error');
+        }
+    } catch (e) {
+        showAlert(`F2 매크로 실행 요청 실패: ${e.message || e}`, 'error');
+    } finally {
+        seatMacroF2Requesting = false;
+    }
+}
+
+document.addEventListener('keydown', (event) => {
+    if (event.key !== 'F2') return;
+    event.preventDefault();
+    triggerSeatMacroF2();
+});
+

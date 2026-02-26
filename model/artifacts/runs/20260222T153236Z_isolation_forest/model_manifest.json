@@ -1,9 +1,0 @@
-{
-  "active": true,
-  "selected_model": "isolation_forest",
-  "params_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\artifacts\\active\\human_model_params_if_540_105_105_no_browser.json",
-  "thresholds_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\artifacts\\active\\human_model_thresholds_if_540_105_105_no_browser.json",
-  "selection_report_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\reports\\benchmark\\model_selection_if_540_105_105_no_browser.json",
-  "benchmark_report_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\reports\\benchmark\\model_benchmark_if_540_105_105_no_browser.csv",
-  "created_at_utc": "2026-02-22T15:32:36.602405+00:00"
-}

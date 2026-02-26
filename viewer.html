@@ -1443,6 +1443,14 @@
             'payment': '결제'
         };
 
+        function getBookStageData(log, stage) {
+            if (!log || !log.stages) return null;
+            if (log.stages[stage]) return log.stages[stage];
+            // Backward compatibility: some logs use `seat` instead of `seat_pick`.
+            if (stage === 'seat_pick' && log.stages.seat) return log.stages.seat;
+            return null;
+        }
+
         function toggleHistoryDetail(id) {
             const el = document.getElementById(id);
             if (!el) return;
@@ -2087,8 +2095,12 @@
 
             createBookStageSelector();
             // 첫 번째로 존재하는 스테이지 자동 선택
-            const firstBookStage = BOOKING_STAGES.find(s => currentBookLog.stages[s]) || BOOKING_STAGES[0];
-            selectBookStage(firstBookStage);
+            const firstBookStage = BOOKING_STAGES.find(s => getBookStageData(currentBookLog, s));
+            if (firstBookStage) {
+                selectBookStage(firstBookStage);
+            } else {
+                drawCanvas('book', {}, 'book-canvas', 'book-tremor', 'book-tremor-canvas', 'book-tremor-stats');
+            }
             // 봇 분석: 전체 스테이지 합산
             analyzeBotBehavior('book', currentBookLog, 'book-bot-analysis');
             updateAdminPanel(currentBookLog);
@@ -2099,7 +2111,7 @@
         function createBookStageSelector() {
             const selector = document.getElementById('book-stage-selector');
             const buttons = BOOKING_STAGES
-                .filter(stage => currentBookLog.stages[stage])
+                .filter(stage => getBookStageData(currentBookLog, stage))
                 .map(stage => `
                     <button class="stage-btn" onclick="selectBookStage('${stage}')" data-stage="${stage}">
                         ${STAGE_NAMES[stage]}
@@ -2120,7 +2132,8 @@
                 }
             });
 
-            drawCanvas('book', currentBookLog.stages[stage], 'book-canvas', 'book-tremor', 'book-tremor-canvas', 'book-tremor-stats');
+            const stageData = getBookStageData(currentBookLog, stage) || {};
+            drawCanvas('book', stageData, 'book-canvas', 'book-tremor', 'book-tremor-canvas', 'book-tremor-stats');
             // 보 분석은 전체 로그 기준 → 탭 변경해도 점수 유지
         }
 
@@ -2128,7 +2141,9 @@
             const hovers = type === 'perf' ? perfHovers : bookHovers;
             const segment = hovers[index];
             if (segment) {
-                const stageData = type === 'perf' ? currentPerfLog.stages.perf : currentBookLog.stages[currentBookStage];
+                const stageData = type === 'perf'
+                    ? (currentPerfLog && currentPerfLog.stages ? (currentPerfLog.stages.perf || {}) : {})
+                    : (getBookStageData(currentBookLog, currentBookStage) || {});
                 analyzeHoverTremor(type, segment, canvasId, statsId, stageData);
 
                 // 버튼 활성화 상태 업데이트
@@ -2146,6 +2161,7 @@
             const ctx = canvas.getContext('2d');
             const tooltipId = type === 'perf' ? 'perf-tooltip' : 'book-tooltip';
             const tooltip = document.getElementById(tooltipId);
+            stageData = stageData || {};
 
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);

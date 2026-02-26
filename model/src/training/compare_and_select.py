@@ -3,6 +3,7 @@ import csv
 import json
 import shutil
 import sys
+from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +28,7 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.append(str(ROOT_DIR))
 
 from model.src.features.feature_pipeline import extract_browser_features, load_json
+from model.src.data_prep.split_unified_raw import run_unified_split
 from model.src.models.deep_svdd import build_deep_svdd_net, bundle_from_trained_net, score_with_runtime, torch_ready
 
 
@@ -38,6 +40,9 @@ DEFAULT_VAL_HUMAN_DIR = MODEL_DIR / "data" / "raw" / "validation" / "human"
 DEFAULT_VAL_MACRO_DIR = MODEL_DIR / "data" / "raw" / "validation" / "macro"
 DEFAULT_TEST_HUMAN_DIR = MODEL_DIR / "data" / "raw" / "test" / "human"
 DEFAULT_TEST_MACRO_DIR = MODEL_DIR / "data" / "raw" / "test" / "macro"
+DEFAULT_UNIFIED_HUMAN_DIR = MODEL_DIR / "data" / "raw" / "human"
+DEFAULT_UNIFIED_MACRO_DIR = MODEL_DIR / "data" / "raw" / "macro"
+DEFAULT_AUTO_SPLIT_OUT_ROOT = MODEL_DIR / "data" / "raw" / "auto_split"
 DEFAULT_SERVER_DIR = MODEL_DIR / "data" / "raw" / "server"
 DEFAULT_PARAMS_OUT = MODEL_DIR / "artifacts" / "active" / "human_model_params.json"
 DEFAULT_THRESHOLDS_OUT = MODEL_DIR / "artifacts" / "active" / "human_model_thresholds.json"
@@ -82,16 +87,16 @@ def normalize_scores(raw: np.ndarray, raw_min: float, raw_max: float) -> np.ndar
     return np.array([max(0.0, (float(v) - raw_min) / scale) for v in raw], dtype=float)
 
 
-def safe_auc(y_true: np.ndarray, y_score: np.ndarray) -> float:
+def safe_auc(is_macro_true: np.ndarray, y_score: np.ndarray) -> float:
     try:
-        return float(roc_auc_score(y_true, y_score))
+        return float(roc_auc_score(is_macro_true, y_score))
     except Exception:
         return 0.0
 
 
-def safe_pr_auc(y_true: np.ndarray, y_score: np.ndarray) -> float:
+def safe_pr_auc(is_macro_true: np.ndarray, y_score: np.ndarray) -> float:
     try:
-        return float(average_precision_score(y_true, y_score))
+        return float(average_precision_score(is_macro_true, y_score))
     except Exception:
         return 0.0
 
@@ -126,21 +131,21 @@ def _binary_stats(
     macro_scores: np.ndarray,
     threshold: float,
 ) -> Dict[str, Any]:
-    y_true = np.concatenate(
+    is_macro_true = np.concatenate(
         [np.zeros(human_scores.shape[0], dtype=int), np.ones(macro_scores.shape[0], dtype=int)]
     )
     y_score = np.concatenate([human_scores, macro_scores])
     y_pred = (y_score > threshold).astype(int)
 
-    tn = int(np.sum((y_true == 0) & (y_pred == 0)))
-    fp = int(np.sum((y_true == 0) & (y_pred == 1)))
-    fn = int(np.sum((y_true == 1) & (y_pred == 0)))
-    tp = int(np.sum((y_true == 1) & (y_pred == 1)))
+    tn = int(np.sum((is_macro_true == 0) & (y_pred == 0)))
+    fp = int(np.sum((is_macro_true == 0) & (y_pred == 1)))
+    fn = int(np.sum((is_macro_true == 1) & (y_pred == 0)))
+    tp = int(np.sum((is_macro_true == 1) & (y_pred == 1)))
 
     human_fpr = fp / max(1, (fp + tn))
     macro_recall = tp / max(1, (tp + fn))
     precision, recall, f1, _ = precision_recall_fscore_support(
-        y_true, y_pred, average="binary", zero_division=0
+        is_macro_true, y_pred, average="binary", zero_division=0
     )
     return {
         "threshold": float(threshold),
@@ -149,8 +154,8 @@ def _binary_stats(
         "precision": float(precision),
         "recall": float(recall),
         "f1": float(f1),
-        "auroc": safe_auc(y_true, y_score),
-        "pr_auc": safe_pr_auc(y_true, y_score),
+        "auroc": safe_auc(is_macro_true, y_score),
+        "pr_auc": safe_pr_auc(is_macro_true, y_score),
         "tp": tp,
         "tn": tn,
         "fp": fp,
@@ -229,6 +234,103 @@ def load_feature_rows(browser_dir: Path) -> List[Dict[str, Any]]:
         }
         rows.append(row)
     return rows
+
+
+def _has_json_files(root: Path) -> bool:
+    if not root.exists():
+        return False
+    try:
+        next(root.rglob("*.json"))
+        return True
+    except StopIteration:
+        return False
+
+
+def _macro_group_key(path: Path) -> str:
+    try:
+        payload = load_json(path)
+        metadata = (payload.get("metadata") or {}) if isinstance(payload, dict) else {}
+        bot_type = str(metadata.get("bot_type") or "").strip()
+        return bot_type if bot_type else "__EMPTY__"
+    except Exception:
+        return "__PARSE_ERR__"
+
+
+def _proportional_targets(group_counts: Dict[str, int], target_total: int) -> Dict[str, int]:
+    keys = sorted(group_counts.keys())
+    total = int(sum(group_counts.values()))
+    if total <= 0 or target_total <= 0:
+        return {k: 0 for k in keys}
+
+    raw = {k: (float(group_counts[k]) / float(total)) * float(target_total) for k in keys}
+    base = {k: int(raw[k]) for k in keys}
+    remainder = int(target_total - sum(base.values()))
+    order = sorted(keys, key=lambda k: (raw[k] - base[k], k), reverse=True)
+    for i in range(remainder):
+        base[order[i]] += 1
+    return base
+
+
+def _downsample_macro_eval_sets(auto_split_out_root: Path, target_per_split: int, seed: int) -> Dict[str, Any]:
+    result: Dict[str, Any] = {
+        "target_per_split": int(target_per_split),
+        "applied": bool(target_per_split > 0),
+        "splits": {},
+    }
+    if target_per_split <= 0:
+        return result
+
+    for split_idx, split in enumerate(["validation", "test"]):
+        macro_dir = auto_split_out_root / split / "macro"
+        files = sorted(macro_dir.glob("*.json")) if macro_dir.exists() else []
+        before = len(files)
+        split_info: Dict[str, Any] = {
+            "before": before,
+            "after": before,
+            "removed": 0,
+            "group_before": {},
+            "group_after": {},
+        }
+
+        if before == 0:
+            result["splits"][split] = split_info
+            continue
+
+        grouped: Dict[str, List[Path]] = defaultdict(list)
+        for path in files:
+            grouped[_macro_group_key(path)].append(path)
+        split_info["group_before"] = {k: len(v) for k, v in sorted(grouped.items())}
+
+        if before > target_per_split:
+            targets = _proportional_targets(split_info["group_before"], target_per_split)
+            keep_paths: set = set()
+            for group_idx, group_name in enumerate(sorted(grouped.keys())):
+                paths = grouped[group_name]
+                rng = np.random.default_rng(seed + split_idx * 1000 + group_idx)
+                idx = np.arange(len(paths))
+                rng.shuffle(idx)
+                k = int(targets.get(group_name, 0))
+                for j in idx[:k]:
+                    keep_paths.add(paths[int(j)])
+
+            remove_paths = [p for p in files if p not in keep_paths]
+            for p in remove_paths:
+                try:
+                    p.unlink()
+                except Exception:
+                    pass
+            split_info["removed"] = len(remove_paths)
+
+        after_files = sorted(macro_dir.glob("*.json")) if macro_dir.exists() else []
+        after_grouped: Dict[str, int] = defaultdict(int)
+        for path in after_files:
+            after_grouped[_macro_group_key(path)] += 1
+
+        split_info["after"] = len(after_files)
+        split_info["group_after"] = dict(sorted(after_grouped.items()))
+        result["splits"][split] = split_info
+
+    return result
 
 
 def _normalize_prefixes(prefixes: List[str]) -> List[str]:
@@ -657,6 +759,59 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--test-human-dir", default=str(DEFAULT_TEST_HUMAN_DIR), help="Test human dir")
     parser.add_argument("--test-macro-dir", default=str(DEFAULT_TEST_MACRO_DIR), help="Test macro dir")
     parser.add_argument(
+        "--disable-auto-split-unified",
+        action="store_true",
+        help=(
+            "Disable automatic unified split. "
+            "By default, if model/data/raw/human and model/data/raw/macro exist, "
+            "they are split and used for train/validation/test."
+        ),
+    )
+    parser.add_argument("--unified-human-dir", default=str(DEFAULT_UNIFIED_HUMAN_DIR), help="Unified human raw dir")
+    parser.add_argument("--unified-macro-dir", default=str(DEFAULT_UNIFIED_MACRO_DIR), help="Unified macro raw dir")
+    parser.add_argument(
+        "--auto-split-out-root",
+        default=str(DEFAULT_AUTO_SPLIT_OUT_ROOT),
+        help="Output root for auto split dataset",
+    )
+    parser.add_argument(
+        "--auto-split-human-ratio",
+        default="7:1.5:1.5",
+        help="Human split ratio train:validation:test",
+    )
+    parser.add_argument(
+        "--auto-split-macro-ratio",
+        default="0:5:5",
+        help="Macro split ratio train:validation:test",
+    )
+    parser.add_argument(
+        "--auto-split-macro-eval-count",
+        type=int,
+        default=115,
+        help=(
+            "If > 0, downsample auto-split macro validation/test each to this fixed count "
+            "after split generation."
+        ),
+    )
+    parser.add_argument(
+        "--auto-split-human-stratify-keys",
+        default="metadata.user_email",
+        help=(
+            "Comma-separated keys for human stratified split "
+            "(e.g. metadata.user_email,filename.date). "
+            "Empty string disables stratification."
+        ),
+    )
+    parser.add_argument(
+        "--auto-split-macro-stratify-keys",
+        default="metadata.bot_type",
+        help=(
+            "Comma-separated keys for macro stratified split "
+            "(e.g. metadata.bot_type,filename.date). "
+            "Empty string disables stratification."
+        ),
+    )
+    parser.add_argument(
         "--server-dir",
         default=str(DEFAULT_SERVER_DIR),
         help="Server log dir (deprecated, ignored in browser-only model features)",
@@ -720,6 +875,61 @@ def main() -> None:
     selection_out = Path(args.selection_out)
     benchmark_json_out = Path(args.benchmark_json_out)
     drop_feature_prefixes = _normalize_prefixes(list(args.drop_feature_prefixes or []))
+    unified_human_dir = Path(args.unified_human_dir)
+    unified_macro_dir = Path(args.unified_macro_dir)
+    auto_split_out_root = Path(args.auto_split_out_root)
+
+    auto_split_used = False
+    auto_split_manifest: Dict[str, Any] = {}
+    auto_split_manifest_path = ""
+    auto_split_macro_downsample: Dict[str, Any] = {}
+    if not bool(args.disable_auto_split_unified):
+        if _has_json_files(unified_human_dir) and _has_json_files(unified_macro_dir):
+            auto_split_manifest = run_unified_split(
+                human_dir=unified_human_dir,
+                macro_dir=unified_macro_dir,
+                out_root=auto_split_out_root,
+                human_ratio=str(args.auto_split_human_ratio),
+                macro_ratio=str(args.auto_split_macro_ratio),
+                seed=int(args.seed),
+                human_stratify_keys=str(args.auto_split_human_stratify_keys),
+                macro_stratify_keys=str(args.auto_split_macro_stratify_keys),
+                overwrite=True,
+                dry_run=False,
+            )
+
+            auto_split_macro_downsample = _downsample_macro_eval_sets(
+                auto_split_out_root,
+                target_per_split=int(args.auto_split_macro_eval_count),
+                seed=int(args.seed),
+            )
+            auto_split_manifest["macro_eval_downsample"] = auto_split_macro_downsample
+
+            manifest_path = auto_split_out_root / "split_manifest.json"
+            if manifest_path.exists():
+                try:
+                    on_disk = json.loads(manifest_path.read_text(encoding="utf-8"))
+                    on_disk["macro_eval_downsample"] = auto_split_macro_downsample
+                    manifest_path.write_text(json.dumps(on_disk, ensure_ascii=False, indent=2), encoding="utf-8")
+                except Exception:
+                    pass
+
+            auto_split_manifest_path = str((auto_split_out_root / "split_manifest.json").resolve())
+            auto_split_used = True
+
+            human_dir = auto_split_out_root / "train" / "human"
+            val_human_dir = auto_split_out_root / "validation" / "human"
+            val_macro_dir = auto_split_out_root / "validation" / "macro"
+            test_human_dir = auto_split_out_root / "test" / "human"
+            test_macro_dir = auto_split_out_root / "test" / "macro"
+            macro_dir = val_macro_dir
+            print(
+                "[AUTO-SPLIT] "
+                f"used unified dirs -> {auto_split_out_root} "
+                f"human={auto_split_manifest.get('counts', {}).get('human', {})} "
+                f"macro={auto_split_manifest.get('counts', {}).get('macro', {})} "
+                f"macro_eval={auto_split_macro_downsample.get('splits', {})}"
+            )
 
     params_out.parent.mkdir(parents=True, exist_ok=True)
     thresholds_out.parent.mkdir(parents=True, exist_ok=True)
@@ -897,6 +1107,16 @@ def main() -> None:
         "best_test_metrics": test_metrics_by_model.get(best.model_type, {}),
         "candidates": [r.model_type for r in results],
         "drop_feature_prefixes": drop_feature_prefixes,
+        "auto_split_unified": {
+            "used": auto_split_used,
+            "unified_human_dir": str(unified_human_dir),
+            "unified_macro_dir": str(unified_macro_dir),
+            "output_root": str(auto_split_out_root),
+            "manifest_path": auto_split_manifest_path,
+            "counts": auto_split_manifest.get("counts", {}),
+            "ratios": auto_split_manifest.get("ratio", {}),
+            "macro_eval_downsample": auto_split_manifest.get("macro_eval_downsample", {}),
+        },
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
     }
     selection_out.write_text(json.dumps(selection, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -912,6 +1132,16 @@ def main() -> None:
             "val_macro": len(macro_rows),
             "test_human": len(test_human_rows),
             "test_macro": len(test_macro_rows),
+        },
+        "auto_split_unified": {
+            "used": auto_split_used,
+            "unified_human_dir": str(unified_human_dir),
+            "unified_macro_dir": str(unified_macro_dir),
+            "output_root": str(auto_split_out_root),
+            "manifest_path": auto_split_manifest_path,
+            "counts": auto_split_manifest.get("counts", {}),
+            "ratios": auto_split_manifest.get("ratio", {}),
+            "macro_eval_downsample": auto_split_manifest.get("macro_eval_downsample", {}),
         },
         "drop_feature_prefixes": drop_feature_prefixes,
         "models": [

@@ -126,17 +126,20 @@ def find_seats_by_color(screen_bgr: np.ndarray, grade: str = "전체") -> list[t
 def click_at(x: int, y: int):
     """좌석 클릭 — pydirectinput (Chrome에서도 동작하는 DirectInput)"""
     import pydirectinput
+    sx, sy = _get_dpi_scale()
     ox = np.random.randint(-1, 2)
     oy = np.random.randint(-1, 2)
-    tx, ty = x + ox, y + oy
+    tx_phys, ty_phys = x + ox, y + oy
+    tx = int(tx_phys * sx)
+    ty = int(ty_phys * sy)
     pydirectinput.moveTo(tx, ty)
     time.sleep(0.01)
     pydirectinput.click()
     time.sleep(CLICK_DELAY)
-    log.info(f"클릭: ({tx}, {ty})")
+    log.info(f"클릭: phys=({tx_phys}, {ty_phys}) -> logical=({tx}, {ty})")
 
 
-def _move_to_confirm_button():
+def _move_to_confirm_button() -> bool:
     """좌석 선택 후 [선택 완료] 또는 팝업 [확인] 버튼으로 마우스를 이동한다.
     - [선택 완료] : 우측 패널 (화면 X 65% 이후)
     - 팝업 [확인] : 화면 중앙 (알림 모달)
@@ -158,8 +161,8 @@ def _move_to_confirm_button():
     LOWER = np.array([ 95, 40,  80])
     UPPER = np.array([140, 255, 255])
 
-    MAX_TRIES = 20   # 20 × 0.05s = 최대 1초 탐색
-    WAIT_EACH = 0.0  # 즉시 캡처 (딜레이 없음)
+    MAX_TRIES = 30   # 30 × 0.05s = 최대 1.5초 탐색
+    WAIT_EACH = 0.05
 
     def _find_button_in_region(hsv_img, x_min_r, x_max_r, y_min_r, lower_hsv, upper_hsv):
         """지정 영역에서 파란 직사각형 버튼 탐색 → (cx_phys, cy_phys) or None"""
@@ -209,7 +212,7 @@ def _move_to_confirm_button():
             by = int(pos[1] * sy)
             log.info(f"🖱️ [선택 완료] 발견! phys=({pos[0]},{pos[1]}) → 논리=({bx},{by}) [{attempt}/{MAX_TRIES}회]")
             pydirectinput.moveTo(bx, by)
-            return
+            return True
 
         # ── 2차: 팝업 [확인] 버튼 (화면 중앙, V>=150) ────────────────────
         # 팝업 overlay(rgba 0,0,0,0.7)가 배경을 어둡게 함 → 배경 V<80
@@ -227,13 +230,17 @@ def _move_to_confirm_button():
             by = int(pos2[1] * sy)
             log.info(f"🖱️ 팝업 [확인] 발견! phys=({pos2[0]},{pos2[1]}) → 논리=({bx},{by}) [{attempt}/{MAX_TRIES}회]")
             pydirectinput.moveTo(bx, by)
-            return
+            return True
 
         log.info(f"[{attempt}/{MAX_TRIES}] 버튼 미발견 (화면 {w_sc}×{h_sc})")
 
     # ── 전부 실패 → 상세 디버그 이미지 2종 저장 ─────────────────────
     log.warning("⚠️ 버튼 끝내 못 찾음 → debug_confirm_btn.png / debug_mask.png 저장")
     out_dir = os.path.dirname(__file__)
+
+    x_left = x_panel
+    x_right = int(w_sc * 0.98)
+    y_top = y_nav
 
     dbg = screen.copy()
     cv2.line(dbg, (x_left,  0),    (x_left,  h_sc), (0, 255, 0), 2)
@@ -243,11 +250,12 @@ def _move_to_confirm_button():
 
     # 색상 마스크 (흰 픽셀 = 파란색 감지됨)
     raw_mask = cv2.inRange(hsv, LOWER, UPPER)
-    raw_mask[:y_top, :]   = 0
-    raw_mask[:, :x_left]  = 0
+    raw_mask[:y_top, :] = 0
+    raw_mask[:, :x_left] = 0
     raw_mask[:, x_right:] = 0
     cv2.imwrite(os.path.join(out_dir, "debug_mask.png"), raw_mask)
     log.warning(f"   저장 완료: {out_dir}")
+    return False
 
 
 
@@ -267,12 +275,15 @@ def search_and_click(grade: str = "전체", max_retries: int = 50, stop_flag: li
         seats = find_seats_by_color(screen, grade)
 
         if seats:
-            x, y = seats[0]  # 가장 앞줄 왼쪽 좌석
-            log.info(f"✅ 좌석 발견! ({x}, {y}) — {len(seats)}개 중 첫 번째 [{attempt}회 시도]")
-            click_at(x, y)
-            # 좌석 선택 후 [선택 완료] 버튼으로 마우스 이동
-            _move_to_confirm_button()
-            return True
+            max_candidates = min(6, len(seats))
+            for idx, (x, y) in enumerate(seats[:max_candidates], start=1):
+                log.info(f"✅ 좌석 발견! ({x}, {y}) — {len(seats)}개 중 {idx}번째 후보 [{attempt}회 시도]")
+                click_at(x, y)
+                # 클릭 반영(선택 성공) 이후에만 선택 완료 버튼이 생긴다.
+                if _move_to_confirm_button():
+                    return True
+                log.info("좌석 클릭 후 버튼 미검출 — 다음 후보 좌석 재시도")
+                time.sleep(0.06)
 
         log.info(f"[{attempt}/{max_retries}] 미발견, {RETRY_INTERVAL}초 후 재시도...")
         time.sleep(RETRY_INTERVAL)
@@ -298,11 +309,14 @@ def search_front_priority(max_retries: int = 50, stop_flag: list = None) -> bool
         for grade in TARGET_GRADES:  # 프리미엄 → 지정석 → 자유석
             seats = find_seats_by_color(screen, grade)
             if seats:
-                x, y = seats[0]
-                log.info(f"✅ [{grade}] 앞좌석 발견! ({x}, {y}) [{attempt}회 시도]")
-                click_at(x, y)
-                _move_to_confirm_button()
-                return True
+                max_candidates = min(4, len(seats))
+                for idx, (x, y) in enumerate(seats[:max_candidates], start=1):
+                    log.info(f"✅ [{grade}] 앞좌석 발견! ({x}, {y}) [{attempt}회 시도, 후보 {idx}]")
+                    click_at(x, y)
+                    if _move_to_confirm_button():
+                        return True
+                    log.info(f"[{grade}] 클릭 후 버튼 미검출 — 같은 등급 다음 좌석 시도")
+                    time.sleep(0.06)
 
         log.info(f"[{attempt}/{max_retries}] 미발견, {RETRY_INTERVAL}초 후 재시도...")
         time.sleep(RETRY_INTERVAL)

@@ -1,38 +1,50 @@
 {
-  "created_at_utc": "2026-02-21T05:19:38.187042+00:00",
+  "created_at_utc": "2026-02-25T05:51:17.534611+00:00",
   "dataset_id": "latest",
-  "config_path": "model/configs/data_paths.yaml",
+  "config_path": "model/configs/data_paths_hybrid_tmp.yaml",
   "input_roots": [
-    "model/data/raw/train",
-    "model/data/raw/validation",
-    "model/data/raw/test"
+    "hybrid_model/data/auto_split/train",
+    "hybrid_model/data/auto_split/validation",
+    "hybrid_model/data/auto_split/test"
   ],
   "glob": "**/*.json",
   "output_root": "model/data/prepared",
   "dataset_dir": "model/data/prepared/latest",
   "groups": {
+    "test/human": {
+      "rows": 115,
+      "features_count": 128,
+      "jsonl": "model/data/prepared/latest/test/human/features.jsonl",
+      "csv": "model/data/prepared/latest/test/human/features.csv"
+    },
     "test/macro": {
-      "rows": 97,
-      "features_count": 113,
+      "rows": 272,
+      "features_count": 128,
       "jsonl": "model/data/prepared/latest/test/macro/features.jsonl",
       "csv": "model/data/prepared/latest/test/macro/features.csv"
     },
     "train/human": {
-      "rows": 624,
-      "features_count": 113,
+      "rows": 535,
+      "features_count": 128,
       "jsonl": "model/data/prepared/latest/train/human/features.jsonl",
       "csv": "model/data/prepared/latest/train/human/features.csv"
     },
+    "validation/human": {
+      "rows": 115,
+      "features_count": 128,
+      "jsonl": "model/data/prepared/latest/validation/human/features.jsonl",
+      "csv": "model/data/prepared/latest/validation/human/features.csv"
+    },
     "validation/macro": {
       "rows": 272,
-      "features_count": 113,
+      "features_count": 128,
       "jsonl": "model/data/prepared/latest/validation/macro/features.jsonl",
       "csv": "model/data/prepared/latest/validation/macro/features.csv"
     }
   },
   "totals": {
-    "groups": 3,
-    "rows": 993,
-    "feature_count": 113
+    "groups": 5,
+    "rows": 1309,
+    "feature_count": 128
   }
 }

@@ -14,6 +14,7 @@ import threading
 import urllib.request
 import urllib.error
 from datetime import datetime, timedelta
+import ctypes
 
 import numpy as np
 
@@ -145,6 +146,18 @@ RISK_DEFAULT_WEIGHTS = {
 RISK_ALLOW_THRESHOLD_ENV = os.getenv("RISK_ALLOW_THRESHOLD")
 RISK_CHALLENGE_THRESHOLD_ENV = os.getenv("RISK_CHALLENGE_THRESHOLD")
 RISK_DECISION_THRESHOLDS_DEFAULT = {"allow": 0.30, "challenge": 0.70}
+# Decision mode:
+# - risk_weighted (default): decision from weighted risk score (model/rule).
+# - model_threshold_fixed: decision from model_score with fixed model threshold.
+RISK_DECISION_MODE = os.getenv("RISK_DECISION_MODE", "risk_weighted").strip().lower()
+if RISK_DECISION_MODE not in {"risk_weighted", "model_threshold_fixed"}:
+    RISK_DECISION_MODE = "risk_weighted"
+# Fixed model threshold source (used when RISK_DECISION_MODE=model_threshold_fixed):
+# 1) RISK_MODEL_FIXED_THRESHOLD (direct numeric override)
+# 2) RISK_MODEL_FIXED_THRESHOLD_KEY in thresholds json
+# 3) thresholds json key "model_fixed_threshold"
+RISK_MODEL_FIXED_THRESHOLD_ENV = os.getenv("RISK_MODEL_FIXED_THRESHOLD")
+RISK_MODEL_FIXED_THRESHOLD_KEY = os.getenv("RISK_MODEL_FIXED_THRESHOLD_KEY", "").strip()
 # Start conservatively: block only for hard signals unless explicitly enabled.
 RISK_BLOCK_AUTOMATION = os.getenv("RISK_BLOCK_AUTOMATION", "false").strip().lower() in {"1", "true", "yes", "on"}
 RISK_RUNTIME_CACHE: Dict[str, Any] = {
@@ -172,10 +185,48 @@ LLM_REPORT_MODEL = os.getenv("LLM_REPORT_MODEL", "gpt-4.1-mini").strip() or "gpt
 LLM_REPORT_TIMEOUT_SEC = int(os.getenv("LLM_REPORT_TIMEOUT_SEC", "20"))
 LLM_REPORT_API_BASE = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1").rstrip("/")
 
+# ---- Seat F2 macro bridge ----
+SEAT_F2_MACRO_ENABLED = os.getenv("SEAT_F2_MACRO_ENABLED", "true").strip().lower() in {"1", "true", "yes", "on"}
+SEAT_F2_MACRO_MAX_RETRIES = int(os.getenv("SEAT_F2_MACRO_MAX_RETRIES", "50"))
+SEAT_F2_MACRO_GRADE = os.getenv("SEAT_F2_MACRO_GRADE", "전체").strip() or "전체"
+SEAT_F2_MACRO_REQUIRE_BROWSER_FOCUS = os.getenv("SEAT_F2_MACRO_REQUIRE_BROWSER_FOCUS", "true").strip().lower() in {"1", "true", "yes", "on"}
+SEAT_F2_MACRO_BROWSER_KEYWORDS = [
+    "chrome",
+    "edge",
+    "firefox",
+    "localhost:8000",
+    "seat_select",
+    "ticket",
+]
+SEAT_F2_MACRO_LOCK = threading.Lock()
+SEAT_F2_MACRO_STATE: Dict[str, Any] = {
+    "running": False,
+    "last_started_iso": "",
+    "last_finished_iso": "",
+    "last_success": None,
+    "last_error": "",
+}
+
+try:
+    import sys as _sys
+    _macro_dir = os.path.join(os.path.dirname(__file__), "macro")
+    if _macro_dir not in _sys.path:
+        _sys.path.insert(0, _macro_dir)
+    from macsearcher import search_and_click as _seat_f2_macro_search_and_click
+except Exception as _seat_macro_import_error:
+    _seat_f2_macro_search_and_click = None
+    SEAT_F2_MACRO_STATE["last_error"] = f"macro_import_error:{_seat_macro_import_error}"
+
 # ---- Queue helpers ----
 PERFORMANCE_DETAIL_OPEN_OFFSET_SEC = int(os.getenv("PERFORMANCE_DETAIL_OPEN_OFFSET_SEC", "5"))
-QUEUE_BASE_WAIT_MS = int(os.getenv("QUEUE_BASE_WAIT_MS", "500"))
+QUEUE_BASE_WAIT_MS = int(os.getenv("QUEUE_BASE_WAIT_MS", "3000"))
 QUEUE_SLOT_MS = int(os.getenv("QUEUE_SLOT_MS", "350"))
+QUEUE_JOIN_DELAY_STEP_MS = int(os.getenv("QUEUE_JOIN_DELAY_STEP_MS", "700"))
+QUEUE_JOIN_DELAY_CAP_STEPS = int(os.getenv("QUEUE_JOIN_DELAY_CAP_STEPS", "8"))
+QUEUE_JOIN_DELAY_PENALTY_MS = int(os.getenv("QUEUE_JOIN_DELAY_PENALTY_MS", "350"))
+QUEUE_SINCE_OPEN_STEP_MS = int(os.getenv("QUEUE_SINCE_OPEN_STEP_MS", "1000"))
+QUEUE_SINCE_OPEN_CAP_STEPS = int(os.getenv("QUEUE_SINCE_OPEN_CAP_STEPS", "10"))
+QUEUE_SINCE_OPEN_PENALTY_MS = int(os.getenv("QUEUE_SINCE_OPEN_PENALTY_MS", "300"))
 QUEUE_READY_TTL_MS = int(os.getenv("QUEUE_READY_TTL_MS", "90000"))
 QUEUE_ENTRY_TTL_MS = int(os.getenv("QUEUE_ENTRY_TTL_MS", "300000"))
 QUEUE_REQUIRE_START_TOKEN = os.getenv("QUEUE_REQUIRE_START_TOKEN", "true").strip().lower() in {"1", "true", "yes", "on"}
@@ -183,19 +234,143 @@ BOOKING_START_TOKEN_TTL_MS = int(os.getenv("BOOKING_START_TOKEN_TTL_MS", "120000
 QUEUE_POLL_MIN_MS = int(os.getenv("QUEUE_POLL_MIN_MS", "300"))
 QUEUE_ENFORCE_SEAT_GATE = os.getenv("QUEUE_ENFORCE_SEAT_GATE", "true").strip().lower() in {"1", "true", "yes", "on"}
 QUEUE_TICKET_COOKIE = "queue_entry_ticket"
+QUEUE_DISPLAY_START_MIN = int(os.getenv("QUEUE_DISPLAY_START_MIN", "2400"))
+QUEUE_DISPLAY_START_MAX = int(os.getenv("QUEUE_DISPLAY_START_MAX", "4200"))
+QUEUE_DISPLAY_MID1_MIN = int(os.getenv("QUEUE_DISPLAY_MID1_MIN", "450"))
+QUEUE_DISPLAY_MID1_MAX = int(os.getenv("QUEUE_DISPLAY_MID1_MAX", "950"))
+QUEUE_DISPLAY_MID2_MIN = int(os.getenv("QUEUE_DISPLAY_MID2_MIN", "20"))
+QUEUE_DISPLAY_MID2_MAX = int(os.getenv("QUEUE_DISPLAY_MID2_MAX", "120"))
+QUEUE_DISPLAY_TOTAL_EXTRA_MIN = int(os.getenv("QUEUE_DISPLAY_TOTAL_EXTRA_MIN", "200"))
+QUEUE_DISPLAY_TOTAL_EXTRA_MAX = int(os.getenv("QUEUE_DISPLAY_TOTAL_EXTRA_MAX", "1600"))
 
 QUEUE_STATE_BY_ID: Dict[str, Dict[str, Any]] = {}
 QUEUE_IDS_BY_PERF: Dict[str, List[str]] = {}
 QUEUE_ENTRY_TICKETS: Dict[str, Dict[str, Any]] = {}
 BOOKING_START_TOKENS: Dict[str, Dict[str, Any]] = {}
+BOOKING_OPEN_EPOCH_BY_PERF: Dict[str, int] = {}
 QUEUE_NEXT_READY_SLOT_BY_PERF: Dict[str, int] = {}
 QUEUE_LOCK = threading.Lock()
+
+
+def _seat_f2_macro_state_snapshot() -> Dict[str, Any]:
+    with SEAT_F2_MACRO_LOCK:
+        return {
+            "enabled": bool(SEAT_F2_MACRO_ENABLED),
+            "running": bool(SEAT_F2_MACRO_STATE.get("running")),
+            "last_started_iso": str(SEAT_F2_MACRO_STATE.get("last_started_iso", "")),
+            "last_finished_iso": str(SEAT_F2_MACRO_STATE.get("last_finished_iso", "")),
+            "last_success": SEAT_F2_MACRO_STATE.get("last_success"),
+            "last_error": str(SEAT_F2_MACRO_STATE.get("last_error", "")),
+        }
+
+
+def _get_active_window_title() -> str:
+    if os.name != "nt":
+        return ""
+    try:
+        user32 = ctypes.windll.user32
+        hwnd = user32.GetForegroundWindow()
+        if not hwnd:
+            return ""
+        length = user32.GetWindowTextLengthW(hwnd)
+        if length <= 0:
+            return ""
+        buff = ctypes.create_unicode_buffer(length + 1)
+        user32.GetWindowTextW(hwnd, buff, length + 1)
+        return str(buff.value or "").strip()
+    except Exception:
+        return ""
+
+
+def _is_browser_window_focused() -> bool:
+    title = _get_active_window_title().lower()
+    if not title:
+        return False
+    return any(keyword in title for keyword in SEAT_F2_MACRO_BROWSER_KEYWORDS)
+
+
+def _seat_f2_macro_worker(grade: str) -> None:
+    success = False
+    error_msg = ""
+    try:
+        if _seat_f2_macro_search_and_click is None:
+            raise RuntimeError("seat_f2_macro_unavailable")
+        if SEAT_F2_MACRO_REQUIRE_BROWSER_FOCUS and not _is_browser_window_focused():
+            active_title = _get_active_window_title()
+            raise RuntimeError(f"active_window_not_browser:{active_title or 'unknown'}")
+        stop_flag = [False]
+        success = bool(
+            _seat_f2_macro_search_and_click(
+                grade,
+                max_retries=max(1, int(SEAT_F2_MACRO_MAX_RETRIES)),
+                stop_flag=stop_flag,
+            )
+        )
+        if not success:
+            error_msg = "seat_not_selected_or_confirm_button_not_found"
+    except Exception as e:
+        error_msg = str(e)
+    finally:
+        with SEAT_F2_MACRO_LOCK:
+            SEAT_F2_MACRO_STATE["running"] = False
+            SEAT_F2_MACRO_STATE["last_finished_iso"] = datetime.utcnow().isoformat() + "Z"
+            SEAT_F2_MACRO_STATE["last_success"] = bool(success)
+            SEAT_F2_MACRO_STATE["last_error"] = error_msg
+
+
+def _start_seat_f2_macro(grade: str) -> Dict[str, Any]:
+    if not SEAT_F2_MACRO_ENABLED:
+        return {
+            "success": False,
+            "message": "좌석 F2 매크로가 비활성화되어 있습니다.",
+            "state": _seat_f2_macro_state_snapshot(),
+        }
+    if _seat_f2_macro_search_and_click is None:
+        return {
+            "success": False,
+            "message": "좌석 F2 매크로 모듈을 불러오지 못했습니다.",
+            "state": _seat_f2_macro_state_snapshot(),
+        }
+
+    already_running = False
+    with SEAT_F2_MACRO_LOCK:
+        if SEAT_F2_MACRO_STATE.get("running"):
+            already_running = True
+        else:
+            SEAT_F2_MACRO_STATE["running"] = True
+            SEAT_F2_MACRO_STATE["last_started_iso"] = datetime.utcnow().isoformat() + "Z"
+            SEAT_F2_MACRO_STATE["last_error"] = ""
+            SEAT_F2_MACRO_STATE["last_success"] = None
+
+    if already_running:
+        return {
+            "success": False,
+            "message": "이미 F2 매크로가 실행 중입니다.",
+            "state": _seat_f2_macro_state_snapshot(),
+        }
+
+    t = threading.Thread(target=_seat_f2_macro_worker, args=(grade,), daemon=True)
+    t.start()
+    return {
+        "success": True,
+        "message": "F2 매크로 실행을 시작했습니다.",
+        "state": _seat_f2_macro_state_snapshot(),
+    }
 
 
 def _hash_value(value: str) -> str:
     if not value:
         return ""
     return hashlib.sha256(value.encode('utf-8')).hexdigest()
+
+
+def _deterministic_int_from_key(key: str, min_value: int, max_value: int) -> int:
+    lo = int(min(min_value, max_value))
+    hi = int(max(min_value, max_value))
+    if lo == hi:
+        return lo
+    h = int(hashlib.sha256(str(key).encode("utf-8")).hexdigest(), 16)
+    return lo + (h % (hi - lo + 1))
 
 
 def _ip_subnet(ip: str) -> str:
@@ -393,6 +568,16 @@ def _percentile(values: List[int], p: float) -> int:
     return int(round(vals[low] * (1.0 - w) + vals[high] * w))
 
 
+def _penalty_steps(elapsed_ms: int, step_ms: int, cap_steps: int) -> int:
+    elapsed = max(0, int(elapsed_ms))
+    step = max(1, int(step_ms))
+    steps = int(elapsed // step)
+    cap = int(cap_steps)
+    if cap > 0:
+        return int(min(cap, steps))
+    return int(steps)
+
+
 def _cleanup_start_tokens_locked(now_ms: int) -> None:
     for token, token_state in list(BOOKING_START_TOKENS.items()):
         if int(token_state.get("expires_epoch_ms", 0)) <= now_ms:
@@ -409,6 +594,10 @@ def _issue_start_token_locked(
     now_ms: int,
 ) -> Dict[str, Any]:
     token = f"bst_{uuid.uuid4().hex}"
+    open_epoch_ms = int(BOOKING_OPEN_EPOCH_BY_PERF.get(performance_id, 0) or 0)
+    if open_epoch_ms <= 0:
+        open_epoch_ms = int(now_ms)
+        BOOKING_OPEN_EPOCH_BY_PERF[performance_id] = open_epoch_ms
     token_state = {
         "token": token,
         "performance_id": performance_id,
@@ -416,10 +605,37 @@ def _issue_start_token_locked(
         "session_id": session_id,
         "user_email": str(user_email or ""),
         "bot_type": str(bot_type or ""),
+        "open_epoch_ms": open_epoch_ms,
         "issued_epoch_ms": now_ms,
         "expires_epoch_ms": now_ms + BOOKING_START_TOKEN_TTL_MS,
     }
     BOOKING_START_TOKENS[token] = token_state
+    return token_state
+
+
+def _get_valid_start_token_state_locked(
+    *,
+    token: str,
+    performance_id: str,
+    flow_id: str,
+    session_id: str,
+    now_ms: int,
+) -> Optional[Dict[str, Any]]:
+    if not token:
+        return None
+    _cleanup_start_tokens_locked(now_ms)
+    token_state = BOOKING_START_TOKENS.get(token)
+    if not token_state:
+        return None
+    if int(token_state.get("expires_epoch_ms", 0)) <= now_ms:
+        BOOKING_START_TOKENS.pop(token, None)
+        return None
+    if str(token_state.get("performance_id", "")) != performance_id:
+        return None
+    if str(token_state.get("flow_id", "")) != flow_id:
+        return None
+    if str(token_state.get("session_id", "")) != session_id:
+        return None
     return token_state
 
 
@@ -431,22 +647,13 @@ def _is_valid_start_token_locked(
     session_id: str,
     now_ms: int,
 ) -> bool:
-    if not token:
-        return False
-    _cleanup_start_tokens_locked(now_ms)
-    token_state = BOOKING_START_TOKENS.get(token)
-    if not token_state:
-        return False
-    if int(token_state.get("expires_epoch_ms", 0)) <= now_ms:
-        BOOKING_START_TOKENS.pop(token, None)
-        return False
-    if str(token_state.get("performance_id", "")) != performance_id:
-        return False
-    if str(token_state.get("flow_id", "")) != flow_id:
-        return False
-    if str(token_state.get("session_id", "")) != session_id:
-        return False
-    return True
+    return _get_valid_start_token_state_locked(
+        token=token,
+        performance_id=performance_id,
+        flow_id=flow_id,
+        session_id=session_id,
+        now_ms=now_ms,
+    ) is not None
 
 
 def _cleanup_queue_locked(now_ms: int) -> None:
@@ -479,6 +686,7 @@ def _cleanup_queue_locked(now_ms: int) -> None:
                 break
         if not has_active and QUEUE_NEXT_READY_SLOT_BY_PERF.get(perf_id, 0) <= now_ms:
             QUEUE_NEXT_READY_SLOT_BY_PERF.pop(perf_id, None)
+            BOOKING_OPEN_EPOCH_BY_PERF.pop(perf_id, None)
 
 
 def _refresh_queue_state_locked(queue_state: Dict[str, Any], now_ms: int) -> None:
@@ -539,6 +747,49 @@ def _queue_total_locked(performance_id: str, now_ms: int) -> int:
     return total
 
 
+def _queue_display_position_locked(queue_state: Dict[str, Any], now_ms: int, fallback_position: int) -> int:
+    _refresh_queue_state_locked(queue_state, now_ms)
+    if str(queue_state.get("state", "")) != "waiting":
+        return 0
+
+    start = int(queue_state.get("display_position_start", 0) or 0)
+    mid1 = int(queue_state.get("display_position_mid1", 0) or 0)
+    mid2 = int(queue_state.get("display_position_mid2", 0) or 0)
+    if start <= 0:
+        return max(1, int(fallback_position))
+
+    # Ensure a monotonic shape: start > mid1 > mid2 >= 1
+    mid1 = min(mid1, max(2, start - 1))
+    mid2 = min(mid2, max(1, mid1 - 1))
+    mid1 = max(2, mid1)
+    mid2 = max(1, mid2)
+
+    join_epoch = int(queue_state.get("join_epoch_ms", 0))
+    ready_epoch = int(queue_state.get("ready_epoch_ms", 0))
+    total_wait = max(1, ready_epoch - join_epoch)
+    elapsed = max(0, min(total_wait, now_ms - join_epoch))
+    progress = elapsed / total_wait
+
+    if progress < 0.55:
+        t = progress / 0.55
+        pos = start + (mid1 - start) * t
+    elif progress < 0.90:
+        t = (progress - 0.55) / 0.35
+        pos = mid1 + (mid2 - mid1) * t
+    else:
+        t = (progress - 0.90) / 0.10
+        pos = mid2 + (1 - mid2) * t
+
+    return max(1, int(round(pos)))
+
+
+def _queue_display_total_locked(queue_state: Dict[str, Any], fallback_total: int) -> int:
+    display_total = int(queue_state.get("display_total_queue", 0) or 0)
+    if display_total <= 0:
+        return max(1, int(fallback_total))
+    return max(1, max(display_total, int(fallback_total)))
+
+
 def _queue_poll_stats_locked(queue_state: Dict[str, Any]) -> Dict[str, int]:
     intervals = list(queue_state.get("poll_intervals_ms", []) or [])
     return {
@@ -585,11 +836,14 @@ def _queue_snapshot_for_log(
             }
 
         _refresh_queue_state_locked(queue_state, now_ms)
+        actual_position = int(_queue_position_locked(queue_state, now_ms))
+        display_position = int(_queue_display_position_locked(queue_state, now_ms, actual_position))
         return {
             "queue_id": str(queue_state.get("queue_id", "")),
             "join_epoch_ms": int(queue_state.get("join_epoch_ms", 0)),
             "enter_trigger": str(queue_state.get("enter_trigger", "")),
-            "position": int(_queue_position_locked(queue_state, now_ms)),
+            "position": display_position,
+            "actual_position": actual_position,
             "poll_interval_ms_stats": _queue_poll_stats_locked(queue_state),
             "jump_count": int(queue_state.get("jump_count", 0)),
         }
@@ -611,8 +865,10 @@ def _queue_status_payload_locked(queue_state: Dict[str, Any], now_ms: int) -> Di
     _refresh_queue_state_locked(queue_state, now_ms)
     perf_id = str(queue_state.get("performance_id", ""))
     state = str(queue_state.get("state", "waiting"))
-    position = int(_queue_position_locked(queue_state, now_ms))
-    total = int(_queue_total_locked(perf_id, now_ms))
+    actual_position = int(_queue_position_locked(queue_state, now_ms))
+    actual_total = int(_queue_total_locked(perf_id, now_ms))
+    position = int(_queue_display_position_locked(queue_state, now_ms, actual_position))
+    total = int(_queue_display_total_locked(queue_state, actual_total))
 
     poll_after_ms = 0
     if state == "waiting":
@@ -627,6 +883,8 @@ def _queue_status_payload_locked(queue_state: Dict[str, Any], now_ms: int) -> Di
         "state": state,
         "position": position,
         "total_queue": total,
+        "actual_position": actual_position,
+        "actual_total_queue": actual_total,
         "join_epoch_ms": int(queue_state.get("join_epoch_ms", 0)),
         "ready_epoch_ms": int(queue_state.get("ready_epoch_ms", 0)),
         "poll_after_ms": int(poll_after_ms),
@@ -781,6 +1039,22 @@ def _resolve_decision_thresholds() -> Dict[str, float]:
     return {"allow": allow, "challenge": challenge}
 
 
+def _resolve_model_fixed_threshold(thresholds_raw: Optional[Dict[str, Any]]) -> Optional[float]:
+    if RISK_MODEL_FIXED_THRESHOLD_ENV is not None and str(RISK_MODEL_FIXED_THRESHOLD_ENV).strip() != "":
+        return _clamp01(_safe_float(RISK_MODEL_FIXED_THRESHOLD_ENV))
+
+    threshold_map = thresholds_raw or {}
+    candidate_keys: List[str] = []
+    if RISK_MODEL_FIXED_THRESHOLD_KEY:
+        candidate_keys.append(RISK_MODEL_FIXED_THRESHOLD_KEY)
+    candidate_keys.append("model_fixed_threshold")
+
+    for key in candidate_keys:
+        if key in threshold_map:
+            return _clamp01(_safe_float(threshold_map.get(key)))
+    return None
+
+
 def _decision_from_risk_runtime(risk_score: float, thresholds: Dict[str, float]) -> str:
     if risk_score < thresholds["allow"]:
         return "allow"
@@ -832,16 +1106,34 @@ def _score_request_risk(browser_log: Optional[Dict[str, Any]], server_log: Dict[
                     runtime_error = str(e)
 
     thresholds = _resolve_decision_thresholds()
+    decision_mode = RISK_DECISION_MODE
+    runtime_thresholds_raw = (runtime or {}).get("thresholds") or {}
+    model_fixed_threshold = None
 
     # 점수 스케일 안정화를 위해 개별 점수를 먼저 0~1로 정규화(clamp)한다.
     model_score = _clamp01(_safe_float(model_score))
     rule_score = _clamp01(_safe_float(rule_score))
 
-    risk_score = _clamp01(
-        RISK_DEFAULT_WEIGHTS["model"] * model_score
-        + RISK_DEFAULT_WEIGHTS["rule"] * rule_score
-    )
-    decision = _decision_from_risk_runtime(risk_score, thresholds=thresholds)
+    if decision_mode == "model_threshold_fixed":
+        model_fixed_threshold = _resolve_model_fixed_threshold(runtime_thresholds_raw)
+        if model_fixed_threshold is None:
+            if runtime_error:
+                runtime_error = f"{runtime_error};model_fixed_threshold_missing"
+            else:
+                runtime_error = "model_fixed_threshold_missing"
+            decision_mode = "risk_weighted"
+
+    if decision_mode == "model_threshold_fixed" and model_fixed_threshold is not None:
+        # In fixed mode, make decision directly from model_score.
+        risk_score = model_score
+        decision = "allow" if model_score < model_fixed_threshold else "block"
+        thresholds = {"allow": model_fixed_threshold, "challenge": model_fixed_threshold}
+    else:
+        risk_score = _clamp01(
+            RISK_DEFAULT_WEIGHTS["model"] * model_score
+            + RISK_DEFAULT_WEIGHTS["rule"] * rule_score
+        )
+        decision = _decision_from_risk_runtime(risk_score, thresholds=thresholds)
 
     # Hard rules override weighted decision.
     if hard_action == "block":
@@ -868,6 +1160,8 @@ def _score_request_risk(browser_log: Optional[Dict[str, Any]], server_log: Dict[
         "model_type": model_type,
         "model_ready": (runtime is not None) and (not model_skipped),
         "model_skipped": model_skipped,
+        "decision_mode": decision_mode,
+        "model_fixed_threshold": model_fixed_threshold,
         "runtime_error": runtime_error,
         "threshold_allow": thresholds["allow"],
         "threshold_challenge": thresholds["challenge"],
@@ -2390,16 +2684,17 @@ async def queue_join(queue_data: QueueJoinData):
     now_ms = _now_ms()
     with QUEUE_LOCK:
         _cleanup_queue_locked(now_ms)
+        start_token_state: Optional[Dict[str, Any]] = None
 
         if QUEUE_REQUIRE_START_TOKEN:
-            is_valid_start = _is_valid_start_token_locked(
+            start_token_state = _get_valid_start_token_state_locked(
                 token=start_token,
                 performance_id=performance_id,
                 flow_id=flow_id,
                 session_id=session_id,
                 now_ms=now_ms,
             )
-            if not is_valid_start:
+            if not start_token_state:
                 raise HTTPException(status_code=403, detail="invalid or missing booking start token")
 
         existing = _find_active_queue_locked(performance_id, flow_id, session_id)
@@ -2413,12 +2708,68 @@ async def queue_join(queue_data: QueueJoinData):
 
         base_wait_ms = max(0, int(QUEUE_BASE_WAIT_MS))
         slot_ms = max(1, int(QUEUE_SLOT_MS))
-        earliest_ready_ms = now_ms + base_wait_ms
+        join_delay_step_ms = max(1, int(QUEUE_JOIN_DELAY_STEP_MS))
+        join_delay_cap_steps = max(0, int(QUEUE_JOIN_DELAY_CAP_STEPS))
+        join_delay_penalty_unit_ms = max(0, int(QUEUE_JOIN_DELAY_PENALTY_MS))
+        since_open_step_ms = max(1, int(QUEUE_SINCE_OPEN_STEP_MS))
+        since_open_cap_steps = max(0, int(QUEUE_SINCE_OPEN_CAP_STEPS))
+        since_open_penalty_unit_ms = max(0, int(QUEUE_SINCE_OPEN_PENALTY_MS))
+
+        start_issued_epoch_ms = int((start_token_state or {}).get("issued_epoch_ms", now_ms))
+        open_epoch_ms = int((start_token_state or {}).get("open_epoch_ms", start_issued_epoch_ms))
+
+        # 핵심 정책: 대기열 페이지 진입 시각(now_ms) 기준으로
+        # 오픈(open_epoch_ms) 대비 늦게 진입할수록 대기 페널티를 누적한다.
+        since_open_ms = max(0, now_ms - open_epoch_ms)
+        since_open_steps = _penalty_steps(
+            elapsed_ms=since_open_ms,
+            step_ms=since_open_step_ms,
+            cap_steps=since_open_cap_steps,
+        )
+        since_open_penalty_ms = int(since_open_steps * since_open_penalty_unit_ms)
+
+        # token 발급 후 join 지연은 관측 지표로는 남기되,
+        # 실제 ready 계산은 queue 진입 시각 기반 정책을 우선한다.
+        join_delay_ms = max(0, now_ms - start_issued_epoch_ms)
+        join_delay_steps = _penalty_steps(
+            elapsed_ms=join_delay_ms,
+            step_ms=join_delay_step_ms,
+            cap_steps=join_delay_cap_steps,
+        )
+        join_delay_penalty_ms = int(join_delay_steps * join_delay_penalty_unit_ms)
+
+        # 빠르게 진입할수록(shorter since_open_ms) shorter wait가 되도록 구성.
+        earliest_ready_ms = now_ms + base_wait_ms + since_open_penalty_ms
         next_slot_ms = int(QUEUE_NEXT_READY_SLOT_BY_PERF.get(performance_id, 0))
         ready_epoch_ms = max(earliest_ready_ms, next_slot_ms)
         wait_ms = max(0, ready_epoch_ms - now_ms)
 
         queue_id = f"q_{uuid.uuid4().hex}"
+        seed_base = f"{performance_id}|{flow_id}|{session_id}|{queue_id}"
+        disp_start = _deterministic_int_from_key(
+            f"{seed_base}:start",
+            QUEUE_DISPLAY_START_MIN,
+            QUEUE_DISPLAY_START_MAX,
+        )
+        disp_mid1 = _deterministic_int_from_key(
+            f"{seed_base}:mid1",
+            QUEUE_DISPLAY_MID1_MIN,
+            QUEUE_DISPLAY_MID1_MAX,
+        )
+        disp_mid2 = _deterministic_int_from_key(
+            f"{seed_base}:mid2",
+            QUEUE_DISPLAY_MID2_MIN,
+            QUEUE_DISPLAY_MID2_MAX,
+        )
+        # Strict descending steps for UI readability.
+        disp_mid1 = min(disp_mid1, max(2, disp_start - 1))
+        disp_mid2 = min(disp_mid2, max(1, disp_mid1 - 1))
+        disp_total = disp_start + _deterministic_int_from_key(
+            f"{seed_base}:total_extra",
+            QUEUE_DISPLAY_TOTAL_EXTRA_MIN,
+            QUEUE_DISPLAY_TOTAL_EXTRA_MAX,
+        )
+
         queue_state = {
             "queue_id": queue_id,
             "performance_id": performance_id,
@@ -2429,6 +2780,18 @@ async def queue_join(queue_data: QueueJoinData):
             "state": "waiting",
             "join_epoch_ms": now_ms,
             "ready_epoch_ms": ready_epoch_ms,
+            "open_epoch_ms": open_epoch_ms,
+            "start_issued_epoch_ms": start_issued_epoch_ms,
+            "since_open_ms": since_open_ms,
+            "since_open_steps": since_open_steps,
+            "since_open_penalty_ms": since_open_penalty_ms,
+            "join_delay_ms": join_delay_ms,
+            "join_delay_steps": join_delay_steps,
+            "join_delay_penalty_ms": join_delay_penalty_ms,
+            "display_position_start": int(disp_start),
+            "display_position_mid1": int(disp_mid1),
+            "display_position_mid2": int(disp_mid2),
+            "display_total_queue": int(disp_total),
             "enter_trigger": "booking_start_click",
             "jump_count": 0,
             "poll_intervals_ms": [],
@@ -2699,13 +3062,27 @@ async def get_log_file(filename: str):
 async def risk_runtime_status():
     runtime = _load_risk_runtime()
     thresholds = _resolve_decision_thresholds()
+    threshold_source = "policy_fixed"
+    model_fixed_threshold = None
+
+    runtime_thresholds_raw = (runtime or {}).get("thresholds") or {}
+    if RISK_DECISION_MODE == "model_threshold_fixed":
+        model_fixed_threshold = _resolve_model_fixed_threshold(runtime_thresholds_raw)
+        if model_fixed_threshold is not None:
+            thresholds = {"allow": model_fixed_threshold, "challenge": model_fixed_threshold}
+            threshold_source = "model_threshold_fixed"
+        else:
+            threshold_source = "model_threshold_fixed_missing_fallback_policy"
+
     if runtime is None:
         return {
             "success": False,
             "ready": False,
             "params_path": os.path.abspath(RISK_PARAMS_PATH),
             "thresholds_path": os.path.abspath(RISK_THRESHOLDS_PATH),
-            "threshold_source": "policy_fixed",
+            "threshold_source": threshold_source,
+            "decision_mode": RISK_DECISION_MODE,
+            "model_fixed_threshold": model_fixed_threshold,
             "decision_thresholds": thresholds,
             "artifact_path": "",
             "error": RISK_RUNTIME_CACHE.get("error", ""),
@@ -2718,7 +3095,9 @@ async def risk_runtime_status():
         "model_type": params.get("model_type", "zscore"),
         "params_path": os.path.abspath(RISK_PARAMS_PATH),
         "thresholds_path": os.path.abspath(RISK_THRESHOLDS_PATH),
-        "threshold_source": "policy_fixed",
+        "threshold_source": threshold_source,
+        "decision_mode": RISK_DECISION_MODE,
+        "model_fixed_threshold": model_fixed_threshold,
         "artifact_path": runtime.get("artifact_path", ""),
         "weights": RISK_DEFAULT_WEIGHTS,
         "decision_thresholds": thresholds,
@@ -3274,6 +3653,11 @@ class UpdateDelivery(BaseModel):
     filename: str
     delivery_address: str
 
+
+class SeatF2MacroTrigger(BaseModel):
+    grade: Optional[str] = None
+
+
 @app.post("/api/mypage/update-delivery")
 async def update_delivery(data: UpdateDelivery):
     """배송지 주소를 수정합니다."""
@@ -3295,6 +3679,21 @@ async def update_delivery(data: UpdateDelivery):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"배송지 수정 실패: {str(e)}")
+
+
+@app.post("/api/macro/f2")
+async def trigger_seat_f2_macro(payload: Optional[SeatF2MacroTrigger] = None):
+    """좌석 선택 페이지에서 F2 매크로(자동 좌석 탐색)를 실행한다."""
+    grade = SEAT_F2_MACRO_GRADE
+    if payload and payload.grade is not None:
+        grade = str(payload.grade).strip() or grade
+    return _start_seat_f2_macro(grade)
+
+
+@app.get("/api/macro/f2/status")
+async def get_seat_f2_macro_status():
+    """좌석 F2 매크로 실행 상태를 반환한다."""
+    return _seat_f2_macro_state_snapshot()
 
 
 # ---- Block Report API ----

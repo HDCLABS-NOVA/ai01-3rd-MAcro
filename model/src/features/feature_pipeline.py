@@ -1,5 +1,6 @@
 import json
 import math
+from bisect import bisect_right
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -46,6 +47,13 @@ def safe_std(values: List[float]) -> float:
     return math.sqrt(var)
 
 
+def safe_var(values: List[float]) -> float:
+    if len(values) < 2:
+        return 0.0
+    mean = safe_mean(values)
+    return sum((v - mean) ** 2 for v in values) / len(values)
+
+
 def safe_percentile(values: List[float], percentile: float) -> float:
     if not values:
         return 0.0
@@ -60,6 +68,100 @@ def safe_percentile(values: List[float], percentile: float) -> float:
         return vals[low]
     w = rank - low
     return vals[low] * (1.0 - w) + vals[high] * w
+
+
+def extract_click_timestamps(clicks: List[Dict[str, Any]]) -> List[float]:
+    click_ts: List[float] = []
+    for c in clicks:
+        if c.get("timestamp") is not None:
+            click_ts.append(safe_float(c.get("timestamp")))
+        elif c.get("relative_ms_from_entry") is not None:
+            click_ts.append(safe_float(c.get("relative_ms_from_entry")))
+        elif c.get("event_time_epoch_ms") is not None:
+            click_ts.append(safe_float(c.get("event_time_epoch_ms")))
+    return sorted(click_ts)
+
+
+def click_tempo_entropy(click_intervals: List[float]) -> float:
+    valid = [v for v in click_intervals if v > 0.0]
+    if not valid:
+        return 0.0
+    # Log-like binning keeps both very-fast and slow tempos separable.
+    bins = [40.0, 80.0, 160.0, 320.0, 640.0, 1280.0, 2560.0, float("inf")]
+    counts = [0 for _ in bins]
+    for v in valid:
+        for i, upper in enumerate(bins):
+            if v <= upper:
+                counts[i] += 1
+                break
+    total = float(sum(counts))
+    if total <= 0.0:
+        return 0.0
+    entropy = 0.0
+    for c in counts:
+        if c <= 0:
+            continue
+        p = float(c) / total
+        entropy -= p * math.log2(p)
+    max_entropy = math.log2(float(len(counts)))
+    if max_entropy <= 0.0:
+        return 0.0
+    return entropy / max_entropy
+
+
+def trajectory_curvature_rad(trajectory: List[List[Any]]) -> float:
+    if len(trajectory) < 3:
+        return 0.0
+    angle_sum = 0.0
+    turn_count = 0
+    for i in range(1, len(trajectory) - 1):
+        p0 = trajectory[i - 1]
+        p1 = trajectory[i]
+        p2 = trajectory[i + 1]
+        x0 = safe_float(p0[0])
+        y0 = safe_float(p0[1])
+        x1 = safe_float(p1[0])
+        y1 = safe_float(p1[1])
+        x2 = safe_float(p2[0])
+        y2 = safe_float(p2[1])
+        v1x = x1 - x0
+        v1y = y1 - y0
+        v2x = x2 - x1
+        v2y = y2 - y1
+        n1 = math.sqrt(v1x * v1x + v1y * v1y)
+        n2 = math.sqrt(v2x * v2x + v2y * v2y)
+        if n1 <= 1e-9 or n2 <= 1e-9:
+            continue
+        cos_theta = (v1x * v2x + v1y * v2y) / (n1 * n2)
+        cos_theta = max(-1.0, min(1.0, cos_theta))
+        angle_sum += abs(math.acos(cos_theta))
+        turn_count += 1
+    if turn_count <= 0:
+        return 0.0
+    return angle_sum / float(turn_count)
+
+
+def reaction_time_latencies_ms(click_ts: List[float], trajectory: List[List[Any]]) -> List[float]:
+    if not click_ts or not trajectory:
+        return []
+    move_ts = sorted(
+        [
+            safe_float(p[2])
+            for p in trajectory
+            if isinstance(p, list) and len(p) >= 3 and p[2] is not None
+        ]
+    )
+    if not move_ts:
+        return []
+    latencies: List[float] = []
+    for ts in click_ts:
+        idx = bisect_right(move_ts, ts) - 1
+        if idx < 0:
+            continue
+        dt = ts - move_ts[idx]
+        if dt >= 0.0:
+            latencies.append(dt)
+    return latencies
 
 
 def trajectory_speeds(trajectory: List[List[Any]]) -> List[float]:
@@ -167,18 +269,11 @@ def _extract_stage_features(stage_name: str, stage_data: Dict[str, Any]) -> Dict
     durations = [safe_float(c.get("duration")) for c in clicks]
     trusted_flags = [1.0 if safe_bool(c.get("is_trusted")) else 0.0 for c in clicks]
 
-    click_ts: List[float] = []
-    for c in clicks:
-        if c.get("timestamp") is not None:
-            click_ts.append(safe_float(c.get("timestamp")))
-        elif c.get("relative_ms_from_entry") is not None:
-            click_ts.append(safe_float(c.get("relative_ms_from_entry")))
-        elif c.get("event_time_epoch_ms") is not None:
-            click_ts.append(safe_float(c.get("event_time_epoch_ms")))
-    click_ts = sorted(click_ts)
+    click_ts = extract_click_timestamps(clicks)
     click_intervals = [click_ts[i] - click_ts[i - 1] for i in range(1, len(click_ts))]
 
     speeds = trajectory_speeds(trajectory)
+    reaction_latencies = reaction_time_latencies_ms(click_ts, trajectory)
 
     features[f"{stage_name}_duration_ms"] = safe_float(stage_data.get("duration_ms"))
     features[f"{stage_name}_click_count"] = float(len(clicks))
@@ -188,9 +283,12 @@ def _extract_stage_features(stage_name: str, stage_data: Dict[str, Any]) -> Dict
     features[f"{stage_name}_trusted_ratio"] = safe_mean(trusted_flags)
     features[f"{stage_name}_avg_click_interval"] = safe_mean(click_intervals)
     features[f"{stage_name}_std_click_interval"] = safe_std(click_intervals)
+    features[f"{stage_name}_reaction_time_var_ms2"] = safe_var(reaction_latencies)
+    features[f"{stage_name}_click_tempo_entropy"] = click_tempo_entropy(click_intervals)
     features[f"{stage_name}_avg_mouse_speed"] = safe_mean(speeds)
     features[f"{stage_name}_std_mouse_speed"] = safe_std(speeds)
     features[f"{stage_name}_avg_straightness"] = trajectory_straightness(trajectory)
+    features[f"{stage_name}_mouse_curvature_rad"] = trajectory_curvature_rad(trajectory)
 
     hover = _extract_hover_features(stage_data)
     for key, value in hover.items():
@@ -216,6 +314,17 @@ def extract_browser_features(browser_log: Dict[str, Any]) -> Dict[str, float]:
     features.update(_extract_stage_features("queue", queue))
     features.update(_extract_stage_features("captcha", captcha))
     features.update(_extract_stage_features("seat", seat))
+
+    key_stages = ["perf", "queue", "captcha", "seat"]
+    features["overall_reaction_time_var_ms2"] = safe_mean(
+        [safe_float(features.get(f"{name}_reaction_time_var_ms2")) for name in key_stages]
+    )
+    features["overall_click_tempo_entropy"] = safe_mean(
+        [safe_float(features.get(f"{name}_click_tempo_entropy")) for name in key_stages]
+    )
+    features["overall_mouse_curvature_rad"] = safe_mean(
+        [safe_float(features.get(f"{name}_mouse_curvature_rad")) for name in key_stages]
+    )
 
     features["total_duration_ms"] = safe_float(metadata.get("total_duration_ms"))
     features["selected_seat_count"] = float(len(seat.get("selected_seats", []) or []))
