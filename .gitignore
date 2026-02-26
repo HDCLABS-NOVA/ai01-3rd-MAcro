@@ -23,3 +23,11 @@ Thumbs.db
 
 # Environment variables
 .env
+
+# Debug / temp files
+macro/debug_*.png
+tmp_*.html
+
+# Runtime data (do not commit)
+data/restricted_users.json
+data/restriction_history.json
