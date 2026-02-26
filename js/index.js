@@ -34,7 +34,7 @@ function displayPerformances() {
 
         return `
             <div class="${cardClass}" onclick="${clickAction}">
-              <div class="performance-card-image" style="background: linear-gradient(135deg, ${getRandomGradient()})">
+              <div class="performance-card-image" style="background: ${getRandomColor()}">
                 <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">
                   ${getCategoryIcon(perf.category)}
                 </div>
@@ -163,16 +163,16 @@ function getCategoryName(category) {
     return names[category] || '공연';
 }
 
-function getRandomGradient() {
-    const gradients = [
-        '#667eea 0%, #764ba2 100%',
-        '#f093fb 0%, #f5576c 100%',
-        '#4facfe 0%, #00f2fe 100%',
-        '#43e97b 0%, #38f9d7 100%',
-        '#fa709a 0%, #fee140 100%',
-        '#30cfd0 0%, #330867 100%'
+function getRandomColor() {
+    const colors = [
+        '#667eea',
+        '#4facfe',
+        '#43e97b',
+        '#30cfd0',
+        '#7c3aed',
+        '#2563eb'
     ];
-    return gradients[Math.floor(Math.random() * gradients.length)];
+    return colors[Math.floor(Math.random() * colors.length)];
 }
 
 function selectPerformance(perfId) {

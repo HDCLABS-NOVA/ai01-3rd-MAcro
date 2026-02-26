@@ -40,7 +40,7 @@ TARGET_GRADES = ["프리미엄", "지정석", "자유석"]
 
 # 설정
 RETRY_INTERVAL = 0.3     # 재시도 간격 (초)
-CLICK_DELAY    = 0.15    # 클릭 후 대기 (초)
+CLICK_DELAY    = 0.03    # 클릭 후 대기 (초) — 최소값
 MIN_DOT_AREA   = 50      # 픽셀 면적 최솟값 (너무 작은 노이즈 제거)
 MAX_DOT_AREA   = 600     # 픽셀 면적 최댓값 (좌석 도트 크기 기준)
 SCREEN_Y_MIN   = 250     # 화면 상단 제외 (브라우저 탭바 + 페이지 헤더/내비게이션)
@@ -130,7 +130,7 @@ def click_at(x: int, y: int):
     oy = np.random.randint(-1, 2)
     tx, ty = x + ox, y + oy
     pydirectinput.moveTo(tx, ty)
-    time.sleep(0.05)
+    time.sleep(0.01)
     pydirectinput.click()
     time.sleep(CLICK_DELAY)
     log.info(f"클릭: ({tx}, {ty})")
@@ -151,15 +151,15 @@ def _move_to_confirm_button():
     # pydirectinput.moveTo() = 논리적(OS) 좌표 기준
     # Windows 125% DPI면 물리→논리 비율 = 0.8
     sx, sy = _get_dpi_scale()
-    log.info(f"🔍 DPI 스케일: sx={sx:.3f}, sy={sy:.3f}")
+    log.debug(f"DPI 스케일: sx={sx:.3f}, sy={sy:.3f}")
 
     # #667eea HSV: H=114, S=144, V=234
     # V 하한을 80으로 낮춰서 팝업 오버레이 dimming 상황에도 대응
     LOWER = np.array([ 95, 40,  80])
     UPPER = np.array([140, 255, 255])
 
-    MAX_TRIES = 8
-    WAIT_EACH = 0.4
+    MAX_TRIES = 20   # 20 × 0.05s = 최대 1초 탐색
+    WAIT_EACH = 0.0  # 즉시 캡처 (딜레이 없음)
 
     def _find_button_in_region(hsv_img, x_min_r, x_max_r, y_min_r, lower_hsv, upper_hsv):
         """지정 영역에서 파란 직사각형 버튼 탐색 → (cx_phys, cy_phys) or None"""

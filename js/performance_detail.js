@@ -58,7 +58,7 @@ function displayPerformance() {
   detailDiv.innerHTML = `
         <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: var(--spacing-xl); margin-bottom: var(--spacing-xl);">
           <div class="card">
-            <div style="width: 100%; height: 400px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 80px;">
+            <div style="width: 100%; height: 400px; background: #667eea; border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center; font-size: 80px;">
               ${getCategoryIcon(currentPerformance.category)}
             </div>
           </div>
@@ -324,7 +324,7 @@ function startDetailCountdown() {
     if (diff <= 0) {
       // ✅ 변경: 새로고침 대신 동적 UI 업데이트
       countdownEl.textContent = '🎉 판매 시작!';
-      countdownEl.style.background = 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)';
+      countdownEl.style.background = '#10b981';
       clearInterval(window.detailCountdownInterval);
 
       // ✅ 동적으로 페이지 활성화
@@ -345,7 +345,7 @@ function startDetailCountdown() {
 
       // 1시간 미만이면 색상 변경
       if (diff < 3600000) {
-        countdownEl.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+        countdownEl.style.background = '#ef4444';
         countdownEl.style.animation = 'pulse 2s infinite';
       }
     }

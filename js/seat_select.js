@@ -2,7 +2,7 @@
 
 // 초기화
 loadLogFromSession();
-logStageEntry('seat');
+logStageEntry('seat_captcha');  // 스테이지 1: 예매창 입장~보안문자 완료
 enableMouseTracking();
 
 // 예매 제한 체크
@@ -29,6 +29,7 @@ enableMouseTracking();
 // 보안문자 관련 변수
 let currentCaptcha = '';
 let isCaptchaVerified = false;
+let captchaAttempts = 0;  // 보안문자 시도 횟수 추적
 
 // 보안문자 생성 함수
 function generateCaptcha() {
@@ -88,7 +89,7 @@ function updateCaptchaButton() {
     const btn = document.getElementById('captcha-submit-btn');
 
     if (input.value.trim().length > 0) {
-        btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        btn.style.background = '#667eea';
         btn.style.color = 'white';
         btn.style.cursor = 'pointer';
     } else {
@@ -108,17 +109,23 @@ function verifyCaptcha() {
     }
 
     if (input === currentCaptcha) {
+        captchaAttempts++;
         isCaptchaVerified = true;
 
         // 세션 동안 보안문자 통과 여부 저장
         sessionStorage.setItem('captchaVerified', 'true');
 
+        // 로그 기록 (클릭 먼저)
+        trackClick(event, { target: 'captcha_verify', action: 'success', captcha: currentCaptcha });
+
+        // ── 스테이지 전환: seat_captcha 종료 → seat_pick 시작 ──
+        logStageExit('seat_captcha', { captcha_attempts: captchaAttempts });
+        logStageEntry('seat_pick');  // 스테이지 2: 보안문자 닫힘~선택완료
+
         document.getElementById('captcha-overlay').classList.add('captcha-hidden');
         showAlert('인증되었습니다! 좌석을 선택해주세요.', 'success');
-
-        // 로그 기록
-        trackClick(event, { target: 'captcha_verify', action: 'success', captcha: currentCaptcha });
     } else {
+        captchaAttempts++;
         showAlert('문자가 일치하지 않습니다. 다시 시도해주세요.', 'error');
         generateCaptcha();
 
@@ -366,7 +373,7 @@ function toggleSeat(seatId, grade, price, element, e) {
         element.classList.remove('available');
         element.classList.add('selected');
 
-        element.style.background = 'linear-gradient(135deg, #FF3D7F 0%, #9C27B0 100%)';
+        element.style.background = '#667eea';
         element.style.color = 'white';
         element.style.boxShadow = '0 4px 12px rgba(255, 61, 127, 0.4)';
 
@@ -446,7 +453,7 @@ function confirmSeats() {
         seat_grades: selectedSeats.map(s => ({ seat: s.id, grade: s.grade, price: s.price }))
     });
 
-    logStageExit('seat', {
+    logStageExit('seat_pick', {
         selected_seats: selectedSeats.map(s => s.id),
         seat_details: selectedSeats
     });

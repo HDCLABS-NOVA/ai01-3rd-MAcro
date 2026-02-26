@@ -4,20 +4,20 @@
    ====================== */
 
 :root {
-  /* 브랜드 컬러 - 인터파크 핑크/퍼플 테마 */
-  --primary-color: #FF3D7F;
-  --primary-dark: #C2185B;
-  --primary-light: #FF6B9D;
-  --secondary-color: #9C27B0;
-  --secondary-dark: #7B1FA2;
+  /* 브랜드 컬러 - 단색 파란 테마 */
+  --primary-color: #667eea;
+  --primary-dark: #5468d4;
+  --primary-light: #8b9ef5;
+  --secondary-color: #667eea;
+  --secondary-dark: #5468d4;
   --accent-purple: #667eea;
-  --accent-violet: #764ba2;
+  --accent-violet: #667eea;
 
   /* 배경 컬러 */
   --bg-primary: #FFFFFF;
   --bg-secondary: #F5F5F7;
   --bg-dark: #1A1A1A;
-  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --bg-gradient: #667eea;
 
   /* 텍스트 컬러 */
   --text-primary: #1A1A1A;
@@ -136,14 +136,14 @@ header {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #FF3D7F 0%, #9C27B0 100%);
+  background: #667eea;
   color: var(--text-white);
-  box-shadow: 0 4px 12px rgba(255, 61, 127, 0.3);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 61, 127, 0.4);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .btn-primary:active {

@@ -33,7 +33,7 @@ body {
 
 /* Header */
 .admin-header {
-    background: linear-gradient(135deg, var(--admin-primary) 0%, var(--admin-primary-dark) 100%);
+    background: var(--admin-primary);
     color: white;
     padding: 30px;
     border-radius: 12px;
@@ -380,7 +380,7 @@ body {
 
 /* Countdown Timer */
 .countdown-timer {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #667eea;
     color: white;
     padding: 12px 20px;
     border-radius: 8px;
@@ -390,7 +390,7 @@ body {
 }
 
 .countdown-timer.urgent {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: #ef4444;
     animation: pulse 2s infinite;
 }
 
