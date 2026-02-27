@@ -548,8 +548,8 @@
           <select id="statusFilter" onchange="filterReports()"
             style="width:80px; padding:0 8px; border-radius:8px; border:1px solid #3f3f46; background:#1e1e2e; color:#a1a1aa; font-size:13px; outline:none; cursor:pointer; height:36px;">
             <option value="all" style="background:#1e1e2e; color:#a1a1aa;">전체</option>
-            <option value="allow" style="background:#1e1e2e; color:#a1a1aa;">허용</option>
-            <option value="challenge" style="background:#1e1e2e; color:#a1a1aa;">의심</option>
+            <option value="allow" style="background:#1e1e2e; color:#a1a1aa;">정상</option>
+            <option value="challenge" style="background:#1e1e2e; color:#a1a1aa;">주의</option>
             <option value="block" style="background:#1e1e2e; color:#a1a1aa;">경고</option>
           </select>
         </div>
@@ -572,7 +572,7 @@
     let allReports = [];
     let selectedFilename = null;
 
-    const decisionLabel = { allow: '✅ 허용', challenge: '⚠️ 의심', block: '🚨 경고' };
+    const decisionLabel = { allow: '정상', challenge: '주의', block: '경고' };
     const decisionBadge = { allow: 'badge-allow', challenge: 'badge-challenge', block: 'badge-block' };
 
     async function loadReports() {
@@ -661,7 +661,7 @@
       const score = ui.bot_score ? ui.bot_score.value : (d.risk_summary ? d.risk_summary.total_score * 100 : 0);
       const scoreNum = parseFloat(score).toFixed(1);
       const scorePct = Math.min(parseFloat(score), 100);
-      const scoreClass = scorePct >= 70 ? 'score-high' : scorePct >= 30 ? 'score-medium' : 'score-low';
+      const scoreClass = scorePct >= 60 ? 'score-high' : scorePct >= 50 ? 'score-medium' : 'score-low';
 
       const speed = ui.speed_variability || {};
       const curve = ui.path_curvature || {};

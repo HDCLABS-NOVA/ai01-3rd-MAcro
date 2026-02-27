@@ -40,11 +40,36 @@ LLM_REPORT_TIMEOUT_SEC = int(os.getenv("LLM_REPORT_TIMEOUT_SEC", "20"))
 LLM_REPORT_API_BASE = os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1").rstrip("/")
 RISK_ALLOW_THRESHOLD_ENV = os.getenv("RISK_ALLOW_THRESHOLD")
 RISK_CHALLENGE_THRESHOLD_ENV = os.getenv("RISK_CHALLENGE_THRESHOLD")
-RISK_DECISION_THRESHOLDS_DEFAULT = {"allow": 0.30, "challenge": 0.70}
+RISK_DECISION_THRESHOLDS_DEFAULT = {"allow": 0.50, "challenge": 0.60}
 
 
 def clamp01(value: float) -> float:
     return max(0.0, min(1.0, value))
+
+
+def score_level_from_100(score_100: float) -> str:
+    value = max(0.0, min(100.0, safe_float(score_100, 0.0)))
+    if value >= 60.0:
+        return "high"
+    if value >= 50.0:
+        return "medium"
+    return "low"
+
+
+def score_level_from_ratio(score: float) -> str:
+    return score_level_from_100(clamp01(safe_float(score, 0.0)) * 100.0)
+
+
+def score_status_title_ko(level: str) -> str:
+    if level == "high":
+        return "경고"
+    if level == "medium":
+        return "주의"
+    return "정상"
+
+
+def score_policy_text_ko() -> str:
+    return "모델 점수 기준: 50점 미만 정상, 50점 이상 60점 미만 주의, 60점 이상 경고"
 
 
 def safe_float(value: Any, default: float = 0.0) -> float:
@@ -80,31 +105,43 @@ def mask_email(email: str) -> str:
 def build_ui_fields_fallback(report_seed: Dict[str, Any]) -> Dict[str, Any]:
     risk_summary = report_seed.get("risk_summary", {}) if isinstance(report_seed, dict) else {}
     ui_seed = report_seed.get("ui_metric_seed", {}) if isinstance(report_seed, dict) else {}
-    reasons = report_seed.get("rule_evidence", []) if isinstance(report_seed, dict) else []
-    if not isinstance(reasons, list):
-        reasons = []
-    reasons = [str(r).strip() for r in reasons if str(r).strip()][:5]
+    model_evidence = report_seed.get("model_evidence", {}) if isinstance(report_seed, dict) else {}
+    behavior_evidence = report_seed.get("behavior_evidence", []) if isinstance(report_seed, dict) else []
+    reasons: List[str] = []
+    for item in (model_evidence.get("top_feature_contributions", []) if isinstance(model_evidence, dict) else []):
+        if isinstance(item, dict):
+            feature = str(item.get("feature", "")).strip()
+            if feature:
+                reasons.append(f"모델 주요 기여 피처: {feature}")
+    for name in (model_evidence.get("top_features", []) if isinstance(model_evidence, dict) else []):
+        text = str(name).strip()
+        if text:
+            reasons.append(f"모델 주요 피처: {text}")
+    for item in behavior_evidence:
+        if isinstance(item, dict):
+            desc = str(item.get("description", "")).strip()
+            if desc:
+                reasons.append(desc)
+    reasons = reasons[:5]
 
     risk_score = clamp01(safe_float((risk_summary or {}).get("total_score"), 0.0))
     bot_score_100 = round(risk_score * 100.0, 1)
-    level = "low"
-    if bot_score_100 >= 70:
-        level = "high"
-    elif bot_score_100 >= 30:
-        level = "medium"
-    status_title = "정상 사용자"
-    if level == "medium":
-        status_title = "주의 사용자"
-    elif level == "high":
-        status_title = "매크로 의심 사용자"
+    level = score_level_from_ratio(risk_score)
+    status_title = score_status_title_ko(level)
+    score_policy_ko = score_policy_text_ko()
 
     speed_variability_pct = max(0.0, safe_float((ui_seed or {}).get("speed_variability_pct"), 0.0))
     path_curvature_rad = max(0.0, safe_float((ui_seed or {}).get("path_curvature_rad"), 0.0))
     hover_sections_count = max(0, int(safe_float((ui_seed or {}).get("hover_sections_count"), 0.0)))
 
-    narrative = "의심 요인: " + ", ".join(reasons[:3]) + "." if reasons else "의심 요인이 명확하게 관찰되지 않았습니다."
+    narrative = (
+        f"{score_policy_ko} 의심 요인: " + ", ".join(reasons[:3]) + "."
+        if reasons
+        else f"{score_policy_ko} 의심 요인이 명확하게 관찰되지 않았습니다."
+    )
     return {
         "status_title_ko": status_title,
+        "score_policy_ko": score_policy_ko,
         "bot_score": {"value": bot_score_100, "max": 100},
         "speed_variability": {"value": round(speed_variability_pct, 2), "unit": "%", "judgement_ko": "정상"},
         "path_curvature": {"value": round(path_curvature_rad, 3), "unit": "rad", "judgement_ko": "자연스러움"},
@@ -125,9 +162,11 @@ def build_markdown_report_fallback(
     report_id = str((ident or {}).get("report_id", "")).strip() or "UNKNOWN_REPORT"
     target_masked = str((ident or {}).get("target_masked_user", "")).strip() or "unknown"
     score_100 = safe_float((ui_fields.get("bot_score", {}) or {}).get("value"))
-    level_map = {"low": "낮음", "medium": "중간", "high": "높음"}
-    level_ko = level_map.get(str(suspicion_level).lower(), "중간")
-    status_title = str(ui_fields.get("status_title_ko", "")).strip() or "판정 결과"
+    level = str(suspicion_level or "").strip().lower()
+    if level not in {"low", "medium", "high"}:
+        level = score_level_from_100(score_100)
+    verdict_map = {"low": "✅ 정상", "medium": "⚠️ 주의", "high": "🚨 경고"}
+    score_policy_ko = score_policy_text_ko()
     reasons = ui_fields.get("suspicion_reasons", [])
     if not isinstance(reasons, list):
         reasons = []
@@ -139,7 +178,9 @@ def build_markdown_report_fallback(
     lines = [
         "[ Header Area: 정량적 지표 ]",
         f"ID: {report_id} / 대상: {target_masked}",
-        f"스코어: [ {round(max(0.0, min(100.0, score_100)), 1)} / 100 ] / 판정: {status_title} (위험도 {level_ko})",
+        f"스코어: [ {round(max(0.0, min(100.0, score_100)), 1)} / 100 ] / 판정: {verdict_map.get(level, '⚠️ 주의')}",
+        f"등급 기준: {score_policy_ko}",
+        "행동 지표(Behavioral Metrics) 구간: 50점 미만 정상, 50점 이상 60점 미만 주의, 60점 이상 경고",
         "",
         "[ Analysis Summary: 모델 분석 요약 ]",
         f"- 속도 변동성: {round(safe_float(speed.get('value')), 2)}{str(speed.get('unit', '%'))} ({str(speed.get('judgement_ko', '정상'))})",
@@ -153,7 +194,12 @@ def build_markdown_report_fallback(
         [
             "",
             "[ AI Insights: 생성 요약 ]",
-            summary_ko.strip() or "근거 기반 분석 결과, 자동화 의심 정황이 확인되었습니다.",
+            summary_ko.strip()
+            or (
+                "해당 세션은 정상 구간입니다."
+                if level == "low"
+                else ("해당 세션은 주의 구간으로 사후 점검이 권장됩니다." if level == "medium" else "해당 세션은 경고 구간으로 우선 점검이 필요합니다.")
+            ),
             narrative,
         ]
     )
@@ -166,7 +212,7 @@ def generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, Any
         report_seed=report_seed,
         ui_fields=fallback_ui_fields,
         summary_ko="",
-        suspicion_level="medium",
+        suspicion_level=score_level_from_ratio(safe_float(((report_seed.get("risk_summary", {}) or {}).get("total_score")), 0.0)),
     )
     if not LLM_REPORT_ENABLED:
         return {
@@ -190,11 +236,11 @@ def generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, Any
         "report_identity": report_seed.get("report_identity", {}),
         "decision": report_seed.get("decision", "block"),
         "risk_summary": report_seed.get("risk_summary", {}),
-        "rule_evidence": report_seed.get("rule_evidence", []),
         "behavior_evidence": report_seed.get("behavior_evidence", []),
         "model_evidence": report_seed.get("model_evidence", {}),
         "request_context": report_seed.get("request_context", {}),
         "ui_metric_seed": report_seed.get("ui_metric_seed", {}),
+        "browser_context": report_seed.get("browser_context", {}),
     }
     system_prompt = (
         "당신은 티켓팅 매크로 탐지 리포트 작성 보조 시스템입니다. "
@@ -225,7 +271,11 @@ def generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, Any
         "- ui_metric_seed의 수치와 크게 벗어나지 않게 작성하세요.\n"
         "- model_evidence.top_feature_contributions를 우선 근거로 사용하세요. "
         "각 항목의 feature/value/normal_mean/contribution을 직접 인용해 설명하세요.\n"
+        "- browser_context(stage_summary, event_stream_count, network_request_count)를 참고해 행동 맥락을 보강하세요.\n"
         "- markdown_report는 관리자 화면에서 바로 보여줄 수 있도록 Markdown 형태(섹션/불릿 포함)로 작성하세요.\n"
+        "- markdown_report에는 아래 등급 기준 문구를 반드시 포함하세요:\n"
+        "  모델 점수 기준: 50점 미만 정상, 50점 이상 60점 미만 주의, 60점 이상 경고\n"
+        "- 행동 지표(Behavioral Metrics) 점수 구간도 동일하게 50 미만/50 이상 60 미만/60 이상 기준으로 서술하세요.\n"
         "- suspicion_narrative_ko는 2~4문장 줄글로 작성하세요.\n"
         f"입력: {json.dumps(model_input, ensure_ascii=False)}"
     )
@@ -273,10 +323,28 @@ def generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, Any
         ui_fields_raw = result.get("ui_fields", {})
         if not isinstance(ui_fields_raw, dict):
             ui_fields_raw = {}
+        bot_value = round(
+            max(
+                0.0,
+                min(
+                    100.0,
+                    safe_float(
+                        (ui_fields_raw.get("bot_score", {}) or {}).get("value"),
+                        safe_float((fallback_ui_fields.get("bot_score", {}) or {}).get("value"), 0.0),
+                    ),
+                ),
+            ),
+            1,
+        )
+        level = score_level_from_100(bot_value)
+        action = {"low": "allow", "medium": "challenge", "high": "block"}[level]
+        status_title_ko = score_status_title_ko(level)
+        score_policy_ko = score_policy_text_ko()
         ui_fields = {
-            "status_title_ko": str(ui_fields_raw.get("status_title_ko", fallback_ui_fields.get("status_title_ko", ""))).strip() or str(fallback_ui_fields.get("status_title_ko", "")),
+            "status_title_ko": status_title_ko,
+            "score_policy_ko": score_policy_ko,
             "bot_score": {
-                "value": round(max(0.0, min(100.0, safe_float((ui_fields_raw.get("bot_score", {}) or {}).get("value"), safe_float((fallback_ui_fields.get("bot_score", {}) or {}).get("value"), 0.0)))), 1),
+                "value": bot_value,
                 "max": 100,
             },
             "speed_variability": {
@@ -321,6 +389,11 @@ def generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, Any
                 summary_ko=summary_ko,
                 suspicion_level=level,
             )
+        if score_policy_ko not in markdown_report:
+            markdown_report = f"등급 기준: {score_policy_ko}\n{markdown_report}".strip()
+        behavioral_band_text = "행동 지표(Behavioral Metrics) 구간: 50점 미만 정상, 50점 이상 60점 미만 주의, 60점 이상 경고"
+        if behavioral_band_text not in markdown_report:
+            markdown_report = f"{markdown_report}\n{behavioral_band_text}".strip()
 
         return {
             "enabled": True,
@@ -385,7 +458,7 @@ def resolve_thresholds(
     allow_override: Optional[str],
     challenge_override: Optional[str],
 ) -> Dict[str, float]:
-    # 배치 리포트도 런타임과 동일하게 정책 임계값(기본 0.30/0.70)을 사용한다.
+    # 배치 리포트도 런타임과 동일하게 정책 임계값(기본 0.50/0.60)을 사용한다.
     # 모델 artifacts의 threshold 값에는 의존하지 않는다.
     allow = float(RISK_DECISION_THRESHOLDS_DEFAULT["allow"])
     challenge = float(RISK_DECISION_THRESHOLDS_DEFAULT["challenge"])
@@ -587,7 +660,7 @@ def calc_confidence(
 ) -> float:
     confidence = 0.20
     confidence += 0.25 if decision in {"challenge", "block"} else 0.0
-    confidence += 0.15 if risk_score >= 0.70 else (0.08 if risk_score >= 0.50 else 0.0)
+    confidence += 0.15 if risk_score >= 0.60 else (0.08 if risk_score >= 0.50 else 0.0)
     confidence += 0.15 if hard_action != "none" else 0.0
     confidence += min(0.15, 0.03 * len(soft_rules))
     confidence += min(0.10, 0.03 * len(behavior_flags))
@@ -619,6 +692,87 @@ def account_key(browser_log: Dict[str, Any], server_log: Optional[Dict[str, Any]
     return "unknown"
 
 
+def summarize_browser_log_for_llm(browser_log: Dict[str, Any]) -> Dict[str, Any]:
+    if not isinstance(browser_log, dict):
+        return {}
+
+    metadata = browser_log.get("metadata", {}) or {}
+    stages = browser_log.get("stages", {}) or {}
+    event_stream = browser_log.get("event_stream", []) or []
+    network = browser_log.get("network", {}) or {}
+    network_requests = (network.get("requests", []) if isinstance(network, dict) else []) or []
+
+    stage_summary: Dict[str, Dict[str, Any]] = {}
+    for stage_name, stage_data_raw in stages.items():
+        stage_name = str(stage_name).strip()
+        stage_data = stage_data_raw if isinstance(stage_data_raw, dict) else {}
+        if not stage_name:
+            continue
+
+        clicks = stage_data.get("clicks", []) or []
+        mouse_trajectory = stage_data.get("mouse_trajectory", []) or []
+        stage_item: Dict[str, Any] = {
+            "duration_ms": round(safe_float(stage_data.get("duration_ms"), 0.0), 2),
+            "click_count": int(len(clicks) if isinstance(clicks, list) else 0),
+            "mouse_points": int(len(mouse_trajectory) if isinstance(mouse_trajectory, list) else 0),
+        }
+
+        status_candidates = [
+            stage_data.get("status"),
+            stage_data.get("completion_status"),
+            stage_data.get("payment_status"),
+            stage_data.get("result"),
+        ]
+        status_text = ""
+        for candidate in status_candidates:
+            text = str(candidate or "").strip()
+            if text:
+                status_text = text
+                break
+        if status_text:
+            stage_item["status"] = status_text
+
+        if stage_name == "queue":
+            stage_item["initial_position"] = int(safe_float(stage_data.get("initial_position"), 0.0))
+            stage_item["final_position"] = int(safe_float(stage_data.get("final_position"), 0.0))
+            stage_item["queue_jump_count"] = int(
+                safe_float(stage_data.get("queue_jump_count", stage_data.get("jump_count")), 0.0)
+            )
+        elif stage_name == "seat":
+            seat_attempts = stage_data.get("seat_attempts", []) or []
+            selected_seats = stage_data.get("selected_seats", []) or []
+            stage_item["seat_attempt_count"] = int(len(seat_attempts) if isinstance(seat_attempts, list) else 0)
+            stage_item["selected_seat_count"] = int(len(selected_seats) if isinstance(selected_seats, list) else 0)
+
+        stage_summary[stage_name] = stage_item
+
+    browser_info = metadata.get("browser_info", {}) or {}
+    screen = (browser_info.get("screen", {}) if isinstance(browser_info, dict) else {}) or {}
+
+    return {
+        "completion_status": str(metadata.get("completion_status", "")).strip(),
+        "is_completed": bool(metadata.get("is_completed", False)),
+        "total_duration_ms": round(safe_float(metadata.get("total_duration_ms"), 0.0), 2),
+        "booking_id": str(metadata.get("booking_id", "")).strip(),
+        "event_stream_count": int(len(event_stream) if isinstance(event_stream, list) else 0),
+        "network_request_count": int(len(network_requests) if isinstance(network_requests, list) else 0),
+        "stage_summary": stage_summary,
+        "browser_info": {
+            "platform": str(browser_info.get("platform", "")).strip() if isinstance(browser_info, dict) else "",
+            "language": str(browser_info.get("language", "")).strip() if isinstance(browser_info, dict) else "",
+            "webdriver": bool(browser_info.get("webdriver", False)) if isinstance(browser_info, dict) else False,
+            "hardware_concurrency": int(safe_float(browser_info.get("hardwareConcurrency"), 0.0))
+            if isinstance(browser_info, dict)
+            else 0,
+            "screen": {
+                "w": int(safe_float(screen.get("w"), 0.0)),
+                "h": int(safe_float(screen.get("h"), 0.0)),
+                "ratio": round(safe_float(screen.get("ratio"), 0.0), 3),
+            },
+        },
+    }
+
+
 @dataclass
 class SessionReport:
     account_key: str
@@ -631,7 +785,6 @@ class SessionReport:
     recommendation: str
     confidence: float
     risk_score: float
-    rule_score: float
     model_score: float
     account_age_days: int
     is_verified: bool
@@ -640,6 +793,7 @@ class SessionReport:
     rule_evidence: Dict[str, Any]
     model_evidence: Dict[str, Any]
     behavior_evidence: List[Dict[str, Any]]
+    browser_context: Dict[str, Any]
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -653,7 +807,6 @@ class SessionReport:
             "recommendation": self.recommendation,
             "confidence": round(self.confidence, 6),
             "risk_score": round(self.risk_score, 6),
-            "rule_score": round(self.rule_score, 6),
             "model_score": round(self.model_score, 6),
             "account_age_days": int(self.account_age_days),
             "is_verified": bool(self.is_verified),
@@ -662,13 +815,14 @@ class SessionReport:
             "rule_evidence": self.rule_evidence,
             "model_evidence": self.model_evidence,
             "behavior_evidence": self.behavior_evidence,
+            "browser_context": self.browser_context,
         }
 
 
 def _risk_grade(score: float) -> str:
-    if score >= 0.70:
+    if score >= 0.60:
         return "High"
-    if score >= 0.30:
+    if score >= 0.50:
         return "Medium"
     return "Low"
 
@@ -721,7 +875,7 @@ def save_posthoc_block_reports(session_reports: List[SessionReport], out_block_d
                 straightness = max(0.0, min(1.0, value))
                 path_curvature_rad = (1.0 - straightness) * float(np.pi)
 
-        risk_grade = _risk_grade(s.risk_score)
+        risk_grade = _risk_grade(s.model_score)
         recommendation = (
             "block_review" if bool((s.rule_evidence or {}).get("block_recommended", False)) else "block"
         )
@@ -735,10 +889,9 @@ def save_posthoc_block_reports(session_reports: List[SessionReport], out_block_d
             },
             "decision": s.decision,
             "risk_summary": {
-                "total_score": round(s.risk_score, 6),
+                "total_score": round(s.model_score, 6),
                 "grade": risk_grade,
             },
-            "rule_evidence": rule_entries,
             "behavior_evidence": s.behavior_evidence,
             "model_evidence": {
                 "anomaly_score": round(s.model_score, 6),
@@ -758,11 +911,12 @@ def save_posthoc_block_reports(session_reports: List[SessionReport], out_block_d
                 "server_log_found": bool(s.server_log_found),
             },
             "ui_metric_seed": {
-                "bot_score_100": round(max(0.0, min(1.0, s.risk_score)) * 100.0, 1),
+                "bot_score_100": round(max(0.0, min(1.0, s.model_score)) * 100.0, 1),
                 "speed_variability_pct": round(speed_variability_pct, 2),
                 "path_curvature_rad": round(path_curvature_rad, 3),
                 "hover_sections_count": 0,
             },
+            "browser_context": s.browser_context,
         }
         llm_analysis = generate_llm_report_payload(report_seed=llm_seed)
         llm_ui_fields = llm_analysis.get("ui_fields", build_ui_fields_fallback(llm_seed))
@@ -867,7 +1021,7 @@ def build_account_reports(session_reports: List[SessionReport]) -> List[Dict[str
         risks = [r.risk_score for r in rows_sorted]
         avg_risk = sum(risks) / max(1, n)
         max_risk = max(risks) if risks else 0.0
-        high_risk_count = sum(1 for x in risks if x >= 0.70)
+        high_risk_count = sum(1 for x in risks if x >= 0.60)
         challenge_count = sum(1 for r in rows_sorted if r.decision == "challenge")
         block_count = sum(1 for r in rows_sorted if r.decision == "block")
 
@@ -952,13 +1106,14 @@ def main() -> None:
     out_account.parent.mkdir(parents=True, exist_ok=True)
     out_block_dir.mkdir(parents=True, exist_ok=True)
 
-    params = json.loads(Path(args.params).read_text(encoding="utf-8"))
-    thresholds_raw = json.loads(Path(args.thresholds).read_text(encoding="utf-8"))
+    params = json.loads(Path(args.params).read_text(encoding="utf-8-sig"))
+    thresholds_raw = json.loads(Path(args.thresholds).read_text(encoding="utf-8-sig"))
     thresholds = resolve_thresholds(
         thresholds=thresholds_raw,
         allow_override=args.allow_threshold,
         challenge_override=args.challenge_threshold,
     )
+    thresholds = dict(RISK_DECISION_THRESHOLDS_DEFAULT)
 
     model_artifact = None
     artifact_path = resolve_artifact_path(str(params.get("model_artifact", "")), args.params)
@@ -980,7 +1135,6 @@ def main() -> None:
         features = extract_browser_features(browser_log)
 
         rule_eval = evaluate_rules(server_log or {}, browser_log=browser_log)
-        rule_score = safe_float(rule_eval.get("soft_score"))
         hard_action = str(rule_eval.get("hard_action", "none"))
         model_score = 0.0
         model_top_contributions: List[Dict[str, Any]] = []
@@ -999,19 +1153,14 @@ def main() -> None:
                 if str(item.get("feature", "")).strip()
             ]
 
-        # model/rule 점수 스케일 안정화를 위해 개별 점수를 먼저 0~1로 정규화한다.
+        # 리포트 점수는 model_score 단일 기준으로 사용한다.
         model_score = clamp01(model_score)
-        rule_score = clamp01(rule_score)
-        risk_score = clamp01(args.w_model * model_score + args.w_rule * rule_score)
-        decision = decision_from_risk(risk_score, thresholds)
-        if hard_action == "block":
-            decision = "block"
-            risk_score = max(risk_score, thresholds["challenge"], 0.95)
+        risk_score = model_score
+        decision = {"low": "allow", "medium": "challenge", "high": "block"}[score_level_from_ratio(risk_score)]
 
-        review_required = False
-        block_recommended = False
-        if decision == "block" and not args.block_automation and hard_action != "block":
-            decision = "challenge"
+        review_required = decision in {"challenge", "block"}
+        block_recommended = decision == "block"
+        if hard_action == "block":
             review_required = True
             block_recommended = True
 
@@ -1039,7 +1188,6 @@ def main() -> None:
             "hard_action": hard_action,
             "hard_rules_triggered": rule_eval.get("hard_rules_triggered", []),
             "soft_rules_triggered": rule_eval.get("soft_rules_triggered", []),
-            "rule_score": round(rule_score, 6),
             "review_required": review_required,
             "block_recommended": block_recommended,
         }
@@ -1077,7 +1225,6 @@ def main() -> None:
                 recommendation=recommendation,
                 confidence=confidence,
                 risk_score=risk_score,
-                rule_score=rule_score,
                 model_score=model_score,
                 account_age_days=account_age_days,
                 is_verified=is_verified,
@@ -1086,6 +1233,7 @@ def main() -> None:
                 rule_evidence=rule_evidence,
                 model_evidence=model_evidence,
                 behavior_evidence=behavior_flags,
+                browser_context=summarize_browser_log_for_llm(browser_log),
             )
         )
 

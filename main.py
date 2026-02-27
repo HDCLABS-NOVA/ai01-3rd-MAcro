@@ -51,13 +51,11 @@ BROWSER_LOGS_DIR = os.path.join(LOGS_DIR, "browser")
 SERVER_LOGS_DIR = os.path.join(LOGS_DIR, "server")
 BLOCK_REPORT_DIR = os.path.join("model", "block_report")
 BLOCK_REPORT_INDEX_JSONL = os.path.join(BLOCK_REPORT_DIR, "index.jsonl")
-RULE_SCORE_DIR = os.path.join("model", "rule_score")
 MODEL_SCORE_DIR = os.path.join("model", "model_score")
 os.makedirs(LOGS_DIR, exist_ok=True)
 os.makedirs(BROWSER_LOGS_DIR, exist_ok=True)
 os.makedirs(SERVER_LOGS_DIR, exist_ok=True)
 os.makedirs(BLOCK_REPORT_DIR, exist_ok=True)
-os.makedirs(RULE_SCORE_DIR, exist_ok=True)
 os.makedirs(MODEL_SCORE_DIR, exist_ok=True)
 
 try:
@@ -139,13 +137,23 @@ REQUEST_HISTORY = {}
 LOGIN_HISTORY = {}
 RISK_PARAMS_PATH = os.path.join("model", "artifacts", "active", "human_model_params.json")
 RISK_THRESHOLDS_PATH = os.path.join("model", "artifacts", "active", "human_model_thresholds.json")
+# oneclass_svm 활성화 시, active oneclass joblib를 우선 사용해 model_score 일관성을 보장한다.
+RISK_ONECLASS_ACTIVE_ARTIFACT_PATH = os.path.join(
+    "model", "artifacts", "active", "human_model_oneclass_svm.joblib"
+)
 RISK_DEFAULT_WEIGHTS = {
     "rule": float(os.getenv("RISK_WEIGHT_RULE", "0.2")),
     "model": float(os.getenv("RISK_WEIGHT_MODEL", "0.8")),
 }
+# model_score scaling:
+# - auto/minmax: train과 동일한 upper-unclipped min-max
+# - logistic_p95: train raw 분포 logistic(p50->0.50, p95->0.95) 강제
+RISK_MODEL_SCORE_SCALING = os.getenv("RISK_MODEL_SCORE_SCALING", "auto").strip().lower()
+if RISK_MODEL_SCORE_SCALING not in {"auto", "logistic_p95", "minmax"}:
+    RISK_MODEL_SCORE_SCALING = "auto"
 RISK_ALLOW_THRESHOLD_ENV = os.getenv("RISK_ALLOW_THRESHOLD")
 RISK_CHALLENGE_THRESHOLD_ENV = os.getenv("RISK_CHALLENGE_THRESHOLD")
-RISK_DECISION_THRESHOLDS_DEFAULT = {"allow": 0.30, "challenge": 0.70}
+RISK_DECISION_THRESHOLDS_DEFAULT = {"allow": 0.50, "challenge": 0.60}
 # Decision mode:
 # - risk_weighted (default): decision from weighted risk score (model/rule).
 # - model_threshold_fixed: decision from model_score with fixed model threshold.
@@ -163,21 +171,12 @@ RISK_BLOCK_AUTOMATION = os.getenv("RISK_BLOCK_AUTOMATION", "false").strip().lowe
 RISK_RUNTIME_CACHE: Dict[str, Any] = {
     "params_mtime": None,
     "thresholds_mtime": None,
+    "artifact_mtime": None,
     "params": None,
     "thresholds": None,
     "model_artifact": None,
     "artifact_path": "",
     "error": "",
-}
-
-# 실시간 차단/챌린지 응답을 즉시 적용할 API 경로/메서드
-# (예매 시작 ~ 대기열 ~ 로그 제출 구간)
-RISK_REALTIME_ENFORCE_RULES = {
-    "/api/booking/start-token": {"POST"},
-    "/api/queue/join": {"POST"},
-    "/api/queue/status": {"GET"},
-    "/api/queue/enter": {"POST"},
-    "/api/logs": {"POST"},
 }
 
 LLM_REPORT_ENABLED = os.getenv("LLM_REPORT_ENABLED", "true").strip().lower() in {"1", "true", "yes", "on"}
@@ -391,14 +390,6 @@ def _extract_ip_key(request: Request) -> str:
     return 'unknown'
 
 
-def _should_enforce_realtime_decision(request: Request) -> bool:
-    """현재 요청에 대해 block/challenge 응답을 즉시 반환할지 판단한다."""
-    path = str(request.url.path or "").strip()
-    method = str(request.method or "").upper()
-    allowed_methods = RISK_REALTIME_ENFORCE_RULES.get(path, set())
-    return method in allowed_methods
-
-
 def _update_behavior(ip_key: str, endpoint: str, now_ms: int) -> Dict[str, int]:
     hist = REQUEST_HISTORY.setdefault(ip_key, [])
     hist.append((now_ms, endpoint))
@@ -502,7 +493,6 @@ def _save_score_snapshots(
         f"{safe_endpoint}_{safe_method}_{safe_request_id}"
     )
 
-    rule_score_path = os.path.join(RULE_SCORE_DIR, f"{base_name}_rule_score.json")
     model_score_path = os.path.join(MODEL_SCORE_DIR, f"{base_name}_model_score.json")
 
     common = {
@@ -518,39 +508,30 @@ def _save_score_snapshots(
         "decision": str((risk_payload or {}).get("decision", "allow")),
     }
 
-    rule_doc = {
-        "type": "rule_score_v1",
+    model_doc = {
+        "type": "model_score_v1",
         **common,
-        "rule_score": round(_safe_float((risk_payload or {}).get("rule_score")), 6),
         "hard_action": str((risk_payload or {}).get("hard_action", "none")),
         "rules_triggered": list((risk_payload or {}).get("rules_triggered", []) or []),
         "soft_rules_triggered": list((risk_payload or {}).get("soft_rules_triggered", []) or []),
         "hard_rules_triggered": list((risk_payload or {}).get("hard_rules_triggered", []) or []),
-        "risk_score": round(_safe_float((risk_payload or {}).get("risk_score")), 6),
-        "threshold_allow": round(_safe_float((risk_payload or {}).get("threshold_allow")), 6),
-        "threshold_challenge": round(_safe_float((risk_payload or {}).get("threshold_challenge")), 6),
-    }
-
-    model_doc = {
-        "type": "model_score_v1",
-        **common,
         "model_type": str((risk_payload or {}).get("model_type", "none")),
         "model_score": round(_safe_float((risk_payload or {}).get("model_score")), 6),
+        "model_score_raw": round(_safe_float((risk_payload or {}).get("model_score_raw")), 6),
         "model_ready": bool((risk_payload or {}).get("model_ready", False)),
         "model_skipped": bool((risk_payload or {}).get("model_skipped", False)),
+        "model_artifact_path": str((risk_payload or {}).get("model_artifact_path", "")),
+        "model_artifact_loaded": bool((risk_payload or {}).get("model_artifact_loaded", False)),
         "runtime_error": str((risk_payload or {}).get("runtime_error", "")),
         "risk_score": round(_safe_float((risk_payload or {}).get("risk_score")), 6),
         "threshold_allow": round(_safe_float((risk_payload or {}).get("threshold_allow")), 6),
         "threshold_challenge": round(_safe_float((risk_payload or {}).get("threshold_challenge")), 6),
     }
 
-    with open(rule_score_path, "w", encoding="utf-8") as f:
-        json.dump(rule_doc, f, ensure_ascii=False, indent=2)
     with open(model_score_path, "w", encoding="utf-8") as f:
         json.dump(model_doc, f, ensure_ascii=False, indent=2)
 
     return {
-        "rule_score_path": rule_score_path,
         "model_score_path": model_score_path,
     }
 
@@ -897,6 +878,63 @@ def _clamp01(value: float) -> float:
     return max(0.0, min(1.0, value))
 
 
+def _score_level_from_100(score_100: float) -> str:
+    value = max(0.0, min(100.0, _safe_float(score_100, 0.0)))
+    if value >= 60.0:
+        return "high"
+    if value >= 50.0:
+        return "medium"
+    return "low"
+
+
+def _score_level_from_ratio(score: float) -> str:
+    return _score_level_from_100(_clamp01(_safe_float(score, 0.0)) * 100.0)
+
+
+def _score_status_title_ko(level: str) -> str:
+    if level == "high":
+        return "경고"
+    if level == "medium":
+        return "주의"
+    return "정상"
+
+
+def _score_policy_text_ko() -> str:
+    return "모델 점수 기준: 50점 미만 정상, 50점 이상 60점 미만 주의, 60점 이상 경고"
+
+
+def _squash_positive_score(value: float) -> float:
+    """
+    Map [0, +inf) -> [0, 1) smoothly without hard clipping.
+    0 -> 0, 1 -> 0.5, 2 -> 0.666..., 5 -> 0.833...
+    """
+    v = max(0.0, _safe_float(value, 0.0))
+    return v / (1.0 + v)
+
+
+def _scale_raw_score_logistic_p95(raw_score: float, raw_train: Any) -> Optional[float]:
+    try:
+        arr = np.array(raw_train, dtype=float).reshape(-1)
+    except Exception:
+        return None
+    if arr.size < 10:
+        return None
+    p50 = float(np.percentile(arr, 50))
+    p95 = float(np.percentile(arr, 95))
+    band = p95 - p50
+    if band <= 1e-12:
+        return None
+
+    # p50 -> 0.50, p95 -> 0.95가 되도록 logistic 기울기 설정
+    k = float(np.log(19.0) / band)
+    z = (float(raw_score) - p50) * k
+    if z >= 60.0:
+        return 1.0
+    if z <= -60.0:
+        return 0.0
+    return float(1.0 / (1.0 + np.exp(-z)))
+
+
 def _resolve_artifact_path(artifact_path: str) -> str:
     if not artifact_path:
         return ""
@@ -923,11 +961,18 @@ def _load_risk_runtime() -> Optional[Dict[str, Any]]:
         params_mtime = os.path.getmtime(RISK_PARAMS_PATH)
         thresholds_exists = os.path.exists(RISK_THRESHOLDS_PATH)
         thresholds_mtime = os.path.getmtime(RISK_THRESHOLDS_PATH) if thresholds_exists else None
+        cached_artifact_path = str(cache.get("artifact_path") or "").strip()
+        cached_artifact_mtime = (
+            os.path.getmtime(cached_artifact_path)
+            if cached_artifact_path and os.path.exists(cached_artifact_path)
+            else None
+        )
 
         needs_reload = (
             cache["params"] is None
             or cache["params_mtime"] != params_mtime
             or cache["thresholds_mtime"] != thresholds_mtime
+            or cache["artifact_mtime"] != cached_artifact_mtime
         )
         if not needs_reload:
             return {
@@ -938,35 +983,46 @@ def _load_risk_runtime() -> Optional[Dict[str, Any]]:
                 "error": cache["error"],
             }
 
-        with open(RISK_PARAMS_PATH, "r", encoding="utf-8") as f:
+        # params 파일은 일부 환경에서 UTF-8 BOM이 포함될 수 있어 utf-8-sig로 안전 로드
+        with open(RISK_PARAMS_PATH, "r", encoding="utf-8-sig") as f:
             params = json.load(f)
 
         thresholds: Dict[str, Any] = {}
         if thresholds_exists:
-            with open(RISK_THRESHOLDS_PATH, "r", encoding="utf-8") as f:
+            with open(RISK_THRESHOLDS_PATH, "r", encoding="utf-8-sig") as f:
                 thresholds = json.load(f)
 
         model_artifact = None
+        runtime_error = ""
+        model_type = str(params.get("model_type", "zscore"))
         artifact_path = _resolve_artifact_path(str(params.get("model_artifact", "")))
+        if model_type == "oneclass_svm":
+            preferred_path = _resolve_artifact_path(RISK_ONECLASS_ACTIVE_ARTIFACT_PATH)
+            if preferred_path:
+                artifact_path = preferred_path
+        artifact_mtime = os.path.getmtime(artifact_path) if artifact_path and os.path.exists(artifact_path) else None
         if artifact_path:
             if joblib is None:
-                cache["error"] = "joblib unavailable; model artifact not loaded"
+                runtime_error = "joblib unavailable; model artifact not loaded"
             else:
                 model_artifact = joblib.load(artifact_path)
+        elif model_type in {"isolation_forest", "oneclass_svm", "local_outlier_factor", "deep_svdd"}:
+            runtime_error = f"model artifact missing for model_type={model_type}"
 
         cache["params_mtime"] = params_mtime
         cache["thresholds_mtime"] = thresholds_mtime
+        cache["artifact_mtime"] = artifact_mtime
         cache["params"] = params
         cache["thresholds"] = thresholds
         cache["model_artifact"] = model_artifact
         cache["artifact_path"] = artifact_path
-        cache["error"] = ""
+        cache["error"] = runtime_error
         return {
             "params": params,
             "thresholds": thresholds,
             "model_artifact": model_artifact,
             "artifact_path": artifact_path,
-            "error": "",
+            "error": runtime_error,
         }
     except Exception as e:
         cache["error"] = str(e)
@@ -996,7 +1052,7 @@ def _model_score_from_features_runtime(
             return 0.0
         std[std == 0] = 1.0
         raw_score = float(np.abs((vec - mean) / std).mean())
-    elif model_type in ("isolation_forest", "oneclass_svm"):
+    elif model_type in ("isolation_forest", "oneclass_svm", "local_outlier_factor"):
         if not model_artifact:
             return 0.0
         model = model_artifact.get("model") if isinstance(model_artifact, dict) else None
@@ -1015,13 +1071,25 @@ def _model_score_from_features_runtime(
     else:
         return 0.0
 
+    # oneclass_svm logistic 스케일은 명시적으로 요청된 경우에만 사용한다.
+    # (auto/minmax에서는 train 시와 동일하게 upper-unclipped min-max 사용)
+    if model_type == "oneclass_svm":
+        use_logistic = (RISK_MODEL_SCORE_SCALING == "logistic_p95")
+        if use_logistic and isinstance(model_artifact, dict):
+            raw_train = model_artifact.get("raw_train")
+            if raw_train is not None:
+                scaled = _scale_raw_score_logistic_p95(raw_score=raw_score, raw_train=raw_train)
+                if scaled is not None:
+                    return max(0.0, scaled)
+
+    # fallback: train/runtime 정합을 위해 upper unclipped min-max를 사용한다.
     if raw_max - raw_min <= 1e-12:
         return 0.0
-    return _clamp01((raw_score - raw_min) / (raw_max - raw_min))
+    return max(0.0, (raw_score - raw_min) / (raw_max - raw_min))
 
 
 def _resolve_decision_thresholds() -> Dict[str, float]:
-    # 운영 단순화를 위해 risk 임계값은 정책 고정값(기본 0.30/0.70)을 사용한다.
+    # 운영 단순화를 위해 risk 임계값은 정책 고정값(기본 0.50/0.60)을 사용한다.
     # 모델 파일(threshold json) 값에는 의존하지 않는다.
     allow = RISK_DECISION_THRESHOLDS_DEFAULT["allow"]
     challenge = RISK_DECISION_THRESHOLDS_DEFAULT["challenge"]
@@ -1041,7 +1109,7 @@ def _resolve_decision_thresholds() -> Dict[str, float]:
 
 def _resolve_model_fixed_threshold(thresholds_raw: Optional[Dict[str, Any]]) -> Optional[float]:
     if RISK_MODEL_FIXED_THRESHOLD_ENV is not None and str(RISK_MODEL_FIXED_THRESHOLD_ENV).strip() != "":
-        return _clamp01(_safe_float(RISK_MODEL_FIXED_THRESHOLD_ENV))
+        return max(0.0, _safe_float(RISK_MODEL_FIXED_THRESHOLD_ENV))
 
     threshold_map = thresholds_raw or {}
     candidate_keys: List[str] = []
@@ -1051,7 +1119,7 @@ def _resolve_model_fixed_threshold(thresholds_raw: Optional[Dict[str, Any]]) -> 
 
     for key in candidate_keys:
         if key in threshold_map:
-            return _clamp01(_safe_float(threshold_map.get(key)))
+            return max(0.0, _safe_float(threshold_map.get(key)))
     return None
 
 
@@ -1064,7 +1132,6 @@ def _decision_from_risk_runtime(risk_score: float, thresholds: Dict[str, float])
 
 
 def _score_request_risk(browser_log: Optional[Dict[str, Any]], server_log: Dict[str, Any]) -> Dict[str, Any]:
-    rule_score = 0.0
     soft_rules: List[str] = []
     hard_rules: List[str] = []
     hard_action = "none"
@@ -1072,79 +1139,55 @@ def _score_request_risk(browser_log: Optional[Dict[str, Any]], server_log: Dict[
     if _evaluate_rules_runtime is not None:
         try:
             rule_eval = _evaluate_rules_runtime(server_log or {}, browser_log or {})
-            rule_score = _safe_float(rule_eval.get("soft_score"))
             soft_rules = list(rule_eval.get("soft_rules_triggered", []))
             hard_rules = list(rule_eval.get("hard_rules_triggered", []))
             hard_action = str(rule_eval.get("hard_action", "none"))
         except Exception:
-            rule_score, soft_rules, hard_rules, hard_action = 0.0, [], [], "none"
+            soft_rules, hard_rules, hard_action = [], [], "none"
 
     model_score = 0.0
     model_type = "none"
     runtime_error = ""
     runtime = None
-    model_skipped = hard_action == "block"
+    model_skipped = False
+    model_artifact_path = ""
+    model_artifact_loaded = False
 
-    if model_skipped:
-        runtime_error = "model_skipped_by_hard_rule_block"
-    else:
-        runtime = _load_risk_runtime()
-        if runtime:
-            params = runtime.get("params") or {}
-            model_type = str(params.get("model_type", "zscore"))
-            runtime_error = runtime.get("error", "")
+    runtime = _load_risk_runtime()
+    if runtime:
+        params = runtime.get("params") or {}
+        model_type = str(params.get("model_type", "zscore"))
+        runtime_error = runtime.get("error", "")
+        model_artifact_path = str(runtime.get("artifact_path", "") or "")
+        model_artifact_loaded = runtime.get("model_artifact") is not None
 
-            if browser_log and _extract_browser_features_runtime is not None:
-                try:
-                    features = _extract_browser_features_runtime(browser_log)
-                    model_score = _model_score_from_features_runtime(
-                        features=features,
-                        params=params,
-                        model_artifact=runtime.get("model_artifact"),
-                    )
-                except Exception as e:
-                    runtime_error = str(e)
+        if browser_log and _extract_browser_features_runtime is not None:
+            try:
+                features = _extract_browser_features_runtime(browser_log)
+                model_score = _model_score_from_features_runtime(
+                    features=features,
+                    params=params,
+                    model_artifact=runtime.get("model_artifact"),
+                )
+            except Exception as e:
+                runtime_error = str(e)
 
-    thresholds = _resolve_decision_thresholds()
-    decision_mode = RISK_DECISION_MODE
-    runtime_thresholds_raw = (runtime or {}).get("thresholds") or {}
+    thresholds = dict(RISK_DECISION_THRESHOLDS_DEFAULT)
+    decision_mode = "model_score_band_fixed"
     model_fixed_threshold = None
 
-    # 점수 스케일 안정화를 위해 개별 점수를 먼저 0~1로 정규화(clamp)한다.
-    model_score = _clamp01(_safe_float(model_score))
-    rule_score = _clamp01(_safe_float(rule_score))
+    # model_score_raw는 모델 출력 스케일(>1 가능)을 유지하고,
+    # 결합 없이 model_score를 완만한 squash로 [0,1)로 투영한다.
+    model_score_raw = max(0.0, _safe_float(model_score))
+    model_score = _squash_positive_score(model_score_raw)
 
-    if decision_mode == "model_threshold_fixed":
-        model_fixed_threshold = _resolve_model_fixed_threshold(runtime_thresholds_raw)
-        if model_fixed_threshold is None:
-            if runtime_error:
-                runtime_error = f"{runtime_error};model_fixed_threshold_missing"
-            else:
-                runtime_error = "model_fixed_threshold_missing"
-            decision_mode = "risk_weighted"
+    risk_score = model_score
+    decision = {"low": "allow", "medium": "challenge", "high": "block"}[_score_level_from_ratio(risk_score)]
 
-    if decision_mode == "model_threshold_fixed" and model_fixed_threshold is not None:
-        # In fixed mode, make decision directly from model_score.
-        risk_score = model_score
-        decision = "allow" if model_score < model_fixed_threshold else "block"
-        thresholds = {"allow": model_fixed_threshold, "challenge": model_fixed_threshold}
-    else:
-        risk_score = _clamp01(
-            RISK_DEFAULT_WEIGHTS["model"] * model_score
-            + RISK_DEFAULT_WEIGHTS["rule"] * rule_score
-        )
-        decision = _decision_from_risk_runtime(risk_score, thresholds=thresholds)
-
-    # Hard rules override weighted decision.
+    # Post-detection mode: final band is model_score only.
+    review_required = decision in {"challenge", "block"}
+    block_recommended = decision == "block"
     if hard_action == "block":
-        decision = "block"
-        risk_score = max(risk_score, thresholds["challenge"], 0.95)
-
-    review_required = False
-    block_recommended = False
-    if decision == "block" and not RISK_BLOCK_AUTOMATION and hard_action != "block":
-        # Conservative rollout mode: prefer challenge + manual review for model-only blocks.
-        decision = "challenge"
         review_required = True
         block_recommended = True
 
@@ -1155,11 +1198,13 @@ def _score_request_risk(browser_log: Optional[Dict[str, Any]], server_log: Dict[
         "soft_rules_triggered": soft_rules,
         "hard_rules_triggered": hard_rules,
         "hard_action": hard_action,
-        "rule_score": rule_score,
         "model_score": model_score,
+        "model_score_raw": model_score_raw,
         "model_type": model_type,
         "model_ready": (runtime is not None) and (not model_skipped),
         "model_skipped": model_skipped,
+        "model_artifact_path": model_artifact_path,
+        "model_artifact_loaded": model_artifact_loaded,
         "decision_mode": decision_mode,
         "model_fixed_threshold": model_fixed_threshold,
         "runtime_error": runtime_error,
@@ -1320,7 +1365,7 @@ def _realtime_report_confidence(
     confidence = 0.30
     confidence += 0.25 if decision == "block" else 0.0
     confidence += 0.20 if hard_action == "block" else (0.10 if hard_action == "challenge" else 0.0)
-    confidence += 0.15 if risk_score >= 0.90 else (0.10 if risk_score >= 0.70 else 0.0)
+    confidence += 0.15 if risk_score >= 0.60 else (0.10 if risk_score >= 0.50 else 0.0)
     confidence += min(0.15, 0.03 * len(hard_rules))
     confidence += min(0.10, 0.02 * len(soft_rules))
     confidence += min(0.10, 0.02 * len(behavior_evidence))
@@ -1359,10 +1404,9 @@ def _compact_text(text: Any, max_len: int = 80) -> str:
 def _build_realtime_block_user_message(
     *,
     llm_analysis: Dict[str, Any],
-    rule_entries: List[str],
 ) -> str:
     # 사용자 노출 문구는 과도한 내부 규칙 노출 없이 간결하게 유지
-    default_message = "비정상적인 접근 패턴이 감지되어 요청이 차단되었습니다."
+    default_message = "모델 점수 기반 사후 분석 대상으로 기록되었습니다."
     if not isinstance(llm_analysis, dict):
         return default_message
 
@@ -1387,23 +1431,17 @@ def _build_realtime_block_user_message(
             if s:
                 candidates.append(s)
 
-    if not candidates:
-        for r in rule_entries[:2]:
-            s = _compact_text(r, max_len=60)
-            if s:
-                candidates.append(s)
-
     for reason in candidates:
         # 내부 룰 식별자/임계값 표현은 사용자 메시지에서 제외
         if re.search(r"[<>=]|requests_last_|concurrent_sessions_|queue_|browser_", reason):
             continue
-        if reason.endswith("차단되었습니다.") or reason.endswith("차단되었습니다"):
+        if reason.endswith("사후 분석 대상으로 기록되었습니다.") or reason.endswith("사후 분석 대상으로 기록되었습니다"):
             return reason if reason.endswith(".") else reason + "."
-        if reason.endswith("요청이 차단되었습니다."):
+        if reason.endswith("사후 분석이 필요합니다."):
             return reason
         if reason.endswith("."):
-            return f"{reason} 요청이 차단되었습니다."
-        return f"{reason}로 요청이 차단되었습니다."
+            return f"{reason} 사후 분석 대상으로 기록되었습니다."
+        return f"{reason}로 사후 분석 대상으로 기록되었습니다."
 
     return default_message
 
@@ -1411,23 +1449,14 @@ def _build_realtime_block_user_message(
 def _build_ui_fields_fallback(report_seed: Dict[str, Any]) -> Dict[str, Any]:
     risk_summary = report_seed.get("risk_summary", {}) if isinstance(report_seed, dict) else {}
     ui_seed = report_seed.get("ui_metric_seed", {}) if isinstance(report_seed, dict) else {}
-    rule_evidence = report_seed.get("rule_evidence", []) if isinstance(report_seed, dict) else []
+    model_evidence = report_seed.get("model_evidence", {}) if isinstance(report_seed, dict) else {}
     behavior_evidence = report_seed.get("behavior_evidence", []) if isinstance(report_seed, dict) else []
 
     risk_score = _clamp01(_safe_float((risk_summary or {}).get("total_score"), 0.0))
     bot_score_100 = round(risk_score * 100.0, 1)
-
-    suspicion_level = "low"
-    if bot_score_100 >= 70:
-        suspicion_level = "high"
-    elif bot_score_100 >= 30:
-        suspicion_level = "medium"
-
-    status_title_ko = "정상 사용자"
-    if suspicion_level == "medium":
-        status_title_ko = "주의 사용자"
-    elif suspicion_level == "high":
-        status_title_ko = "매크로 의심 사용자"
+    suspicion_level = _score_level_from_ratio(risk_score)
+    status_title_ko = _score_status_title_ko(suspicion_level)
+    score_policy_ko = _score_policy_text_ko()
 
     speed_variability_pct = max(0.0, _safe_float((ui_seed or {}).get("speed_variability_pct"), 0.0))
     path_curvature_rad = max(0.0, _safe_float((ui_seed or {}).get("path_curvature_rad"), 0.0))
@@ -1452,10 +1481,15 @@ def _build_ui_fields_fallback(report_seed: Dict[str, Any]) -> Dict[str, Any]:
         hover_judgement = "미발견"
 
     reasons: List[str] = []
-    for r in rule_evidence:
-        s = str(r).strip()
+    for item in (model_evidence.get("top_feature_contributions", []) if isinstance(model_evidence, dict) else []):
+        if isinstance(item, dict):
+            name = str(item.get("feature", "")).strip()
+            if name:
+                reasons.append(f"모델 주요 기여 피처: {name}")
+    for name in (model_evidence.get("top_features", []) if isinstance(model_evidence, dict) else []):
+        s = str(name).strip()
         if s:
-            reasons.append(s)
+            reasons.append(f"모델 주요 피처: {s}")
     for item in behavior_evidence:
         if isinstance(item, dict):
             s = str(item.get("description", "")).strip()
@@ -1464,12 +1498,13 @@ def _build_ui_fields_fallback(report_seed: Dict[str, Any]) -> Dict[str, Any]:
     reasons = reasons[:5]
 
     if reasons:
-        narrative = "의심 요인: " + ", ".join(reasons[:3]) + "."
+        narrative = f"{score_policy_ko} 의심 요인: " + ", ".join(reasons[:3]) + "."
     else:
-        narrative = "의심 요인이 명확하게 관찰되지 않았습니다."
+        narrative = f"{score_policy_ko} 의심 요인이 명확하게 관찰되지 않았습니다."
 
     return {
         "status_title_ko": status_title_ko,
+        "score_policy_ko": score_policy_ko,
         "bot_score": {
             "value": bot_score_100,
             "max": 100,
@@ -1506,23 +1541,27 @@ def _build_markdown_report_fallback(
     target_masked = str((ident or {}).get("target_masked_user", "")).strip() or "unknown"
     risk_summary = report_seed.get("risk_summary", {}) if isinstance(report_seed, dict) else {}
     score_100 = _safe_float((ui_fields.get("bot_score", {}) or {}).get("value"), _safe_float(risk_summary.get("total_score")) * 100.0)
-    level = str(suspicion_level).lower()
+    level = str(suspicion_level or "").strip().lower()
     if level not in {"low", "medium", "high"}:
-        level = "medium"
+        level = _score_level_from_100(score_100)
+    score_policy_ko = _score_policy_text_ko()
 
     verdict_map = {
-        "low": "✅ 정상 (매크로 징후 낮음)",
-        "medium": "⚠️ 경고 (추가 확인 필요)",
-        "high": "🚨 위험 (매크로 확률 매우 높음)",
+        "low": "✅ 정상",
+        "medium": "⚠️ 주의",
+        "high": "🚨 경고",
     }
     verdict_text = verdict_map.get(level, verdict_map["medium"])
-    status_title = str(ui_fields.get("status_title_ko", "")).strip() or "판정 결과"
     reasons = ui_fields.get("suspicion_reasons", [])
     if not isinstance(reasons, list):
         reasons = []
     reasons = [str(x).strip() for x in reasons if str(x).strip()][:5]
     if not reasons:
-        reasons = [str(x).strip() for x in (report_seed.get("rule_evidence", []) or []) if str(x).strip()][:3]
+        reasons = [
+            str((item or {}).get("description", "")).strip()
+            for item in (report_seed.get("behavior_evidence", []) or [])
+            if isinstance(item, dict) and str((item or {}).get("description", "")).strip()
+        ][:3]
     narrative = str(ui_fields.get("suspicion_narrative_ko", "")).strip()
     if not narrative:
         narrative = (
@@ -1538,6 +1577,7 @@ def _build_markdown_report_fallback(
         f"[ Header Area: 정량적 지표 ] {separator}",
         f"ID: {report_id} / 대상: {target_masked}",
         f"스코어: [ {round(max(0.0, min(100.0, score_100)), 1)} / 100 ] / 판정: {verdict_text}",
+        f"등급 기준: {score_policy_ko}",
         separator,
         "",
         f"[ Analysis Summary: 모델 분석 요약 ] {separator}",
@@ -1554,8 +1594,7 @@ def _build_markdown_report_fallback(
     if not summary_text:
         summary_text = (
             "해당 세션은 정상 사용자 범위 내 지표를 보였습니다."
-            if level == "low"
-            else ("일부 자동화 의심 신호가 관찰되어 추가 확인이 권장됩니다." if level == "medium" else "자동화 의심 신호가 다수 관찰되어 위험도가 높습니다.")
+            if level == "low" else ("해당 세션은 주의 구간으로 사후 점검이 권장됩니다." if level == "medium" else "해당 세션은 경고 구간으로 우선 점검이 필요합니다.")
         )
 
     lines.extend(
@@ -1571,12 +1610,9 @@ def _build_markdown_report_fallback(
 
 def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, Any]:
     fallback_ui_fields = _build_ui_fields_fallback(report_seed)
-    fallback_level = "low"
-    fallback_score = _clamp01(_safe_float(((report_seed.get("risk_summary", {}) or {}).get("total_score")), 0.0))
-    if fallback_score >= 0.70:
-        fallback_level = "high"
-    elif fallback_score >= 0.30:
-        fallback_level = "medium"
+    fallback_level = _score_level_from_ratio(
+        _safe_float(((report_seed.get("risk_summary", {}) or {}).get("total_score")), 0.0)
+    )
     fallback_markdown = _build_markdown_report_fallback(
         report_seed=report_seed,
         ui_fields=fallback_ui_fields,
@@ -1605,7 +1641,6 @@ def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, An
         "report_identity": report_seed.get("report_identity", {}),
         "decision": report_seed.get("decision", "block"),
         "risk_summary": report_seed.get("risk_summary", {}),
-        "rule_evidence": report_seed.get("rule_evidence", []),
         "behavior_evidence": report_seed.get("behavior_evidence", []),
         "model_evidence": report_seed.get("model_evidence", {}),
         "request_context": report_seed.get("request_context", {}),
@@ -1655,7 +1690,7 @@ def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, An
         "  ● 호버 구간: {hover_sections_count}개 ({미발견/소수 발견/다수 발견})\n"
         "  ● 호버 미세 떨림(dwell std): {hover_std_dwell_ms}ms / 평균 정지: {hover_avg_dwell_ms}ms\n"
         "  ● 주요 기여 피처: top_feature_contributions 1~3위를 'feature(기여도: contribution)' 형식으로 나열 (기여 있을 때만)\n"
-        "  ● 주요 의심 요인: rule_evidence, behavior_evidence 기반으로 (있을 때만)\n"
+        "  ● 주요 의심 요인: behavior_evidence와 모델 기여 피처 기반으로 (있을 때만)\n"
         "  --------------------------------------------------\n"
         "  \n"
         "  [ AI Insights: GPT 생성 종합 리포트 ] --------------------------------------------------\n"
@@ -1665,9 +1700,11 @@ def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, An
         "  3) [권장 조치] recommended_action(allow/challenge/block) 결정 이유를 한 문장으로 명시\n"
         "  --------------------------------------------------\n"
         "  - 판정 문구는 반드시 다음 중 하나를 사용하세요:\n"
-        "    low (0~30): ✅ 정상 (매크로 징후 낮음)\n"
-        "    medium (30~70): ⚠️ 의심 (추가 확인 필요)\n"
-        "    high (70~100): 🚨 경고 (매크로 확률 매우 높음)\n"
+        "    low (<50): ✅ 정상\n"
+        "    medium (>=50 and <60): ⚠️ 주의\n"
+        "    high (>=60): 🚨 경고\n"
+        "- markdown_report에는 아래 등급 기준 문구를 반드시 포함하세요:\n"
+        "  모델 점수 기준: 50점 미만 정상, 50점 이상 60점 미만 주의, 60점 이상 경고\n"
         "- low 판정에서 '자동화 의심 정황이 확인되었습니다' 같은 모순 문구를 금지합니다.\n"
         "- suspicion_narrative_ko도 동일하게 수치 인용 + 판정 근거 + 권장 조치 3요소를 포함하세요.\n"
         "- Analysis Summary의 주요 기여 피처가 없으면 해당 항목을 생략하세요.\n"
@@ -1741,14 +1778,13 @@ def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, An
         if not isinstance(ui_fields_raw, dict):
             ui_fields_raw = {}
 
-        ui_status = str(ui_fields_raw.get("status_title_ko", fallback_ui_fields.get("status_title_ko", ""))).strip()
-        if not ui_status:
-            ui_status = str(fallback_ui_fields.get("status_title_ko", ""))
-
         ui_bot_raw = ui_fields_raw.get("bot_score", {})
         if not isinstance(ui_bot_raw, dict):
             ui_bot_raw = {}
         bot_value = max(0.0, min(100.0, _safe_float(ui_bot_raw.get("value"), _safe_float((fallback_ui_fields.get("bot_score", {}) or {}).get("value"), 0.0))))
+        level = _score_level_from_100(bot_value)
+        ui_status = _score_status_title_ko(level)
+        action = {"low": "allow", "medium": "challenge", "high": "block"}[level]
 
         ui_speed_raw = ui_fields_raw.get("speed_variability", {})
         if not isinstance(ui_speed_raw, dict):
@@ -1788,9 +1824,13 @@ def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, An
                 summary_ko=summary_ko,
                 suspicion_level=level,
             )
+        score_policy_ko = _score_policy_text_ko()
+        if score_policy_ko not in markdown_report:
+            markdown_report = f"등급 기준: {score_policy_ko}\n{markdown_report}".strip()
 
         ui_fields = {
             "status_title_ko": ui_status,
+            "score_policy_ko": score_policy_ko,
             "bot_score": {
                 "value": round(bot_value, 1),
                 "max": 100,
@@ -1861,13 +1901,13 @@ def _build_realtime_block_report(
 ) -> Dict[str, str]:
     # 함수명은 기존 호환을 위해 유지하지만, 내부적으로는 allow/challenge/block 모두 처리한다.
     risk = (server_log or {}).get("risk", {}) or {}
-    decision = str(risk.get("decision", "allow")).strip().lower()
-    if decision not in {"allow", "challenge", "block"}:
-        decision = "challenge"
+    decision = _decision_from_risk_runtime(
+        _clamp01(_safe_float(risk.get("model_score"), 0.0)),
+        dict(RISK_DECISION_THRESHOLDS_DEFAULT),
+    )
 
     hard_rules = list(risk.get("hard_rules_triggered", []) or [])
     soft_rules = list(risk.get("soft_rules_triggered", []) or [])
-    rule_entries = hard_rules + soft_rules
     behavior_evidence = _runtime_behavior_evidence(browser_log, server_log)
 
     identity = (server_log or {}).get("identity", {}) or {}
@@ -1950,16 +1990,12 @@ def _build_realtime_block_report(
     for name in model_top_feature_names:
         if name not in top_features:
             top_features.append(name)
+    total_score = round(_safe_float(risk.get("model_score")), 6)
     if not top_features:
-        top_features = rule_entries[:2]
-
-    total_score = round(_safe_float(risk.get("risk_score")), 6)
-    if total_score >= 0.70:
-        grade = "High"
-    elif total_score >= 0.30:
-        grade = "Medium"
-    else:
-        grade = "Low"
+        top_features = [str(item.get("description", "")).strip() for item in behavior_evidence if isinstance(item, dict)]
+        top_features = [x for x in top_features if x][:2]
+    score_level = _score_level_from_ratio(total_score)
+    grade = {"low": "Low", "medium": "Medium", "high": "High"}[score_level]
 
     account_age_days = int(_safe_float(session.get("account_age_days")))
     is_verified = str(session.get("login_state", "")).strip().lower() in {"logged_in", "member"}
@@ -1992,14 +2028,17 @@ def _build_realtime_block_report(
             "total_score": total_score,
             "grade": grade,
         },
-        "rule_evidence": rule_entries,
         "behavior_evidence": behavior_evidence,
         "model_evidence": {
             "anomaly_score": round(_safe_float(risk.get("model_score")), 6),
+            "anomaly_score_raw": round(_safe_float(risk.get("model_score_raw")), 6),
             "top_features": (model_top_feature_names[:3] if model_top_feature_names else top_features[:3]),
             "top_feature_contributions": model_top_contributions,
+            "model_type": str(risk.get("model_type", "none")),
+            "model_artifact_path": str(risk.get("model_artifact_path", "")),
             "model_ready": bool(risk.get("model_ready", False)),
             "model_skipped": bool(risk.get("model_skipped", False)),
+            "model_artifact_loaded": bool(risk.get("model_artifact_loaded", False)),
         },
         "request_context": {
             "request_id": request_id,
@@ -2021,14 +2060,11 @@ def _build_realtime_block_report(
     llm_analysis = _generate_llm_report_payload(report_seed=llm_seed)
     llm_ui_fields = llm_analysis.get("ui_fields", _build_ui_fields_fallback(llm_seed))
     if decision == "block":
-        user_message = _build_realtime_block_user_message(
-            llm_analysis=llm_analysis,
-            rule_entries=rule_entries,
-        )
+        user_message = "모델 점수 경고 구간(60점 이상)으로 사후 분석 대상으로 기록되었습니다."
     elif decision == "challenge":
-        user_message = "의심 신호가 감지되어 추가 확인이 필요합니다."
+        user_message = "모델 점수 주의 구간(50점 이상 60점 미만)으로 사후 분석 대상으로 기록되었습니다."
     else:
-        user_message = "정상 범위로 판단되었습니다."
+        user_message = "모델 점수 정상 구간(50점 미만)으로 기록되었습니다."
 
     recommended_action = str(llm_analysis.get("recommended_action", decision)).strip().lower()
     if recommended_action not in {"allow", "challenge", "block"}:
@@ -2096,11 +2132,14 @@ def _build_realtime_block_report(
             "grade": grade,
         },
         "evidence_logs": {
-            "rule": rule_entries,
             "model": {
                 "anomaly_score": round(_safe_float(risk.get("model_score")), 6),
+                "anomaly_score_raw": round(_safe_float(risk.get("model_score_raw")), 6),
                 "top_features": (model_top_feature_names[:3] if model_top_feature_names else top_features[:3]),
                 "top_feature_contributions": model_top_contributions,
+                "model_type": str(risk.get("model_type", "none")),
+                "model_artifact_path": str(risk.get("model_artifact_path", "")),
+                "model_artifact_loaded": bool(risk.get("model_artifact_loaded", False)),
             },
             "behavior": {
                 "avg_click_interval": f"{round(avg_click_interval, 2)}ms" if avg_click_interval > 0 else "",
@@ -2121,8 +2160,8 @@ def _build_realtime_block_report(
             "server_log_path": server_log_path,
         },
         "actions": {
-            "realtime_enforced": decision in {"challenge", "block"},
-            "response_status_code": 403 if decision == "block" else (202 if decision == "challenge" else 200),
+            "realtime_enforced": False,
+            "response_status_code": 200,
         },
         "user_message": user_message,
         "ui_fields": llm_ui_fields,
@@ -2168,11 +2207,9 @@ async def server_log_middleware(request: Request, call_next):
             return RedirectResponse(url="/queue.html?reason=queue_required", status_code=302)
 
     # Collect and store server logs for all /api/* requests.
-    # Real-time enforcement is applied to booking flow endpoints.
+    # Post-detection mode: requests are never blocked/challenged in real time.
     if not request.url.path.startswith('/api/'):
         return await call_next(request)
-
-    enforce_decision = _should_enforce_realtime_decision(request)
 
     start = time.time()
     body_bytes = b""
@@ -2356,8 +2393,8 @@ async def server_log_middleware(request: Request, call_next):
             'soft_rules_triggered': risk_result.get('soft_rules_triggered', []),
             'hard_rules_triggered': risk_result.get('hard_rules_triggered', []),
             'hard_action': str(risk_result.get('hard_action', 'none')),
-            'rule_score': round(_safe_float(risk_result.get('rule_score')), 6),
             'model_score': round(_safe_float(risk_result.get('model_score')), 6),
+            'model_score_raw': round(_safe_float(risk_result.get('model_score_raw')), 6),
             'model_type': str(risk_result.get('model_type', 'none')),
             'model_ready': bool(risk_result.get('model_ready', False)),
             'model_skipped': bool(risk_result.get('model_skipped', False)),
@@ -2367,18 +2404,6 @@ async def server_log_middleware(request: Request, call_next):
             'review_required': bool(risk_result.get('review_required', False)),
             'block_recommended': bool(risk_result.get('block_recommended', False)),
         }
-
-        if risk_payload['decision'] == 'block':
-            server_log['security']['blocked'] = True
-            server_log['security']['block_reason'] = 'abnormal_access_detected'
-            server_log['security']['block_message'] = '비정상적인 접근'
-            risk_payload['alert_message'] = '비정상적인 접근'
-            print(
-                f"[SECURITY][BLOCK] 비정상적인 접근 감지 "
-                f"(request_id={request_id}, flow_id={flow_id or ''}, risk_score={risk_payload.get('risk_score')})"
-            )
-        elif risk_payload['decision'] == 'challenge':
-            server_log['security']['captcha_required'] = True
 
         date_str = datetime.now().strftime('%Y%m%d')
         raw_bot_type = str(bot_type or '').strip()
@@ -2415,7 +2440,10 @@ async def server_log_middleware(request: Request, call_next):
         except Exception as score_error:
             risk_payload["score_snapshot_error"] = str(score_error)
 
-        should_build_risk_report = (request.url.path == '/api/logs') or (risk_payload['decision'] == 'block')
+        should_build_risk_report = (
+            (request.url.path == '/api/logs')
+            or (_safe_float(risk_payload.get('model_score')) >= RISK_DECISION_THRESHOLDS_DEFAULT["allow"])
+        )
         if should_build_risk_report:
             try:
                 # 리포트 함수는 risk 컨텍스트를 사용하므로 호출 직전에만 주입한다.
@@ -2438,8 +2466,7 @@ async def server_log_middleware(request: Request, call_next):
                     risk_payload['llm_report_json_path'] = llm_report_json_path
 
                 user_message = str((report_result or {}).get("user_message", "")).strip()
-                if user_message and risk_payload['decision'] == 'block':
-                    server_log['security']['block_message'] = user_message
+                if user_message and risk_payload['decision'] in {'challenge', 'block'}:
                     risk_payload['alert_message'] = user_message
             except Exception as report_error:
                 risk_payload['realtime_report_error'] = str(report_error)
@@ -2451,28 +2478,7 @@ async def server_log_middleware(request: Request, call_next):
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(server_log, f, ensure_ascii=False, indent=2)
 
-        # Enforce real action on booking flow endpoints.
-        if enforce_decision and risk_payload['decision'] == 'block':
-            return JSONResponse(
-                status_code=403,
-                content={
-                    'success': False,
-                    'decision': 'block',
-                    'message': str(server_log.get('security', {}).get('block_message') or '비정상적인 접근으로 요청이 차단되었습니다.'),
-                    'risk': risk_payload,
-                },
-            )
-        if enforce_decision and risk_payload['decision'] == 'challenge':
-            return JSONResponse(
-                status_code=202,
-                content={
-                    'success': False,
-                    'decision': 'challenge',
-                    'message': 'additional verification required',
-                    'challenge_required': True,
-                    'risk': risk_payload,
-                },
-            )
+        # Post-detection mode: never enforce realtime allow/challenge/block response.
     except Exception:
         pass
 
@@ -3702,6 +3708,7 @@ async def list_reports():
     """block_report 디렉토리의 LLM 리포트 목록 반환 (최신순)"""
     try:
         entries = []
+        valid_entries = []
         index_path = BLOCK_REPORT_INDEX_JSONL
         if os.path.exists(index_path):
             with open(index_path, "r", encoding="utf-8") as f:
@@ -3713,8 +3720,36 @@ async def list_reports():
                         entries.append(json.loads(line))
                     except Exception:
                         pass
-        entries.sort(key=lambda x: x.get("created_at_iso", ""), reverse=True)
-        return {"reports": entries}
+        # index.jsonl 은 append-only라 원본 파일을 지워도 stale entry가 남을 수 있다.
+        # 목록 응답에서는 실제 존재하는 llm_report_json_path만 노출한다.
+        for entry in entries:
+            if not isinstance(entry, dict):
+                continue
+
+            raw_path = str(entry.get("llm_report_json_path", "")).strip()
+            if not raw_path:
+                continue
+
+            filename = os.path.basename(raw_path)
+            candidates = [raw_path]
+            if filename:
+                candidates.append(os.path.join(BLOCK_REPORT_DIR, filename))
+
+            existing = ""
+            for c in candidates:
+                if c and os.path.exists(c):
+                    existing = c
+                    break
+
+            if not existing:
+                continue
+
+            normalized = dict(entry)
+            normalized["llm_report_json_path"] = existing
+            valid_entries.append(normalized)
+
+        valid_entries.sort(key=lambda x: x.get("created_at_iso", ""), reverse=True)
+        return {"reports": valid_entries}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

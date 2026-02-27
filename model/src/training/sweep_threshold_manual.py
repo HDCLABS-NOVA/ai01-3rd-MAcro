@@ -27,7 +27,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Manual threshold sweep for one-class models (direct threshold tuning)."
     )
-    parser.add_argument("--model-type", default="isolation_forest", choices=["isolation_forest", "oneclass_svm", "deep_svdd", "zscore"])
+    parser.add_argument(
+        "--model-type",
+        default="isolation_forest",
+        choices=["isolation_forest", "oneclass_svm", "local_outlier_factor", "deep_svdd", "zscore"],
+    )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--train-human-dir", default="model/data/raw/auto_split/train/human")
     parser.add_argument("--val-human-dir", default="model/data/raw/auto_split/validation/human")

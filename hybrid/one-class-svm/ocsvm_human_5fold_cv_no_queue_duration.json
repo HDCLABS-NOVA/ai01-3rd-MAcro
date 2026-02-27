@@ -1,0 +1,78 @@
+{
+  "model": "oneclass_svm",
+  "dataset": "model/data/raw/human",
+  "human_total": 765,
+  "n_features": 113,
+  "drop_feature_prefixes": [
+    "browser_",
+    "queue_duration_ms"
+  ],
+  "cv": {
+    "n_splits": 5,
+    "shuffle": true,
+    "random_state": 42,
+    "fpr_target_on_train": 0.05
+  },
+  "folds": [
+    {
+      "fold": 1,
+      "train_size": 612,
+      "val_size": 153,
+      "threshold": 0.8205288124008474,
+      "train_fpr": 0.049019607843137254,
+      "val_fpr": 0.09803921568627451,
+      "train_fp": 30,
+      "val_fp": 15
+    },
+    {
+      "fold": 2,
+      "train_size": 612,
+      "val_size": 153,
+      "threshold": 0.8769478086881457,
+      "train_fpr": 0.049019607843137254,
+      "val_fpr": 0.1437908496732026,
+      "train_fp": 30,
+      "val_fp": 22
+    },
+    {
+      "fold": 3,
+      "train_size": 612,
+      "val_size": 153,
+      "threshold": 0.7717643828846288,
+      "train_fpr": 0.049019607843137254,
+      "val_fpr": 0.1111111111111111,
+      "train_fp": 30,
+      "val_fp": 17
+    },
+    {
+      "fold": 4,
+      "train_size": 612,
+      "val_size": 153,
+      "threshold": 0.8884003477923836,
+      "train_fpr": 0.049019607843137254,
+      "val_fpr": 0.0718954248366013,
+      "train_fp": 30,
+      "val_fp": 11
+    },
+    {
+      "fold": 5,
+      "train_size": 612,
+      "val_size": 153,
+      "threshold": 0.9008368415130171,
+      "train_fpr": 0.049019607843137254,
+      "val_fpr": 0.1111111111111111,
+      "train_fp": 30,
+      "val_fp": 17
+    }
+  ],
+  "aggregate": {
+    "train_fpr_mean": 0.049019607843137254,
+    "train_fpr_std": 0.0,
+    "val_fpr_mean": 0.10718954248366011,
+    "val_fpr_std": 0.025979878319414104,
+    "val_fpr_min": 0.0718954248366013,
+    "val_fpr_max": 0.1437908496732026,
+    "val_fpr_mean_95ci_low": 0.0749364343758587,
+    "val_fpr_mean_95ci_high": 0.13944265059146152
+  }
+}

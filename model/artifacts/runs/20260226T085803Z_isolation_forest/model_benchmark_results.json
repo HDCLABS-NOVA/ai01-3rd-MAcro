@@ -1,0 +1,148 @@
+{
+  "created_at_utc": "2026-02-26T08:58:03.883473+00:00",
+  "fpr_target": 0.01,
+  "threshold_safety_margin": 0.0,
+  "split_mode": "explicit_train_val_test",
+  "counts": {
+    "train_human": 535,
+    "val_human": 115,
+    "val_macro": 115,
+    "test_human": 115,
+    "test_macro": 115
+  },
+  "auto_split_unified": {
+    "used": true,
+    "unified_human_dir": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\data\\raw\\human",
+    "unified_macro_dir": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\data\\raw\\macro",
+    "output_root": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\data\\raw\\auto_split",
+    "manifest_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\data\\raw\\auto_split\\split_manifest.json",
+    "counts": {
+      "human": {
+        "train": 535,
+        "validation": 115,
+        "test": 115
+      },
+      "macro": {
+        "train": 0,
+        "validation": 272,
+        "test": 272
+      }
+    },
+    "ratios": {
+      "human": "7:1.5:1.5",
+      "macro": "0:5:5"
+    },
+    "macro_eval_downsample": {
+      "target_per_split": 115,
+      "applied": true,
+      "splits": {
+        "validation": {
+          "before": 272,
+          "after": 115,
+          "removed": 157,
+          "group_before": {
+            "test/macro": 136,
+            "val/macro": 136
+          },
+          "group_after": {
+            "test/macro": 57,
+            "val/macro": 58
+          }
+        },
+        "test": {
+          "before": 272,
+          "after": 115,
+          "removed": 157,
+          "group_before": {
+            "test/macro": 136,
+            "val/macro": 136
+          },
+          "group_after": {
+            "test/macro": 57,
+            "val/macro": 58
+          }
+        }
+      }
+    }
+  },
+  "drop_feature_prefixes": [
+    "browser_",
+    "queue_duration_ms"
+  ],
+  "models": [
+    {
+      "model_type": "isolation_forest",
+      "validation": {
+        "threshold": 0.8350222098483364,
+        "human_fpr": 0.0,
+        "macro_recall": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "auroc": 0.9452551984877127,
+        "pr_auc": 0.8868413033487912,
+        "tp": 0,
+        "tn": 115,
+        "fp": 0,
+        "fn": 115,
+        "score_distribution": {
+          "human": {
+            "min": 0.03385054343786903,
+            "p25": 0.09832588513054666,
+            "p50": 0.14078389234760638,
+            "p75": 0.3087739082258255,
+            "p95": 0.5998668083432005,
+            "max": 0.8350222090471647,
+            "mean": 0.22197679569407713,
+            "std": 0.17986431807464814
+          },
+          "macro": {
+            "min": 0.42709459029901387,
+            "p25": 0.534874672777188,
+            "p50": 0.6128897391295797,
+            "p75": 0.6770848786066608,
+            "p95": 0.735827238300457,
+            "max": 0.7928173335314804,
+            "mean": 0.6101091665362047,
+            "std": 0.08464477759721925
+          }
+        }
+      },
+      "test": {
+        "threshold": 0.8350222098483364,
+        "human_fpr": 0.008695652173913044,
+        "macro_recall": 0.0,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "auroc": 0.9600756143667297,
+        "pr_auc": 0.9228587406707839,
+        "tp": 0,
+        "tn": 114,
+        "fp": 1,
+        "fn": 115,
+        "human_score_dist": {
+          "min": 0.012492026933600305,
+          "p25": 0.10066674304252624,
+          "p50": 0.15140499146683684,
+          "p75": 0.2903215498105808,
+          "p95": 0.566333165011194,
+          "max": 1.0480805389591388,
+          "mean": 0.22158648541562778,
+          "std": 0.17795548762764646
+        },
+        "macro_score_dist": {
+          "min": 0.42375150060973577,
+          "p25": 0.5568589357162645,
+          "p50": 0.6123692966852675,
+          "p75": 0.6715580457730587,
+          "p95": 0.7475897797636677,
+          "max": 0.7898811467856149,
+          "mean": 0.619095142484201,
+          "std": 0.07911794260755407
+        }
+      }
+    }
+  ],
+  "selected_model": "isolation_forest"
+}

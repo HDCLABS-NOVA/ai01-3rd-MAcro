@@ -1,0 +1,11 @@
+{
+  "fpr_0_5pct": 2.3994274606342785,
+  "fpr_1pct": 2.396623441707665,
+  "fpr_2pct": 2.1461177083859346,
+  "fpr_5pct": 1.3764911557197184,
+  "allow": 2.396623441707665,
+  "challenge": 2.3994274606342785,
+  "selected_threshold_validation_human_p95": 1.3764911557197184,
+  "risk_allow": 0.3,
+  "risk_challenge": 0.7
+}

@@ -1,0 +1,56 @@
+{
+  "split_root": "model\\data\\raw\\auto_split_h70_m0001_valmacro",
+  "seed": 42,
+  "fpr_cap": 0.05,
+  "drop_feature_prefixes": [
+    "browser_"
+  ],
+  "model": {
+    "model": "oneclass_svm",
+    "counts": {
+      "train_human": 535,
+      "val_human": 115,
+      "test_human": 115,
+      "test_macro": 272
+    },
+    "feature_count": 114,
+    "candidate_thresholds": 387,
+    "feasible_thresholds": 276,
+    "strict_best": {
+      "threshold": 2.431101383812227,
+      "val_human_fpr": 0.0,
+      "test_human_fpr": 0.0,
+      "test_macro_recall": 0.0,
+      "test_macro_precision": 0.0,
+      "test_f1": 0.0,
+      "test_tp": 0,
+      "test_fp": 0,
+      "test_tn": 115,
+      "test_fn": 272
+    },
+    "recall_best_under_test_cap": {
+      "threshold": 1.4132098837558311,
+      "val_human_fpr": 0.05217391304347826,
+      "test_human_fpr": 0.043478260869565216,
+      "test_macro_recall": 0.9926470588235294,
+      "test_macro_precision": 0.9818181818181818,
+      "test_f1": 0.9872029250457038,
+      "test_tp": 270,
+      "test_fp": 5,
+      "test_tn": 110,
+      "test_fn": 2
+    },
+    "recall_best_under_val_test_cap": {
+      "threshold": 1.453931530547376,
+      "val_human_fpr": 0.043478260869565216,
+      "test_human_fpr": 0.043478260869565216,
+      "test_macro_recall": 0.9742647058823529,
+      "test_macro_precision": 0.9814814814814815,
+      "test_f1": 0.977859778597786,
+      "test_tp": 265,
+      "test_fp": 5,
+      "test_tn": 110,
+      "test_fn": 7
+    }
+  }
+}

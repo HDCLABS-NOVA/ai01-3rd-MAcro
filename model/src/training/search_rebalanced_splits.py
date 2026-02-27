@@ -281,7 +281,11 @@ def parse_args() -> argparse.Namespace:
         description="Search robust train/validation/test split seeds using only rebalanced_v1 data."
     )
     parser.add_argument("--data-root", default=str(DEFAULT_DATA_ROOT))
-    parser.add_argument("--model-type", default="isolation_forest", choices=["isolation_forest"])
+    parser.add_argument(
+        "--model-type",
+        default="isolation_forest",
+        choices=["isolation_forest", "local_outlier_factor"],
+    )
     parser.add_argument("--fpr-target", type=float, default=0.02)
     parser.add_argument("--threshold-safety-margin", type=float, default=0.0)
     parser.add_argument("--human-ratio", default="7:1.5:1.5")
