@@ -120,7 +120,7 @@ def _raw_score_from_vector(
         std[std == 0] = 1.0
         return float(np.abs((vec - mean) / std).mean())
 
-    if model_type in {"isolation_forest", "oneclass_svm"}:
+    if model_type in {"isolation_forest", "oneclass_svm", "local_outlier_factor"}:
         if not model_artifact:
             return 0.0
         model = model_artifact.get("model")
@@ -222,8 +222,8 @@ def top_model_contributors(
             )
             return ranked[: max(1, int(top_k))]
 
-    # oneclass_svm / deep_svdd (and IF fallback): leave-one-feature-to-baseline approximation.
-    if model_type in {"isolation_forest", "oneclass_svm", "deep_svdd"}:
+    # oneclass_svm / local_outlier_factor / deep_svdd (and IF fallback): leave-one-feature-to-baseline approximation.
+    if model_type in {"isolation_forest", "oneclass_svm", "local_outlier_factor", "deep_svdd"}:
         base_vec = _baseline_vector(vec, params, model_artifact)
 
         raw_orig = _raw_score_from_vector(vec, model_type, params, model_artifact)

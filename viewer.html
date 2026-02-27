@@ -1362,8 +1362,8 @@
                                 <select id="rvStatus" onchange="rvFilter()"
                                     style="width:80px; padding:0 8px; border-radius:8px; border:1px solid #3f3f46; background:#0f1117; color:#a1a1aa; font-size:13px; outline:none; cursor:pointer; height:36px;">
                                     <option value="all" style="background:#0f1117; color:#a1a1aa;">전체</option>
-                                    <option value="allow" style="background:#0f1117; color:#a1a1aa;">허용</option>
-                                    <option value="challenge" style="background:#0f1117; color:#a1a1aa;">의심</option>
+                                    <option value="allow" style="background:#0f1117; color:#a1a1aa;">정상</option>
+                                    <option value="challenge" style="background:#0f1117; color:#a1a1aa;">주의</option>
                                     <option value="block" style="background:#0f1117; color:#a1a1aa;">경고</option>
                                 </select>
                             </div>
@@ -1475,7 +1475,7 @@
         // ===== 인라인 리포트 뷰어 =====
         let rvAllReports = [];
 
-        const rvDecLabel = { allow: '✅ 허용', challenge: '⚠️ 의심', block: '🚨 경고' };
+        const rvDecLabel = { allow: '정상', challenge: '주의', block: '경고' };
 
         async function rvLoadReports() {
             try {
@@ -1659,9 +1659,9 @@
             if (curve.value != null) metaParts.push(`path_curvature는 ${curve.value}${curve.unit || 'rad'}`);
             metaParts.push(`bot_score는 ${scoreNum}/100`);
 
-            const rangeWord = dec === 'allow' ? '정상 범위 내에 있습니다' :
-                dec === 'challenge' ? '일부 비정상 범위에 있습니다' :
-                    '위험 범위에 있습니다';
+            const rangeWord = dec === 'allow' ? '정상 범위입니다' :
+                dec === 'challenge' ? '주의 범위입니다' :
+                    '경고 범위입니다';
             const sent1 = `본 사용자의 ${metaParts.join(', ')}으로 ${rangeWord}.`;
 
             // ② 주요 피처 문장
@@ -1680,10 +1680,10 @@
 
             // ③ 결론 문장
             const verdict = dec === 'allow'
-                ? '정상 사용자로 판단되며, 접근 허용(allow)을 권장합니다'
+                ? '정상 구간으로 판단됩니다'
                 : dec === 'challenge'
-                    ? '주의 대상으로 판단되며, 추가 인증(challenge)을 권장합니다'
-                    : '매크로·봇으로 강하게 의심되며, 접근 차단(block)을 권장합니다';
+                    ? '주의 구간으로 판단되어 추가 확인이 권장됩니다'
+                    : '경고 구간으로 판단되어 우선 점검이 필요합니다';
             const sent3 = `따라서 본 사례는 ${verdict}.`;
 
             return [sent1, sent2, sent3].filter(Boolean).join(' ');
@@ -1696,7 +1696,7 @@
             const score = ui.bot_score ? ui.bot_score.value : (d.risk_summary ? d.risk_summary.total_score * 100 : 0);
             const scoreNum = parseFloat(score).toFixed(1);
             const scorePct = Math.min(parseFloat(score), 100);
-            const scoreClass = scorePct >= 70 ? 'score-high' : scorePct >= 30 ? 'score-medium' : 'score-low';
+            const scoreClass = scorePct >= 60 ? 'score-high' : scorePct >= 50 ? 'score-medium' : 'score-low';
             const speed = ui.speed_variability || {};
             const curve = ui.path_curvature || {};
             const hover = ui.hover_sections || {};
@@ -1705,7 +1705,7 @@
             const avgDwell = seed.hover_avg_dwell_ms ?? (ui.hover_avg_dwell || {}).value ?? null;
             const tremorClass = stdDwell === null ? '' : stdDwell >= 30 ? 'judge-ok' : stdDwell >= 10 ? 'judge-warn' : 'judge-danger';
             const tremorLabel = stdDwell === null ? '-' : stdDwell >= 30 ? '자연스러움' : stdDwell >= 10 ? '의심' : '강한 의심';
-            const decLabel2 = { allow: '✅ 허용', challenge: '⚠️ 의심', block: '🚨 경고' };
+            const decLabel2 = { allow: '정상', challenge: '주의', block: '경고' };
             const createdAt = d.created_at_iso ? new Date(d.created_at_iso).toLocaleString('ko-KR') : '-';
 
             let insights = '';
@@ -1736,15 +1736,15 @@
               <div class="score-section">
                 <div class="section-title">봇 위험 점수 (Bot Risk Score)</div>
                 <div class="score-row">
-                  <div class="score-number" style="color:${scorePct >= 70 ? '#ef4444' : scorePct >= 30 ? '#f59e0b' : '#10b981'}">${scoreNum}</div>
+                  <div class="score-number" style="color:${scorePct >= 60 ? '#ef4444' : scorePct >= 50 ? '#f59e0b' : '#10b981'}">${scoreNum}</div>
                   <div class="score-label">/ 100</div>
-                  <div style="margin-left:auto;font-size:15px;font-weight:700;">${ui.status_title_ko || (scorePct >= 70 ? '🚨 봇 의심 강함' : scorePct >= 30 ? '⚠️ 주의 필요' : '✅ 정상 사용자')}</div>
+                  <div style="margin-left:auto;font-size:15px;font-weight:700;">${ui.status_title_ko || (scorePct >= 60 ? '경고' : scorePct >= 50 ? '주의' : '정상')}</div>
                 </div>
                 <div class="score-bar-bg"><div class="score-bar-fill ${scoreClass}" style="width:${scorePct}%"></div></div>
                 <div class="score-guide">
-                  <div class="score-guide-item"><div class="score-guide-dot" style="background:#10b981"></div>0–29점: 정상 — 인간 행동 패턴과 유사, 예매 허용</div>
-                  <div class="score-guide-item"><div class="score-guide-dot" style="background:#f59e0b"></div>30–69점: 주의 — 일부 비정상 패턴 감지, 모니터링</div>
-                  <div class="score-guide-item"><div class="score-guide-dot" style="background:#ef4444"></div>70–100점: 위험 — 자동화 도구 강하게 의심, 차단</div>
+                  <div class="score-guide-item"><div class="score-guide-dot" style="background:#10b981"></div>0~49점: 정상</div>
+                  <div class="score-guide-item"><div class="score-guide-dot" style="background:#f59e0b"></div>50~59점: 주의</div>
+                  <div class="score-guide-item"><div class="score-guide-dot" style="background:#ef4444"></div>60~100점: 경고</div>
                 </div>
               </div>
               <div class="section">

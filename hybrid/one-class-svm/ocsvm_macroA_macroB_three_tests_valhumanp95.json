@@ -1,0 +1,97 @@
+{
+  "split_root": "model\\data\\raw\\auto_split_h70_m0001_valmacro",
+  "macro_source": "hybrid_model\\data\\macro",
+  "model": "oneclass_svm",
+  "seed": 42,
+  "drop_feature_prefixes": [
+    "browser_",
+    "queue_duration_ms"
+  ],
+  "threshold_policy": "validation_human_percentile_95",
+  "results": [
+    {
+      "scenario": "test1_macroA_only",
+      "counts": {
+        "train_human": 535,
+        "val_human": 115,
+        "test_human": 115,
+        "test_macro_total": 272,
+        "test_macro_mix": {
+          "A": 272,
+          "B": 0
+        }
+      },
+      "feature_count": 113,
+      "threshold_policy": "validation_human_percentile_95",
+      "threshold": 1.3764911557197184,
+      "train_human_fpr": 0.0,
+      "val_human_fpr": 0.05217391304347826,
+      "test_human_fpr": 0.05217391304347826,
+      "test_macro_recall": 1.0,
+      "test_macro_precision": 0.9784172661870504,
+      "test_f1": 0.9890909090909091,
+      "test_tp": 272,
+      "test_fp": 6,
+      "test_tn": 109,
+      "test_fn": 0,
+      "test_auroc": 0.9707480818414322,
+      "test_pr_auc": 0.9503434941092562
+    },
+    {
+      "scenario": "test2_macroB_only",
+      "counts": {
+        "train_human": 535,
+        "val_human": 115,
+        "test_human": 115,
+        "test_macro_total": 272,
+        "test_macro_mix": {
+          "A": 0,
+          "B": 272
+        }
+      },
+      "feature_count": 113,
+      "threshold_policy": "validation_human_percentile_95",
+      "threshold": 1.3764911557197184,
+      "train_human_fpr": 0.0,
+      "val_human_fpr": 0.05217391304347826,
+      "test_human_fpr": 0.05217391304347826,
+      "test_macro_recall": 0.9889705882352942,
+      "test_macro_precision": 0.9781818181818182,
+      "test_f1": 0.9835466179159049,
+      "test_tp": 269,
+      "test_fp": 6,
+      "test_tn": 109,
+      "test_fn": 3,
+      "test_auroc": 0.970780051150895,
+      "test_pr_auc": 0.9504100307213651
+    },
+    {
+      "scenario": "test3_macroA100_B100",
+      "counts": {
+        "train_human": 535,
+        "val_human": 115,
+        "test_human": 115,
+        "test_macro_total": 200,
+        "test_macro_mix": {
+          "A": 100,
+          "B": 100
+        }
+      },
+      "feature_count": 113,
+      "threshold_policy": "validation_human_percentile_95",
+      "threshold": 1.3764911557197184,
+      "train_human_fpr": 0.0,
+      "val_human_fpr": 0.05217391304347826,
+      "test_human_fpr": 0.05217391304347826,
+      "test_macro_recall": 0.995,
+      "test_macro_precision": 0.9707317073170731,
+      "test_f1": 0.9827160493827161,
+      "test_tp": 199,
+      "test_fp": 6,
+      "test_tn": 109,
+      "test_fn": 1,
+      "test_auroc": 0.971,
+      "test_pr_auc": 0.9372595295958406
+    }
+  ]
+}

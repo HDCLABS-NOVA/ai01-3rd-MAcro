@@ -1,5 +1,45 @@
 ﻿# 프로젝트 시스템 아키텍처 (기술 스택 중심)
 
+## 0) 한눈에 보는 기술스택 다이어그램 (박스/화살표)
+```text
++-----------------------------+          +------------------------------+
+| Frontend                    |          | Bot Automation               |
+| - HTML/CSS                  |          | - Node.js                    |
+| - Vanilla JS                |          | - Puppeteer                  |
+| - Fetch / sessionStorage    |          +--------------+---------------+
++--------------+--------------+                         |
+               |                                        |
+               v                                        v
++--------------+----------------------------------------+---------------+
+| Backend API (Python)                                                  |
+| - Uvicorn + FastAPI + Starlette                                      |
+| - Endpoint + Middleware + Pydantic                                   |
++-----------------------------+------------------------------------------+
+                              |
+                              v
++-----------------------------+------------------------------------------+
+| Risk Runtime                                                         |
+| - Rule Engine + Feature Pipeline                                    |
+| - scikit-learn / joblib / SHAP / (optional) PyTorch                |
++-----------------------------+------------------------------------------+
+                              |
+                              v
++-----------------------------+------------------------------------------+
+| Storage (File-based JSON)                                           |
+| - model/data/raw                                                    |
+| - model/rule_score, model/model_score                               |
+| - model/block_report, model/reports, model/artifacts/active         |
+| - data/*.json                                                        |
++-----------------------------+------------------------------------------+
+                              |
+                              v
++-----------------------------+------------------------------------------+
+| External (Optional)                                                  |
+| - OpenAI API (LLM report)                                            |
+| - api.ipify.org (client IP lookup)                                   |
++------------------------------------------------------------------------+
+```
+
 ## 1) 기술 스택 기반 아키텍처 맵
 ```mermaid
 flowchart LR
@@ -26,7 +66,7 @@ flowchart LR
         RULE[Python Rule Engine\nmodel/src/rules/rule_base.py]
         FEAT[Feature Pipeline\nmodel/src/features/feature_pipeline.py]
         NUMPY[NumPy]
-        SK[scikit-learn\nIsolationForest/OneClassSVM]
+        SK[scikit-learn\nIsolationForest/OneClassSVM/LocalOutlierFactor]
         JOBLIB[joblib\n모델 아티팩트 로드]
         SHAP[SHAP\n모델 기여도 설명]
         TORCH[PyTorch\nDeepSVDD (옵션)]
@@ -118,7 +158,7 @@ sequenceDiagram
 | Validation | Pydantic | 요청/응답 데이터 모델 검증 | `main.py` |
 | Rule Engine | Python | 하드룰/소프트룰 점수 계산 | `model/src/rules/rule_base.py` |
 | Feature Engineering | Python, NumPy | 브라우저 로그 피처 추출 | `model/src/features/feature_pipeline.py` |
-| ML Inference | scikit-learn, joblib | 이상탐지 모델 로드/점수 계산 | `main.py`, `model/src/serving/risk_scorer.py` |
+| ML Inference | scikit-learn, joblib | 이상탐지 모델 로드/점수 계산 (IsolationForest/OneClassSVM/LOF) | `main.py`, `model/src/serving/risk_scorer.py` |
 | Explainability | SHAP | 주요 피처 기여도 산출 | `model/src/serving/model_explain.py` |
 | Optional Model | PyTorch | DeepSVDD 계열 실험/추론 옵션 | `model/src/models/deep_svdd.py` |
 | Storage | JSON 파일 기반 | 원본 로그/점수/리포트/운영데이터 저장 | `model/**`, `data/*.json` |

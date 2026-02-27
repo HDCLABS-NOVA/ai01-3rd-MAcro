@@ -9,7 +9,6 @@
     "recommendation": "string ('allow', 'challenge', 'block')",
     "confidence": "number (0~1)",
     "risk_score": "number (0~1)",
-    "rule_score": "number (0~1)",
     "model_score": "number (0~1)",
     "rule_evidence": {
       "hard_action": "string ('none', 'challenge', 'block')",
@@ -19,7 +18,6 @@
       "soft_rules_triggered": [
         "string"
       ],
-      "rule_score": "number (0~1)",
       "review_required": "boolean",
       "block_recommended": "boolean"
     },

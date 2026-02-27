@@ -81,7 +81,7 @@ def model_score_from_features(
         std[std == 0] = 1.0
         z = np.abs((vec - mean) / std)
         raw = float(z.mean())
-    elif model_type in ("isolation_forest", "oneclass_svm"):
+    elif model_type in ("isolation_forest", "oneclass_svm", "local_outlier_factor"):
         if not model_artifact:
             return 0.0
         model = model_artifact.get("model")

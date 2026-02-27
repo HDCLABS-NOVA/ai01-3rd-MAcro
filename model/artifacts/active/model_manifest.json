@@ -1,11 +1,9 @@
-{
-  "active": true,
-  "selected_model": "isolation_forest",
-  "params_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\artifacts\\active\\human_model_params.json",
-  "thresholds_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\artifacts\\active\\human_model_thresholds.json",
-  "selection_report_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\hybrid_model\\reports\\benchmark\\model_selection_hybrid_if.json",
-  "benchmark_report_path": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\hybrid_model\\reports\\benchmark\\model_benchmark_hybrid_if.csv",
-  "source": "synced_from_hybrid_model_active",
-  "backup_dir": "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\artifacts\\active\\backup_sync_from_hybrid_20260225T124048",
-  "synced_at_local": "2026-02-25T12:40:48.894067"
+﻿{
+    "active":  true,
+    "selected_model":  "oneclass_svm",
+    "params_path":  "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\artifacts\\active\\human_model_params.json",
+    "thresholds_path":  "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\model\\artifacts\\active\\human_model_thresholds.json",
+    "selection_report_path":  "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\hybrid_model\\reports\\benchmark\\if_ocsvm_profilemix_inferred_fpr005_selection.json",
+    "benchmark_report_path":  "C:\\Users\\katie\\Downloads\\ai01-3rd-3team-1\\hybrid_model\\reports\\benchmark\\if_ocsvm_profilemix_inferred_fpr005_benchmark.csv",
+    "created_at_utc":  "2026-02-27T04:15:09.0527438Z"
 }

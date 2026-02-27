@@ -13,6 +13,7 @@ import joblib
 import numpy as np
 from sklearn.ensemble import IsolationForest
 from sklearn.metrics import average_precision_score, precision_recall_fscore_support, roc_auc_score
+from sklearn.neighbors import LocalOutlierFactor
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import OneClassSVM
 try:
@@ -214,6 +215,27 @@ def select_threshold_with_constraint(
         threshold = float(threshold + safety_margin * band)
 
     return threshold
+
+
+def select_threshold_from_validation_human(
+    *,
+    human_scores: np.ndarray,
+    fpr_target: float,
+    safety_margin: float = 0.0,
+) -> float:
+    if human_scores.size == 0:
+        return float("inf")
+    target = max(0.0, min(1.0, fpr_target))
+    threshold = percentile_threshold(human_scores, target)
+
+    # Optional safety margin: push threshold upward.
+    if safety_margin > 0:
+        p50 = float(np.percentile(human_scores, 50))
+        p95 = float(np.percentile(human_scores, 95))
+        band = max(1e-9, p95 - p50)
+        threshold = float(threshold + safety_margin * band)
+
+    return float(threshold)
 
 
 def load_feature_rows(browser_dir: Path) -> List[Dict[str, Any]]:
@@ -460,6 +482,31 @@ def score_oneclass_svm(state: Dict[str, Any], X: np.ndarray) -> np.ndarray:
     return -model.decision_function(Xs).reshape(-1)
 
 
+def fit_local_outlier_factor(X_train: np.ndarray) -> Dict[str, Any]:
+    scaler = StandardScaler()
+    Xs = scaler.fit_transform(X_train)
+    model = LocalOutlierFactor(
+        n_neighbors=35,
+        contamination="auto",
+        novelty=True,
+    )
+    model.fit(Xs)
+    raw_train = -model.decision_function(Xs).reshape(-1)
+    return {
+        "model_type": "local_outlier_factor",
+        "scaler": scaler,
+        "model": model,
+        "raw_train": raw_train,
+    }
+
+
+def score_local_outlier_factor(state: Dict[str, Any], X: np.ndarray) -> np.ndarray:
+    scaler = state["scaler"]
+    model = state["model"]
+    Xs = scaler.transform(X)
+    return -model.decision_function(Xs).reshape(-1)
+
+
 def fit_deep_svdd(X_train: np.ndarray, seed: int) -> Dict[str, Any]:
     if not torch_ready() or torch is None or DataLoader is None or TensorDataset is None:
         raise RuntimeError("deep_svdd requires torch. Please install PyTorch (CPU or GPU).")
@@ -543,6 +590,8 @@ def fit_candidate(model_type: str, X_train: np.ndarray, seed: int) -> Dict[str, 
         return fit_isolation_forest(X_train, seed=seed)
     if model_type == "oneclass_svm":
         return fit_oneclass_svm(X_train)
+    if model_type == "local_outlier_factor":
+        return fit_local_outlier_factor(X_train)
     if model_type == "deep_svdd":
         return fit_deep_svdd(X_train, seed=seed)
     raise ValueError(f"Unsupported model_type: {model_type}")
@@ -556,6 +605,8 @@ def score_candidate(state: Dict[str, Any], X: np.ndarray) -> np.ndarray:
         return score_isolation_forest(state, X)
     if model_type == "oneclass_svm":
         return score_oneclass_svm(state, X)
+    if model_type == "local_outlier_factor":
+        return score_local_outlier_factor(state, X)
     if model_type == "deep_svdd":
         return score_deep_svdd(state, X)
     raise ValueError(f"Unsupported model_type: {model_type}")
@@ -587,6 +638,7 @@ def evaluate_candidate(
     X_macro_eval: np.ndarray,
     fpr_target: float,
     threshold_safety_margin: float = 0.0,
+    threshold_policy: str = "validation_human_percentile",
 ) -> EvalResult:
     raw_train = state["raw_train"].reshape(-1)
     raw_min = float(np.min(raw_train))
@@ -595,12 +647,22 @@ def evaluate_candidate(
     human_scores = normalize_scores(score_candidate(state, X_human_val).reshape(-1), raw_min, raw_max)
     macro_scores = normalize_scores(score_candidate(state, X_macro_eval).reshape(-1), raw_min, raw_max)
 
-    threshold = select_threshold_with_constraint(
-        human_scores=human_scores,
-        macro_scores=macro_scores,
-        fpr_target=fpr_target,
-        safety_margin=threshold_safety_margin,
-    )
+    if threshold_policy == "validation_human_percentile":
+        # No leakage: decide threshold using validation human only.
+        threshold = select_threshold_from_validation_human(
+            human_scores=human_scores,
+            fpr_target=fpr_target,
+            safety_margin=threshold_safety_margin,
+        )
+    elif threshold_policy == "validation_macro_constrained":
+        threshold = select_threshold_with_constraint(
+            human_scores=human_scores,
+            macro_scores=macro_scores,
+            fpr_target=fpr_target,
+            safety_margin=threshold_safety_margin,
+        )
+    else:
+        raise ValueError(f"Unsupported threshold_policy: {threshold_policy}")
     stats = _binary_stats(human_scores=human_scores, macro_scores=macro_scores, threshold=threshold)
 
     return EvalResult(
@@ -820,6 +882,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     parser.add_argument("--fpr-target", type=float, default=0.01, help="Target FPR for thresholding")
     parser.add_argument(
+        "--threshold-policy",
+        default="validation_human_percentile",
+        choices=["validation_human_percentile", "validation_macro_constrained"],
+        help=(
+            "Threshold selection policy. "
+            "'validation_human_percentile' uses validation human only (recommended, no test leakage). "
+            "'validation_macro_constrained' uses validation human+macro optimization."
+        ),
+    )
+    parser.add_argument(
         "--threshold-safety-margin",
         type=float,
         default=0.0,
@@ -828,7 +900,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--candidates",
         nargs="+",
-        default=["zscore", "isolation_forest", "oneclass_svm", "deep_svdd"],
+        default=["zscore", "isolation_forest", "oneclass_svm", "local_outlier_factor", "deep_svdd"],
         help="Candidate model types",
     )
     parser.add_argument("--params-out", default=str(DEFAULT_PARAMS_OUT), help="Selected model params output json")
@@ -1001,6 +1073,7 @@ def main() -> None:
             X_macro_eval=X_macro_eval,
             fpr_target=args.fpr_target,
             threshold_safety_margin=float(args.threshold_safety_margin),
+            threshold_policy=str(args.threshold_policy),
         )
         results.append(result)
         if use_test_set:
@@ -1078,6 +1151,7 @@ def main() -> None:
     selection = {
         "selected_model": best.model_type,
         "fpr_target": args.fpr_target,
+        "threshold_policy": str(args.threshold_policy),
         "threshold_safety_margin": float(args.threshold_safety_margin),
         "split_mode": "explicit_train_val_test" if use_explicit_validation else "train_split_internal_validation",
         "human_total": len(human_rows_all),
@@ -1124,6 +1198,7 @@ def main() -> None:
     benchmark_json = {
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "fpr_target": float(args.fpr_target),
+        "threshold_policy": str(args.threshold_policy),
         "threshold_safety_margin": float(args.threshold_safety_margin),
         "split_mode": "explicit_train_val_test" if use_explicit_validation else "train_split_internal_validation",
         "counts": {
@@ -1221,6 +1296,7 @@ def main() -> None:
         f"ROC-AUC={best.auroc:.4f} PR-AUC={best.pr_auc:.4f} "
         f"FPR={best.human_fpr:.4f} threshold={best.threshold:.4f}"
     )
+    print(f"threshold_policy={args.threshold_policy}")
     print(
         "[BEST] Score Distribution "
         f"human(min/p50/p95/max)={best.human_score_dist['min']:.4f}/"

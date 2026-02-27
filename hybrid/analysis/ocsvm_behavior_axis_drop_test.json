@@ -1,0 +1,85 @@
+{
+  "setup": {
+    "model": "oneclass_svm",
+    "split_root": "model\\data\\raw\\auto_split_h70_m0001_valmacro",
+    "macro_source": "hybrid_model\\data\\macro",
+    "seed": 42,
+    "threshold_policy": "validation_human_p95",
+    "base_drop_prefixes": [
+      "browser_",
+      "queue_duration_ms"
+    ],
+    "axis_drop_tokens": [
+      "curvature",
+      "mouse_speed",
+      "straightness"
+    ],
+    "counts": {
+      "train_human": 535,
+      "val_human": 115,
+      "test_human": 115,
+      "macro": 544
+    }
+  },
+  "baseline": {
+    "feature_count": 113,
+    "threshold": 1.3764911557197184,
+    "train_human_fpr": 0.0,
+    "val_human_fpr": 0.05217391304347826,
+    "test_human_fpr": 0.05217391304347826,
+    "test_macro_recall": 0.9944852941176471,
+    "test_macro_precision": 0.9890310786106032,
+    "test_f1": 0.9917506874427131,
+    "test_auroc": 0.9707640664961636,
+    "test_pr_auc": 0.9713891304215332,
+    "tp": 541,
+    "fp": 6,
+    "tn": 109,
+    "fn": 3
+  },
+  "axis_drop": {
+    "feature_count": 96,
+    "threshold": 1.0447567767333408,
+    "train_human_fpr": 0.0,
+    "val_human_fpr": 0.05217391304347826,
+    "test_human_fpr": 0.034782608695652174,
+    "test_macro_recall": 0.9522058823529411,
+    "test_macro_precision": 0.9923371647509579,
+    "test_f1": 0.9718574108818011,
+    "test_auroc": 0.9666719948849104,
+    "test_pr_auc": 0.9690781133466071,
+    "tp": 518,
+    "fp": 4,
+    "tn": 111,
+    "fn": 26
+  },
+  "comparison": {
+    "feature_count_delta": -17,
+    "auroc_delta": -0.004092071611253245,
+    "pr_auc_delta": -0.0023110170749260917,
+    "recall_delta": -0.042279411764705954,
+    "precision_delta": 0.003306086140354658,
+    "f1_delta": -0.019893276560912,
+    "test_human_fpr_delta": -0.017391304347826084
+  },
+  "removed_feature_count": 17,
+  "removed_feature_examples": [
+    "captcha_avg_mouse_speed",
+    "captcha_avg_straightness",
+    "captcha_mouse_curvature_rad",
+    "captcha_std_mouse_speed",
+    "overall_mouse_curvature_rad",
+    "perf_avg_mouse_speed",
+    "perf_avg_straightness",
+    "perf_mouse_curvature_rad",
+    "perf_std_mouse_speed",
+    "queue_avg_mouse_speed",
+    "queue_avg_straightness",
+    "queue_mouse_curvature_rad",
+    "queue_std_mouse_speed",
+    "seat_avg_mouse_speed",
+    "seat_avg_straightness",
+    "seat_mouse_curvature_rad",
+    "seat_std_mouse_speed"
+  ]
+}

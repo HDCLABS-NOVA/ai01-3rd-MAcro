@@ -116,10 +116,10 @@ function verifyCaptcha() {
         sessionStorage.setItem('captchaVerified', 'true');
 
         // 로그 기록 (클릭 먼저)
-        trackClick(event, { target: 'captcha_verify', action: 'success', captcha: currentCaptcha });
+        // click은 logger.js의 mouseup 자동 수집으로 기록된다.
 
         // ── 스테이지 전환: seat_captcha 종료 → seat_pick 시작 ──
-        logStageExit('seat_captcha', { captcha_attempts: captchaAttempts });
+        logStageExit('seat_captcha', { status: 'success' });
         logStageEntry('seat_pick');  // 스테이지 2: 보안문자 닫힘~선택완료
 
         document.getElementById('captcha-overlay').classList.add('captcha-hidden');
