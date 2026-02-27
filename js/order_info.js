@@ -15,7 +15,8 @@ document.getElementById('booker-name').value = currentUser.name;
 document.getElementById('booker-phone').value = currentUser.phone || '';
 document.getElementById('booker-email').value = currentUser.email || '';
 
-// 핸드폰 번호 자동 포맷팅 (하이픈 자동 삽입)
+// 핸드폰 번호 자동 포맷팅 (하이픈 자동 삽입) - 사용자가 하이픈 제거 입력을 원하므로 비활성화
+/*
 const phoneInput = document.getElementById('booker-phone');
 phoneInput.addEventListener('input', function (e) {
     let value = e.target.value.replace(/[^0-9]/g, ''); // 숫자만 추출
@@ -31,6 +32,7 @@ phoneInput.addEventListener('input', function (e) {
         e.target.value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
     }
 });
+*/
 
 let selectedDelivery = 'pickup';
 
@@ -63,11 +65,11 @@ function confirmOrderInfo() {
 
     let phone;
     if (phoneWithHyphen.test(phoneRaw)) {
-        // 하이픈 포함 형식 → 하이픈 제거
-        phone = phoneRaw.replace(/-/g, '');
-    } else if (phoneDigitsOnly.test(phoneRaw)) {
-        // 숫자만 → 그대로 사용
+        // 하이픈 포함 형식 → 그대로 사용
         phone = phoneRaw;
+    } else if (phoneDigitsOnly.test(phoneRaw)) {
+        // 숫자만 → 하이픈 추가
+        phone = phoneRaw.slice(0, 3) + '-' + phoneRaw.slice(3, 7) + '-' + phoneRaw.slice(7);
     } else {
         // 허용되지 않는 형식
         showAlert('올바른 형식으로 입력해주세요.\\n예) 010-1234-5678 또는 01012345678', 'warning');
