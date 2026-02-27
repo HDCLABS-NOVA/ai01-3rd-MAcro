@@ -87,9 +87,11 @@ async function loadPerformance() {
       throw new Error("공연을 찾을 수 없습니다.");
     }
 
-    // 요구사항: 상세 페이지 진입 시 항상 오픈 5초 전부터 시작
-    currentPerformance.open_time = new Date(Date.now() + DETAIL_OPEN_DELAY_MS).toISOString();
-    currentPerformance.status = "upcoming";
+    // 요구사항: 상세 페이지 진입 시 항상 오픈 5초 전부터 시작 (특정 공연 제외)
+    if (perfId !== "perf003") {
+      currentPerformance.open_time = new Date(Date.now() + DETAIL_OPEN_DELAY_MS).toISOString();
+      currentPerformance.status = "upcoming";
+    }
 
     displayPerformance();
 
