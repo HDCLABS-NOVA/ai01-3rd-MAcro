@@ -17,6 +17,12 @@ import os
 import time
 import threading
 import logging
+
+# pythonw 환경(터미널 없음)에서 stdout/stderr가 None일 경우 안전하게 처리
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, 'w')
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, 'w')
 from pynput import keyboard as pynput_keyboard
 
 # 경로 설정
@@ -26,10 +32,19 @@ from macsearcher import search_and_click, search_front_priority
 from mactray import create_tray
 
 # 로그 설정
+# 로그 파일 경로 (macmain.py 옆에 저장)
+_log_file = os.path.join(os.path.dirname(__file__), "macro.log")
+_handlers = [logging.FileHandler(_log_file, encoding="utf-8")]
+try:
+    if sys.stdout and sys.stdout.fileno() >= 0:
+        _handlers.append(logging.StreamHandler(sys.stdout))
+except Exception:
+    pass
 logging.basicConfig(
     level=logging.INFO,
     format="[%(asctime)s] %(levelname)s %(message)s",
-    datefmt="%H:%M:%S"
+    datefmt="%H:%M:%S",
+    handlers=_handlers
 )
 log = logging.getLogger("main")
 

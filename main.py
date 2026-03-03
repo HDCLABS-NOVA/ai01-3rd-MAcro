@@ -3169,7 +3169,9 @@ async def get_performance(performance_id: str):
             raise HTTPException(status_code=404, detail="해당 공연을 찾을 수 없습니다.")
         
         performance_out = dict(performance)
-        if PERFORMANCE_DETAIL_OPEN_OFFSET_SEC >= 0:
+        # 'FC 서울 vs 수원 삼성'(perf003)은 가상 오픈 시간 정책에서 제외한다.
+        is_excluded = (performance_id == "perf003")
+        if PERFORMANCE_DETAIL_OPEN_OFFSET_SEC >= 0 and not is_excluded:
             virtual_open_dt = datetime.utcnow() + timedelta(seconds=PERFORMANCE_DETAIL_OPEN_OFFSET_SEC)
             performance_out["open_time"] = virtual_open_dt.replace(microsecond=0).isoformat() + "Z"
             performance_out["status"] = "upcoming"

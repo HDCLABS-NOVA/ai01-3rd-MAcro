@@ -55,12 +55,45 @@
       "created_at": "2026-02-05T19:32:21.099610"
     },
     {
+<<<<<<< HEAD
       "email": "cwkim99@email.com",
       "password": "1234",
       "name": "김채원",
       "phone": "010-1234-5678",
       "birthdate": null,
       "created_at": "2026-02-28T02:11:10.653955"
+=======
+      "email": "test514@ticket.com",
+      "password": "test514",
+      "name": "집가",
+      "phone": "01019990514",
+      "birthdate": null,
+      "created_at": "2026-02-26T17:27:13.547892"
+    },
+    {
+      "email": "test524@ticket.com",
+      "password": "test524",
+      "name": "현금비",
+      "phone": "0101698198",
+      "birthdate": null,
+      "created_at": "2026-02-27T14:19:59.523348"
+    },
+    {
+      "email": "test1678@ticket.com",
+      "password": "test1678",
+      "name": "현금비",
+      "phone": "01016781678",
+      "birthdate": null,
+      "created_at": "2026-02-27T14:21:45.072894"
+    },
+    {
+      "email": "test1677@ticket.com",
+      "password": "test1677",
+      "name": "현구름",
+      "phone": "01016781678",
+      "birthdate": null,
+      "created_at": "2026-02-27T14:22:56.141279"
+>>>>>>> 85b60da780a91787d2db78e4108ecb26472e9a75
     }
   ]
 }
