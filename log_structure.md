@@ -9,7 +9,7 @@
 | 플로우/세션 메타 | `flow_id`, `session_id`, `performance_id`, `bot_type`, `created_at`, `flow_start_time`, `flow_end_time` | 사용자 예매 흐름을 단위 세션으로 묶어 추적하고, 브라우저 로그와 서버 로그를 연계하기 위함 |
 | 사용자/환경 컨텍스트 | `user_email`, `user_ip`, `browser_info(userAgent/platform/language/webdriver/hardware/screen)` | 사용자 접속 환경과 자동화 의심 신호를 함께 확보해 행위 해석 정확도를 높이기 위함 |
 | 단계 공통 행동 데이터 | `stages.<stage>.entry_time`, `exit_time`, `duration_ms`, `mouse_trajectory`, `clicks`, `viewport` | 단계별 체류 시간, 마우스/클릭 패턴을 수집해 사람/매크로 행위 차이를 분석하기 위함 |
-| 단계별 업무 이벤트 | `perf`(공연/회차 선택), `queue`(대기열 위치/변동), `captcha`(검증 상태), `seat`(좌석 선택), `payment`(결제 진행), `complete`(완료 결과) | 예매 퍼널 전 구간의 실제 상호작용을 기록해 이상 구간 탐지 및 원인 분석에 활용하기 위함 |
+| 단계별 업무 이벤트 | `perf`, `queue`, `captcha`, `seat`, `payment`, `complete` | 예매 과정 전 구간의 실제 상호작용을 기록해 이상 구간 탐지 및 원인 분석에 활용하기 위함 |
 | 예매 결과/종료 상태 | `completion_status(success/failed/abandoned)`, `is_completed`, `total_duration_ms`, `booking_id`, `final_seats`, `seat_grades` | 성공/실패/중도이탈 결과를 정량화하고 리스크 판정 및 운영 리포트의 근거로 사용하기 위함 |
 
 ## Server 로그

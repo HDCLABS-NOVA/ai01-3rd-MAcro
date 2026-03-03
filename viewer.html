@@ -1699,12 +1699,6 @@
             const scoreClass = scorePct >= 60 ? 'score-high' : scorePct >= 50 ? 'score-medium' : 'score-low';
             const speed = ui.speed_variability || {};
             const curve = ui.path_curvature || {};
-            const hover = ui.hover_sections || {};
-            const seed = d.ui_metric_seed || {};
-            const stdDwell = seed.hover_std_dwell_ms ?? (ui.hover_std_dwell || {}).value ?? null;
-            const avgDwell = seed.hover_avg_dwell_ms ?? (ui.hover_avg_dwell || {}).value ?? null;
-            const tremorClass = stdDwell === null ? '' : stdDwell >= 30 ? 'judge-ok' : stdDwell >= 10 ? 'judge-warn' : 'judge-danger';
-            const tremorLabel = stdDwell === null ? '-' : stdDwell >= 30 ? '자연스러움' : stdDwell >= 10 ? '의심' : '강한 의심';
             const decLabel2 = { allow: '정상', challenge: '주의', block: '경고' };
             const createdAt = d.created_at_iso ? new Date(d.created_at_iso).toLocaleString('ko-KR') : '-';
 
@@ -1750,14 +1744,9 @@
               <div class="section">
                 <div class="section-title">행동 지표 (Behavioral Metrics)</div>
                 <div style="font-size:11px;color:#94a3b8;margin-bottom:10px;line-height:1.6;">사용자의 마우스·클릭 행동을 실시간으로 분석한 지표입니다.</div>
-                <div style="display:flex;gap:10px;margin-bottom:10px;">
+                <div style="display:flex;gap:10px;">
                   <div class="chip" style="flex:1;"><div class="chip-label">⚡ 반응 속도 변동성</div><div><span class="chip-val">${speed.value ?? '-'}</span><span class="chip-unit">${speed.unit || '%'}</span></div><div class="chip-judge ${rvJudgeClassFull(speed.judgement_ko)}">${speed.judgement_ko || '-'}</div><div class="chip-desc">클릭·이동 반응 속도의 표준편차 비율. 값이 낮을수록 기계적으로 일정한 속도를 유지함을 의미합니다.</div></div>
                   <div class="chip" style="flex:1;"><div class="chip-label">🌀 궤적 곡선성</div><div><span class="chip-val">${curve.value ?? '-'}</span><span class="chip-unit">${curve.unit || 'rad'}</span></div><div class="chip-judge ${rvJudgeClassFull(curve.judgement_ko)}">${curve.judgement_ko || '-'}</div><div class="chip-desc">마우스 이동 경로의 평균 곡률(라디안). 자연스러운 곡선 이동 없이 직선에 가까울수록 봇 가능성이 높습니다.</div></div>
-                </div>
-                <div style="display:flex;gap:10px;">
-                  <div class="chip" style="flex:1;"><div class="chip-label">🖱️ 호버 구간</div><div><span class="chip-val">${hover.value ?? '-'}</span><span class="chip-unit">${hover.unit || '개'}</span></div><div class="chip-judge ${rvJudgeClassFull(hover.judgement_ko)}">${hover.judgement_ko || '-'}</div><div class="chip-desc">마우스가 요소 위에 멈춘 구간 수. 정상 사용자는 여러 요소를 탐색하며 다수의 호버 구간을 가집니다.</div></div>
-                  <div class="chip" style="flex:1;"><div class="chip-label">🔬 미세 떨림 (Hover STD)</div><div><span class="chip-val">${stdDwell !== null ? stdDwell : '-'}</span><span class="chip-unit">ms</span></div><div class="chip-judge ${tremorClass}">${tremorLabel}</div><div class="chip-desc">호버 정지 시간의 표준편차(ms). 30ms 이상이면 자연스러운 떨림, 10ms 미만이면 봇 의심.</div></div>
-                  <div class="chip" style="flex:1;"><div class="chip-label">⏱️ 평균 호버 정지</div><div><span class="chip-val">${avgDwell !== null ? avgDwell : '-'}</span><span class="chip-unit">ms</span></div><div class="chip-desc">호버 구간당 평균 정지 시간(ms).</div></div>
                 </div>
               </div>
               <div class="section">

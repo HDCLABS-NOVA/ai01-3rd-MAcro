@@ -174,7 +174,6 @@ def build_markdown_report_fallback(
     narrative = str(ui_fields.get("suspicion_narrative_ko", "")).strip() or "추가 의심 요인은 관찰되지 않았습니다."
     speed = ui_fields.get("speed_variability", {}) or {}
     curve = ui_fields.get("path_curvature", {}) or {}
-    hover = ui_fields.get("hover_sections", {}) or {}
     lines = [
         "[ Header Area: 정량적 지표 ]",
         f"ID: {report_id} / 대상: {target_masked}",
@@ -185,7 +184,6 @@ def build_markdown_report_fallback(
         "[ Analysis Summary: 모델 분석 요약 ]",
         f"- 속도 변동성: {round(safe_float(speed.get('value')), 2)}{str(speed.get('unit', '%'))} ({str(speed.get('judgement_ko', '정상'))})",
         f"- 경로 곡선성: {round(safe_float(curve.get('value')), 3)}{str(curve.get('unit', 'rad'))} ({str(curve.get('judgement_ko', '자연스러움'))})",
-        f"- 호버 구간: {int(safe_float(hover.get('value')))}{str(hover.get('unit', '개'))} ({str(hover.get('judgement_ko', '발견'))})",
     ]
     if reasons:
         lines.append("- 주요 의심 요인:")
@@ -262,7 +260,6 @@ def generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, Any
         "\"bot_score\": {\"value\": number, \"max\": 100}, "
         "\"speed_variability\": {\"value\": number, \"unit\": \"%\", \"judgement_ko\": string}, "
         "\"path_curvature\": {\"value\": number, \"unit\": \"rad\", \"judgement_ko\": string}, "
-        "\"hover_sections\": {\"value\": number, \"unit\": \"개\", \"judgement_ko\": string}, "
         "\"suspicion_reasons\": string[], "
         "\"suspicion_narrative_ko\": string"
         "}"
@@ -277,6 +274,7 @@ def generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, Any
         "  모델 점수 기준: 50점 미만 정상, 50점 이상 60점 미만 주의, 60점 이상 경고\n"
         "- 행동 지표(Behavioral Metrics) 점수 구간도 동일하게 50 미만/50 이상 60 미만/60 이상 기준으로 서술하세요.\n"
         "- suspicion_narrative_ko는 2~4문장 줄글로 작성하세요.\n"
+        "- 호버 관련 지표(호버 구간/미세 떨림/평균 호버 정지)는 markdown_report와 suspicion_narrative_ko에서 언급하지 마세요.\n"
         f"입력: {json.dumps(model_input, ensure_ascii=False)}"
     )
     request_body = {

@@ -665,18 +665,6 @@
 
       const speed = ui.speed_variability || {};
       const curve = ui.path_curvature || {};
-      const hover = ui.hover_sections || {};
-
-      // 미세 떨림 지표: ui_metric_seed 또는 ui_fields에서 추출
-      const seed = d.ui_metric_seed || {};
-      const stdDwell = seed.hover_std_dwell_ms ?? (ui.hover_std_dwell || {}).value ?? null;
-      const avgDwell = seed.hover_avg_dwell_ms ?? (ui.hover_avg_dwell || {}).value ?? null;
-      const tremorClass = stdDwell === null ? '' :
-        stdDwell >= 30 ? 'judge-ok' :
-          stdDwell >= 10 ? 'judge-warn' : 'judge-danger';
-      const tremorLabel = stdDwell === null ? '-' :
-        stdDwell >= 30 ? '자연스러움' :
-          stdDwell >= 10 ? '의심' : '강한 의심';
 
       // markdown_report에서 AI Insights 섹션 추출
       // 형식: "[ AI Insights: ... ] ---...\n{text}\n---"
@@ -758,7 +746,7 @@
         <div class="section">
           <div class="section-title">행동 지표</div>
           <!-- 1행: 속도·궤적 -->
-          <div style="display:flex;gap:10px;margin-bottom:10px;">
+          <div style="display:flex;gap:10px;">
             <div class="chip" style="flex:1;">
               <div class="chip-label">반응 속도 변동성</div>
               <div>
@@ -774,32 +762,6 @@
                 <span class="chip-unit">${curve.unit || 'rad'}</span>
               </div>
               <div class="chip-judge ${judgeClass(curve.judgement_ko)}">${curve.judgement_ko || '-'}</div>
-            </div>
-          </div>
-          <!-- 2행: 호버 관련 3개 나란히 -->
-          <div style="display:flex;gap:10px;">
-            <div class="chip" style="flex:1;">
-              <div class="chip-label">호버 구간</div>
-              <div>
-                <span class="chip-val">${hover.value ?? '-'}</span>
-                <span class="chip-unit">${hover.unit || '개'}</span>
-              </div>
-              <div class="chip-judge ${judgeClass(hover.judgement_ko)}">${hover.judgement_ko || '-'}</div>
-            </div>
-            <div class="chip" style="flex:1;">
-              <div class="chip-label">미세 떨림 (hover std)</div>
-              <div>
-                <span class="chip-val">${stdDwell !== null ? stdDwell : '-'}</span>
-                <span class="chip-unit">ms</span>
-              </div>
-              <div class="chip-judge ${tremorClass}">${tremorLabel}</div>
-            </div>
-            <div class="chip" style="flex:1;">
-              <div class="chip-label">평균 호버 정지</div>
-              <div>
-                <span class="chip-val">${avgDwell !== null ? avgDwell : '-'}</span>
-                <span class="chip-unit">ms</span>
-              </div>
             </div>
           </div>
         </div>

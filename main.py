@@ -1571,7 +1571,6 @@ def _build_markdown_report_fallback(
         )
     speed = ui_fields.get("speed_variability", {}) or {}
     curve = ui_fields.get("path_curvature", {}) or {}
-    hover = ui_fields.get("hover_sections", {}) or {}
     separator = "--------------------------------------------------"
     lines = [
         f"[ Header Area: 정량적 지표 ] {separator}",
@@ -1583,7 +1582,6 @@ def _build_markdown_report_fallback(
         f"[ Analysis Summary: 모델 분석 요약 ] {separator}",
         f"● 반응 속도(변동성): {round(_safe_float(speed.get('value')), 2)}{str(speed.get('unit', '%'))} ({str(speed.get('judgement_ko', '정상'))})",
         f"● 궤적 곡선성: {round(_safe_float(curve.get('value')), 3)}{str(curve.get('unit', 'rad'))} ({str(curve.get('judgement_ko', '자연스러움'))})",
-        f"● 호버 구간: {int(_safe_float(hover.get('value')))}{str(hover.get('unit', '개'))} ({str(hover.get('judgement_ko', '발견'))})",
     ]
     if reasons:
         lines.append("● 주요 의심 요인:")
@@ -1669,7 +1667,6 @@ def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, An
         "\"bot_score\": {\"value\": number, \"max\": 100}, "
         "\"speed_variability\": {\"value\": number, \"unit\": \"%\", \"judgement_ko\": string}, "
         "\"path_curvature\": {\"value\": number, \"unit\": \"rad\", \"judgement_ko\": string}, "
-        "\"hover_sections\": {\"value\": number, \"unit\": \"개\", \"judgement_ko\": string}, "
         "\"suspicion_reasons\": string[], "
         "\"suspicion_narrative_ko\": string"
         "}"
@@ -1687,8 +1684,6 @@ def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, An
         "  [ Analysis Summary: 모델 분석 요약 ] --------------------------------------------------\n"
         "  ● 반응 속도(변동성): {speed_variability_pct}% ({정상/의심/위험})\n"
         "  ● 궤적 곡선성: {path_curvature_rad}rad ({자연스러움/기계적/매우 기계적})\n"
-        "  ● 호버 구간: {hover_sections_count}개 ({미발견/소수 발견/다수 발견})\n"
-        "  ● 호버 미세 떨림(dwell std): {hover_std_dwell_ms}ms / 평균 정지: {hover_avg_dwell_ms}ms\n"
         "  ● 주요 기여 피처: top_feature_contributions 1~3위를 'feature(기여도: contribution)' 형식으로 나열 (기여 있을 때만)\n"
         "  ● 주요 의심 요인: behavior_evidence와 모델 기여 피처 기반으로 (있을 때만)\n"
         "  --------------------------------------------------\n"
@@ -1708,10 +1703,7 @@ def _generate_llm_report_payload(*, report_seed: Dict[str, Any]) -> Dict[str, An
         "- low 판정에서 '자동화 의심 정황이 확인되었습니다' 같은 모순 문구를 금지합니다.\n"
         "- suspicion_narrative_ko도 동일하게 수치 인용 + 판정 근거 + 권장 조치 3요소를 포함하세요.\n"
         "- Analysis Summary의 주요 기여 피처가 없으면 해당 항목을 생략하세요.\n"
-        "- 호버 미세 떨림(hover_std_dwell_ms) 해석 규칙:\n"
-        "  인간은 호버 시 손 떨림으로 std > 30ms 이상이 자연스러pc.\n"
-        "  매크로는 정확하게 제어되어 std ≈0ms(또는 매우 낙음) 로 나타남.\n"
-        "  hover_std_dwell_ms 값을 반드시 인급하고 '자연스러움 / 의심 / 강한 의심' 중 하나로 판정.\n"
+        "- 호버 관련 지표(호버 구간/미세 떨림/평균 호버 정지)는 markdown_report와 suspicion_narrative_ko에서 언급하지 마세요.\n"
         f"입력: {json.dumps(model_input, ensure_ascii=False)}"
     )
 
