@@ -1,17 +1,24 @@
+# Core API
 fastapi>=0.115.0
 uvicorn[standard]>=0.32.0
 pydantic>=2.10.0
 python-multipart>=0.0.12
 python-dotenv>=1.0.0
 
+# ML / data pipeline
 numpy>=1.26.0
-pyautogui>=0.9.54
-pydirectinput>=1.0.4
-opencv-python>=4.10.0
-keyboard>=0.13.5
-pystray>=0.19.5
-pillow>=10.4.0
 scikit-learn>=1.4.0
 joblib>=1.4.0
 shap>=0.42.0
 torch>=2.2.0
+
+# Macro / desktop automation (optional at runtime)
+pyautogui>=0.9.54
+pydirectinput>=1.0.4
+opencv-python>=4.10.0
+pynput>=1.7.7
+pystray>=0.19.5
+Pillow>=10.4.0
+
+# Utilities
+pyngrok>=7.2.1

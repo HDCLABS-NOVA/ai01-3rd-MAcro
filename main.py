@@ -3767,7 +3767,10 @@ async def get_report(filename: str):
 
 
 # 정적 파일 서빙 (HTML, CSS, JS)
-app.mount("/", StaticFiles(directory=".", html=True), name="static")
+app.mount("/css", StaticFiles(directory="css"), name="css")
+app.mount("/js", StaticFiles(directory="js"), name="js")
+app.mount("/image", StaticFiles(directory="image"), name="image")
+app.mount("/", StaticFiles(directory="html", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn

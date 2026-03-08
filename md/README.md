@@ -21,7 +21,7 @@
 ```text
 .
 ├─ main.py                         # FastAPI 서버 + 미들웨어 + 리스크 런타임
-├─ *.html, css/, js/               # 프론트엔드 페이지/스타일/스크립트
+├─ html/*.html, css/, js/          # 프론트엔드 페이지/스타일/스크립트
 ├─ data/                           # 사용자/제재 등 운영 데이터(JSON)
 ├─ model/                          # 서빙 코드, 리포트, active 아티팩트
 ├─ hybrid_model/                   # 학습/평가 파이프라인 및 벤치마크 결과
